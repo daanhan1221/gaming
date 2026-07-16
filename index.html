@@ -20,9 +20,36 @@
   <!-- 리액트 앱이 렌더링될 DOM 트리거 -->
   <div id="root"></div>
 
+  <!-- Firebase v10 모듈 시스템을 Babel 안에서 사용할 수 있도록 선언형 스크립트로 로드 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    
+    // 글로벌 윈도우 객체에 바인딩하여 Babel(React) 컴포넌트 내에서 호출할 수 있게 합니다.
+    window.FirebaseLib = { initializeApp, getDatabase, ref, set, onValue };
+  </script>
+
   <!-- Babel 컴파일러를 통해 리액트 코드를 실시간 해석하여 실행합니다 -->
   <script type="text/babel">
     const { useState, useEffect } = React;
+
+    // Firebase 라이브러리 연동 준비
+    const { initializeApp, getDatabase, ref, set, onValue } = window.FirebaseLib;
+
+    // [필수] 여기에 본인의 Firebase 프로젝트 SDK 설정을 입력하세요!
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Firebase 앱 & 데이터베이스 커넥션 생성
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
     // 아이콘 오류를 원천 차단하기 위한 자체 고해상도 SVG 아이콘 컴포넌트들
     const Gamepad2 = ({ className }) => (
@@ -43,7 +70,6 @@
     const Award = ({ className }) => (
       <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg>
     );
-    // 자바스크립트 내장 Map 클래스와 충돌을 피하기 위해 이름을 MapIcon으로 수정했습니다.
     const MapIcon = ({ className }) => (
       <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.12 3.88 16 2v16l-6 2-6-2V4l6 2Z"/><path d="M10 6v14"/><path d="M14 4v14"/></svg>
     );
@@ -129,35 +155,60 @@
       ]
     };
 
-    const STORAGE_KEY_CHARACTERS = 'game_notebook_chars';
-    const STORAGE_KEY_NOTES = 'game_notebook_notes';
-
     function App() {
-      const [selectedGame, setSelectedGame] = useState('lol');
+      const [selectedGame, setSelectedGame] = useState('lol'); //
       
-      const [characters, setCharacters] = useState(() => {
-        const saved = localStorage.getItem(STORAGE_KEY_CHARACTERS);
-        return saved ? JSON.parse(saved) : INITIAL_CHARACTERS;
-      });
+      // 상태 관리 초기값들을 빈 객체/배열로 잡은 뒤 useEffect에서 Firebase로부터 최초 데이터를 동기화합니다.
+      const [characters, setCharacters] = useState(INITIAL_CHARACTERS);
+      const [notes, setNotes] = useState({});
 
-      const [selectedCharId, setSelectedCharId] = useState('');
-      const [newCharName, setNewCharName] = useState('');
-      const [newCharRole, setNewCharRole] = useState('');
-      const [newCharEmoji, setNewCharEmoji] = useState('🎮');
+      const [selectedCharId, setSelectedCharId] = useState(''); //[cite: 1]
+      const [newCharName, setNewCharName] = useState(''); //[cite: 1]
+      const [newCharRole, setNewCharRole] = useState(''); //[cite: 1]
+      const [newCharEmoji, setNewCharEmoji] = useState('🎮'); //[cite: 1]
 
-      const [notes, setNotes] = useState(() => {
-        const saved = localStorage.getItem(STORAGE_KEY_NOTES);
-        return saved ? JSON.parse(saved) : {};
-      });
+      const [evalDate, setEvalDate] = useState(new Date().toISOString().split('T')[0]); //[cite: 1]
+      const [evalRating, setEvalRating] = useState(3); //[cite: 1]
+      const [evalFeedback, setEvalFeedback] = useState(''); //[cite: 1]
+      const [evalTodos, setEvalTodos] = useState(''); //[cite: 1]
 
-      const [evalDate, setEvalDate] = useState(new Date().toISOString().split('T')[0]);
-      const [evalRating, setEvalRating] = useState(3);
-      const [evalFeedback, setEvalFeedback] = useState('');
-      const [evalTodos, setEvalTodos] = useState('');
+      const [tempPathMemo, setTempPathMemo] = useState(''); //[cite: 1]
+      const [tempTipMemo, setTempTipMemo] = useState(''); //[cite: 1]
+      const [toastMessage, setToastMessage] = useState(''); //[cite: 1]
 
-      const [tempPathMemo, setTempPathMemo] = useState('');
-      const [tempTipMemo, setTempTipMemo] = useState('');
-      const [toastMessage, setToastMessage] = useState('');
+      // ──────────────────────────────────────────────────
+      // [핵심 변경] Firebase Realtime Database 실시간 동기화 코드
+      // ──────────────────────────────────────────────────
+      useEffect(() => {
+        // 1. 캐릭터 리스트 실시간 리스너 연결
+        const charsRef = ref(database, 'game_notebook_chars');
+        const unsubscribeChars = onValue(charsRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            setCharacters(data);
+          } else {
+            // Firebase에 데이터가 없을 경우 로컬 초기 캐릭터 목록을 밀어 넣어 줍니다.
+            set(charsRef, INITIAL_CHARACTERS);
+            setCharacters(INITIAL_CHARACTERS);
+          }
+        });
+
+        // 2. 작성한 노트/오답 피드백 데이터 실시간 리스너 연결
+        const notesRef = ref(database, 'game_notebook_notes');
+        const unsubscribeNotes = onValue(notesRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            setNotes(data);
+          } else {
+            setNotes({});
+          }
+        });
+
+        return () => {
+          unsubscribeChars();
+          unsubscribeNotes();
+        };
+      }, []);
 
       useEffect(() => {
         const charsList = characters[selectedGame] || [];
@@ -182,14 +233,6 @@
         }
       }, [selectedCharId, selectedGame, notes]);
 
-      useEffect(() => {
-        localStorage.setItem(STORAGE_KEY_CHARACTERS, JSON.stringify(characters));
-      }, [characters]);
-
-      useEffect(() => {
-        localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(notes));
-      }, [notes]);
-
       const showToast = (msg) => {
         setToastMessage(msg);
         setTimeout(() => setToastMessage(''), 2000);
@@ -197,7 +240,7 @@
 
       const handleRestoreDefaults = () => {
         if (window.confirm('정말 기본 목록을 복원하시겠습니까? (새로 추가하신 커스텀 캐릭터 목록은 초기화됩니다. 작성하신 노트와 메모는 안전하게 유지됩니다!)')) {
-          setCharacters(INITIAL_CHARACTERS);
+          set(ref(database, 'game_notebook_chars'), INITIAL_CHARACTERS);
           showToast('도미나, 해저드, 테호가 포함된 최신 캐릭터 목록으로 복원되었습니다!');
         }
       };
@@ -213,10 +256,12 @@
           image: newCharEmoji
         };
 
-        setCharacters(prev => ({
-          ...prev,
-          [selectedGame]: [...prev[selectedGame], newChar]
-        }));
+        const updatedChars = {
+          ...characters,
+          [selectedGame]: [...(characters[selectedGame] || []), newChar]
+        };
+
+        set(ref(database, 'game_notebook_chars'), updatedChars);
 
         setSelectedCharId(newChar.id);
         setNewCharName('');
@@ -229,14 +274,16 @@
         e.stopPropagation();
         if (!window.confirm('정말 이 캐릭터를 메모 목록에서 삭제하시겠습니까?')) return;
 
-        setCharacters(prev => ({
-          ...prev,
-          [selectedGame]: prev[selectedGame].filter(c => c.id !== charId)
-        }));
+        const updatedList = (characters[selectedGame] || []).filter(c => c.id !== charId);
+        const updatedChars = {
+          ...characters,
+          [selectedGame]: updatedList
+        };
 
-        const remaining = characters[selectedGame].filter(c => c.id !== charId);
-        if (remaining.length > 0) {
-          setSelectedCharId(remaining[0].id);
+        set(ref(database, 'game_notebook_chars'), updatedChars);
+
+        if (updatedList.length > 0) {
+          setSelectedCharId(updatedList[0].id);
         } else {
           setSelectedCharId('');
         }
@@ -244,7 +291,7 @@
         const noteKey = `${selectedGame}_${charId}`;
         const newNotes = { ...notes };
         delete newNotes[noteKey];
-        setNotes(newNotes);
+        set(ref(database, 'game_notebook_notes'), newNotes);
         showToast('캐릭터가 목록에서 제거되었습니다.');
       };
 
@@ -252,15 +299,16 @@
         if (!selectedCharId) return;
         const noteKey = `${selectedGame}_${selectedCharId}`;
         
-        setNotes(prev => ({
-          ...prev,
+        const updatedNotes = {
+          ...notes,
           [noteKey]: {
-            ...(prev[noteKey] || { evaluations: [] }),
+            ...(notes[noteKey] || { evaluations: [] }),
             pathMemo: tempPathMemo,
             tipMemo: tempTipMemo
           }
-        }));
-        
+        };
+
+        set(ref(database, 'game_notebook_notes'), updatedNotes);
         showToast('핵심 기본 전술 메모가 안전하게 저장되었습니다!');
       };
 
@@ -292,17 +340,18 @@
           todos: todoList
         };
 
-        setNotes(prev => {
-          const existing = prev[noteKey] || { pathMemo: '', tipMemo: '', evaluations: [] };
-          const evals = existing.evaluations || [];
-          return {
-            ...prev,
-            [noteKey]: {
-              ...existing,
-              evaluations: [newEval, ...evals]
-            }
-          };
-        });
+        const existing = notes[noteKey] || { pathMemo: '', tipMemo: '', evaluations: [] };
+        const evals = existing.evaluations || [];
+        
+        const updatedNotes = {
+          ...notes,
+          [noteKey]: {
+            ...existing,
+            evaluations: [newEval, ...evals]
+          }
+        };
+
+        set(ref(database, 'game_notebook_notes'), updatedNotes);
 
         setEvalFeedback('');
         setEvalTodos('');
@@ -326,13 +375,15 @@
           return ev;
         });
 
-        setNotes(prev => ({
-          ...prev,
+        const updatedNotes = {
+          ...notes,
           [noteKey]: {
-            ...prev[noteKey],
+            ...notes[noteKey],
             evaluations: updatedEvals
           }
-        }));
+        };
+
+        set(ref(database, 'game_notebook_notes'), updatedNotes);
       };
 
       const handleDeleteEvaluation = (evalId) => {
@@ -343,13 +394,15 @@
 
         const updatedEvals = charNote.evaluations.filter(ev => ev.id !== evalId);
 
-        setNotes(prev => ({
-          ...prev,
+        const updatedNotes = {
+          ...notes,
           [noteKey]: {
-            ...prev[noteKey],
+            ...notes[noteKey],
             evaluations: updatedEvals
           }
-        }));
+        };
+
+        set(ref(database, 'game_notebook_notes'), updatedNotes);
         showToast('기록이 삭제되었습니다.');
       };
 
@@ -423,7 +476,7 @@
                   <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">GAMING NOTE</h1>
                 </div>
                 <p className="text-white/80 text-xs sm:text-sm mt-1 font-medium">
-                  나만의 전용 오답노트 & 전술 플레이 그라운드
+                  나만의 전용 오답노트 & 전술 플레이 그라운드[cite: 1]
                 </p>
               </div>
 
@@ -472,7 +525,7 @@
                 <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
                   <h2 className="text-lg font-bold flex items-center gap-2">
                     <BookOpen className={`w-5 h-5 ${currentConfig.textColor}`} />
-                    캐릭터 선택
+                    캐릭터 선택[cite: 1]
                   </h2>
                   <div className="flex items-center gap-2">
                     <button
@@ -514,7 +567,6 @@
                         </div>
                         <div className="flex items-center gap-1.5">
                           {isSelected && <ChevronRight className="w-5 h-5 text-white" />}
-                          {/* 커스텀 캐릭터이거나 특정 조건에서 개별 삭제 */}
                           {char.id.startsWith('custom_') && (
                             <button
                               onClick={(e) => handleDeleteCharacter(char.id, e)}
@@ -612,14 +664,14 @@
                     <div className="flex items-center justify-between mb-5 pb-2 border-b border-slate-800">
                       <h3 className="font-bold text-lg flex items-center gap-2">
                         <FileText className={`w-5 h-5 ${currentConfig.textColor}`} />
-                        {currentCharacter.name} 핵심 기본 전술 메모
+                        {currentCharacter.name} 핵심 기본 전술 메모[cite: 1]
                       </h3>
                       <button
                         onClick={handleSaveTextMemos}
                         className={`px-4 py-2 rounded-xl text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md ${currentConfig.btnCol}`}
                       >
                         <Save className="w-3.5 h-3.5" />
-                        저장하기
+                        저장하기[cite: 1]
                       </button>
                     </div>
 
@@ -665,7 +717,7 @@
                   <div className="bg-slate-900/85 rounded-2xl p-6 border border-slate-800 shadow-xl">
                     <h3 className="font-bold text-lg mb-4 pb-2 border-b border-slate-800 flex items-center gap-2">
                       <Clock className={`w-5 h-5 ${currentConfig.textColor}`} />
-                      실전 플레이 피드백 & 셀프 평가
+                      실전 플레이 피드백 & 셀프 평가[cite: 1]
                     </h3>
 
                     {/* 플레이 기록 추가 폼 */}
@@ -729,7 +781,7 @@
                         className={`w-full py-2.5 rounded-lg text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 ${currentConfig.btnCol}`}
                       >
                         <Plus className="w-4 h-4" />
-                        오늘의 플레이 기록 등록하기
+                        오늘의 플레이 기록 등록하기[cite: 1]
                       </button>
                     </form>
 
@@ -770,7 +822,7 @@
                             <div className="border-t border-slate-900/80 pt-3 mt-3">
                               <h4 className="text-xs font-bold text-indigo-400 mb-2 flex items-center gap-1.5">
                                 <CheckCircle className="w-3.5 h-3.5" />
-                                실천 리스트 (To-Do)
+                                실천 리스트 (To-Do)[cite: 1]
                               </h4>
                               <div className="space-y-1.5">
                                 {ev.todos.map((todo) => (
@@ -842,7 +894,7 @@
       );
     }
 
-    // React 애플리케이션을 가상 DOM 노드에 장착합니다
+    // React 애플리케이션을 가상 DOM 노드에 장착합니다[cite: 1]
     const container = document.getElementById('root');
     const root = ReactDOM.createRoot(container);
     root.render(<App />);
