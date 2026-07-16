@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Note - 나만의 전술 오답노트</title>
+  
+  <!-- React 18 및 ReactDOM 실시간 CDN 로드 -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel 컴파일러 (웹 브라우저가 JSX를 실행할 수 있게 해주는 도구) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Tailwind CSS 실시간 스타일링 CDN 로드 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100">
+  
+  <!-- 리액트 앱이 렌더링될 DOM 트리거 -->
+  <div id="root"></div>
+
+  <!-- Babel 컴파일러를 통해 리액트 코드를 실시간 해석하여 실행합니다 -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // 아이콘 오류를 원천 차단하기 위한 자체 고해상도 SVG 아이콘 컴포넌트들
+    const Gamepad2 = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="3"/></svg>
+    );
+    const Plus = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+    );
+    const Trash2 = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+    );
+    const CheckCircle = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+    );
+    const BookOpen = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    );
+    const Award = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg>
+    );
+    // 자바스크립트 내장 Map 클래스와 충돌을 피하기 위해 이름을 MapIcon으로 수정했습니다.
+    const MapIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.12 3.88 16 2v16l-6 2-6-2V4l6 2Z"/><path d="M10 6v14"/><path d="M14 4v14"/></svg>
+    );
+    const Clock = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    );
+    const ChevronRight = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    );
+    const Save = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
+    );
+    const FileText = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+    );
+    const RotateCcw = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+    );
+
+    // 업그레이드된 전체 기본 캐릭터 데이터 정의 (도미나, 해저드, 테호 포함)
+    const INITIAL_CHARACTERS = {
+      lol: [
+        { id: 'lee-sin', name: '리 신', role: 'AD 브루저 / 정글', image: '🐉' },
+        { id: 'graves', name: '그레이브즈', role: '성장형 AD 캐리 / 정글', image: '🔫' },
+        { id: 'viego', name: '비에고', role: '전사 / 정글', image: '👑' },
+        { id: 'elise', name: '엘리스', role: 'AP 암살자 / 정글', image: '🕷️' },
+        { id: 'hecarim', name: '헤카림', role: '돌격 전사 / 정글', image: '🐴' },
+        { id: 'nocturne', name: '녹턴', role: '암살자 / 정글', image: '👤' },
+        { id: 'nidalee', name: '니달리', role: 'AP 포킹 / 정글', image: '🐯' },
+        { id: 'master-yi', name: '마스터 이', role: '평타형 캐리 / 정글', image: '⚔️' },
+        { id: 'jarvan-iv', name: '자르반 4세', role: '이니시에이터 / 정글', image: '🚩' },
+        { id: 'shaco', name: '샤코', role: '트릭스터 암살자 / 정글', image: '🤡' },
+        { id: 'evelynn', name: '이블린', role: '은신형 AP 암살자 / 정글', image: '💅' },
+        { id: 'ekko', name: '에코', role: '유틸형 AP 암살자 / 정글', image: '⏳' },
+        { id: 'kayn', name: '케인', role: '변신형 브루저·암살자 / 정글', image: '💀' },
+        { id: 'kindred', name: '킨드레드', role: '원거리 딜러 / 정글', image: '🏹' },
+        { id: 'khazix', name: '카직스', role: '고립 암살자 / 정글', image: '🦗' },
+        { id: 'rengar', name: '렝가', role: '수풀 암살자 / 정글', image: '🦁' },
+        { id: 'sejuani', name: '세주아니', role: '탱커 CC 셔틀 / 정글', image: '🐗' },
+        { id: 'xin-zhao', name: '신 짜오', role: '교전형 브루저 / 정글', image: '🔱' },
+        { id: 'nunu', name: '누누와 윌럼프', role: '오브젝트 컨트롤 / 정글', image: '⛄' },
+        { id: 'amumu', name: '아무무', role: '한타형 탱커 / 정글', image: '😭' },
+        { id: 'vi', name: '바이', role: '타겟팅 돌진 / 정글', image: '🥊' },
+        { id: 'volibear', name: '볼리베어', role: '다이브 탱커 / 정글', image: '🐻' },
+        { id: 'lillia', name: '릴리아', role: 'AP 지속 딜러 / 정글', image: '🦌' },
+        { id: 'belveth', name: '벨베스', role: '성장형 전사 / 정글', image: '👾' },
+        { id: 'briar', name: '브라이어', role: '광폭화 전사 / 정글', image: '🦇' },
+        { id: 'rammus', name: '람머스', role: 'AD 카운터 탱커 / 정글', image: '🐢' },
+        { id: 'fiddlesticks', name: '피들스틱', role: '광역 AP 공포 / 정글', image: '👻' },
+        { id: 'ivern', name: '아이번', role: '서포터형 / 정글', image: '🌳' },
+        { id: 'udyr', name: '우디르', role: '태세 변환 전사 / 정글', image: '🐾' },
+        { id: 'jax', name: '잭스', role: '왕귀형 브루저 / 정글', image: '💡' },
+        { id: 'maokai', name: '마오카이', role: '한타형 유틸 탱커 / 정글', image: '🌲' },
+        { id: 'wukong', name: '오공', role: '분신 이니시에이터 / 정글', image: '🐵' },
+        { id: 'gragas', name: '그라가스', role: '만능 배치기 AP / 정글', image: '🌀' },
+        { id: 'taliyah', name: '탈리야', role: '로밍 AP 캐리 / 정글', image: '🪨' },
+        { id: 'zac', name: '자크', role: '초장거리 이니시에이터 / 정글', image: '🟢' }
+      ],
+      valorant: [
+        { id: 'sova', name: '소바', role: '정보 획득 / 척후대', image: '🏹' },
+        { id: 'fade', name: '페이드', role: '공포 디버프 / 척후대', image: '👁️' },
+        { id: 'gecko', name: '게코', role: '유틸리티 크루 / 척후대', image: '🦎' },
+        { id: 'sky', name: '스카이', role: '치유 및 진입 지원 / 척후대', image: '🦅' },
+        { id: 'kayo', name: '케이/오', role: '제압 및 섬광 / 척후대', image: '🤖' },
+        { id: 'breach', name: '브리치', role: '지진 및 지형 분쇄 / 척후대', image: '💥' },
+        { id: 'tejo', name: '테호', role: '기술 장치 제어 / 척후대', image: '🎛️' }
+      ],
+      overwatch: [
+        { id: 'winston', name: '윈스턴', role: '다이브 탱커 / 돌격', image: '🦍' },
+        { id: 'dva', name: 'D.Va', role: '기동형 서브탱커 / 돌격', image: '🐰' },
+        { id: 'reinhardt', name: '라인하르트', role: '메인 방벽 탱커 / 돌격', image: '🛡️' },
+        { id: 'doomfist', name: '둠피스트', role: '돌입 및 넉백 / 돌격', image: '👊' },
+        { id: 'sigma', name: '시그마', role: '포킹 및 유틸리티 / 돌격', image: '🔮' },
+        { id: 'junkerqueen', name: '정커퀸', role: '출혈 돌격대장 / 돌격', image: '🪓' },
+        { id: 'orisa', name: '오리사', role: '저지선 장벽 유지 / 돌격', image: '⚙️' },
+        { id: 'ramattra', name: '라마트라', role: '옴닉 및 네메시스 / 돌격', image: '🟣' },
+        { id: 'roadhog', name: '로드호그', role: '그랩 및 생존형 탱커 / 돌격', image: '🐷' },
+        { id: 'wreckingball', name: '레킹볼', role: '기동성 교란 / 돌격', image: '🐹' },
+        { id: 'zarya', name: '자리아', role: '입자 에너지 방벽 / 돌격', image: '⚛️' },
+        { id: 'mauga', name: '마우가', role: '쌍기관포 난사 / 돌격', image: '🌋' },
+        { id: 'domina', name: '도미나', role: '보호막 및 군중 제어 / 돌격', image: '⚡' },
+        { id: 'hazard', name: '해저드', role: '수정 변이 돌격 / 돌격', image: '🧪' }
+      ]
+    };
+
+    const STORAGE_KEY_CHARACTERS = 'game_notebook_chars';
+    const STORAGE_KEY_NOTES = 'game_notebook_notes';
+
+    function App() {
+      const [selectedGame, setSelectedGame] = useState('lol');
+      
+      const [characters, setCharacters] = useState(() => {
+        const saved = localStorage.getItem(STORAGE_KEY_CHARACTERS);
+        return saved ? JSON.parse(saved) : INITIAL_CHARACTERS;
+      });
+
+      const [selectedCharId, setSelectedCharId] = useState('');
+      const [newCharName, setNewCharName] = useState('');
+      const [newCharRole, setNewCharRole] = useState('');
+      const [newCharEmoji, setNewCharEmoji] = useState('🎮');
+
+      const [notes, setNotes] = useState(() => {
+        const saved = localStorage.getItem(STORAGE_KEY_NOTES);
+        return saved ? JSON.parse(saved) : {};
+      });
+
+      const [evalDate, setEvalDate] = useState(new Date().toISOString().split('T')[0]);
+      const [evalRating, setEvalRating] = useState(3);
+      const [evalFeedback, setEvalFeedback] = useState('');
+      const [evalTodos, setEvalTodos] = useState('');
+
+      const [tempPathMemo, setTempPathMemo] = useState('');
+      const [tempTipMemo, setTempTipMemo] = useState('');
+      const [toastMessage, setToastMessage] = useState('');
+
+      useEffect(() => {
+        const charsList = characters[selectedGame] || [];
+        if (charsList.length > 0) {
+          if (!charsList.some(c => c.id === selectedCharId)) {
+            setSelectedCharId(charsList[0].id);
+          }
+        } else {
+          setSelectedCharId('');
+        }
+      }, [selectedGame, characters]);
+
+      useEffect(() => {
+        if (selectedCharId) {
+          const noteKey = `${selectedGame}_${selectedCharId}`;
+          const charNote = notes[noteKey] || { pathMemo: '', tipMemo: '' };
+          setTempPathMemo(charNote.pathMemo || '');
+          setTempTipMemo(charNote.tipMemo || '');
+        } else {
+          setTempPathMemo('');
+          setTempTipMemo('');
+        }
+      }, [selectedCharId, selectedGame, notes]);
+
+      useEffect(() => {
+        localStorage.setItem(STORAGE_KEY_CHARACTERS, JSON.stringify(characters));
+      }, [characters]);
+
+      useEffect(() => {
+        localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(notes));
+      }, [notes]);
+
+      const showToast = (msg) => {
+        setToastMessage(msg);
+        setTimeout(() => setToastMessage(''), 2000);
+      };
+
+      const handleRestoreDefaults = () => {
+        if (window.confirm('정말 기본 목록을 복원하시겠습니까? (새로 추가하신 커스텀 캐릭터 목록은 초기화됩니다. 작성하신 노트와 메모는 안전하게 유지됩니다!)')) {
+          setCharacters(INITIAL_CHARACTERS);
+          showToast('도미나, 해저드, 테호가 포함된 최신 캐릭터 목록으로 복원되었습니다!');
+        }
+      };
+
+      const handleAddCharacter = (e) => {
+        e.preventDefault();
+        if (!newCharName.trim()) return;
+
+        const newChar = {
+          id: `custom_${Date.now()}`,
+          name: newCharName.trim(),
+          role: newCharRole.trim() || '사용자 정의 영웅',
+          image: newCharEmoji
+        };
+
+        setCharacters(prev => ({
+          ...prev,
+          [selectedGame]: [...prev[selectedGame], newChar]
+        }));
+
+        setSelectedCharId(newChar.id);
+        setNewCharName('');
+        setNewCharRole('');
+        setNewCharEmoji('🎮');
+        showToast(`${newChar.name}이(가) 추가되었습니다!`);
+      };
+
+      const handleDeleteCharacter = (charId, e) => {
+        e.stopPropagation();
+        if (!window.confirm('정말 이 캐릭터를 메모 목록에서 삭제하시겠습니까?')) return;
+
+        setCharacters(prev => ({
+          ...prev,
+          [selectedGame]: prev[selectedGame].filter(c => c.id !== charId)
+        }));
+
+        const remaining = characters[selectedGame].filter(c => c.id !== charId);
+        if (remaining.length > 0) {
+          setSelectedCharId(remaining[0].id);
+        } else {
+          setSelectedCharId('');
+        }
+
+        const noteKey = `${selectedGame}_${charId}`;
+        const newNotes = { ...notes };
+        delete newNotes[noteKey];
+        setNotes(newNotes);
+        showToast('캐릭터가 목록에서 제거되었습니다.');
+      };
+
+      const handleSaveTextMemos = () => {
+        if (!selectedCharId) return;
+        const noteKey = `${selectedGame}_${selectedCharId}`;
+        
+        setNotes(prev => ({
+          ...prev,
+          [noteKey]: {
+            ...(prev[noteKey] || { evaluations: [] }),
+            pathMemo: tempPathMemo,
+            tipMemo: tempTipMemo
+          }
+        }));
+        
+        showToast('핵심 기본 전술 메모가 안전하게 저장되었습니다!');
+      };
+
+      const handleAddEvaluation = (e) => {
+        e.preventDefault();
+        if (!selectedCharId) return;
+        if (!evalFeedback.trim()) {
+          showToast('플레이 소감을 입력해주세요!');
+          return;
+        }
+
+        const noteKey = `${selectedGame}_${selectedCharId}`;
+        
+        const todoList = evalTodos
+          .split('\n')
+          .map(t => t.trim())
+          .filter(t => t.length > 0)
+          .map((text, idx) => ({
+            id: `${Date.now()}_todo_${idx}`,
+            text,
+            completed: false
+          }));
+
+        const newEval = {
+          id: `${Date.now()}_eval`,
+          date: evalDate,
+          rating: Number(evalRating),
+          feedback: evalFeedback,
+          todos: todoList
+        };
+
+        setNotes(prev => {
+          const existing = prev[noteKey] || { pathMemo: '', tipMemo: '', evaluations: [] };
+          const evals = existing.evaluations || [];
+          return {
+            ...prev,
+            [noteKey]: {
+              ...existing,
+              evaluations: [newEval, ...evals]
+            }
+          };
+        });
+
+        setEvalFeedback('');
+        setEvalTodos('');
+        setEvalRating(3);
+        setEvalDate(new Date().toISOString().split('T')[0]);
+        showToast('플레이 기록이 등록되었습니다!');
+      };
+
+      const handleToggleTodo = (evalId, todoId) => {
+        const noteKey = `${selectedGame}_${selectedCharId}`;
+        const charNote = notes[noteKey];
+        if (!charNote) return;
+
+        const updatedEvals = charNote.evaluations.map(ev => {
+          if (ev.id === evalId) {
+            return {
+              ...ev,
+              todos: ev.todos.map(t => t.id === todoId ? { ...t, completed: !t.completed } : t)
+            };
+          }
+          return ev;
+        });
+
+        setNotes(prev => ({
+          ...prev,
+          [noteKey]: {
+            ...prev[noteKey],
+            evaluations: updatedEvals
+          }
+        }));
+      };
+
+      const handleDeleteEvaluation = (evalId) => {
+        if (!window.confirm('이 플레이 기록을 영구 삭제하시겠습니까?')) return;
+        const noteKey = `${selectedGame}_${selectedCharId}`;
+        const charNote = notes[noteKey];
+        if (!charNote) return;
+
+        const updatedEvals = charNote.evaluations.filter(ev => ev.id !== evalId);
+
+        setNotes(prev => ({
+          ...prev,
+          [noteKey]: {
+            ...prev[noteKey],
+            evaluations: updatedEvals
+          }
+        }));
+        showToast('기록이 삭제되었습니다.');
+      };
+
+      const currentCharacter = (characters[selectedGame] || []).find(c => c.id === selectedCharId);
+      const currentNote = selectedCharId ? (notes[`${selectedGame}_${selectedCharId}`] || { pathMemo: '', tipMemo: '', evaluations: [] }) : { pathMemo: '', tipMemo: '', evaluations: [] };
+      const currentEvaluations = currentNote.evaluations || [];
+
+      const gameConfig = {
+        lol: {
+          title: '리그 오브 레전드',
+          sub: '정글(Jungle) 포지션 분석',
+          color: 'from-blue-600 to-indigo-800',
+          textColor: 'text-indigo-400',
+          bgLight: 'bg-indigo-950/20',
+          borderCol: 'border-indigo-500/30',
+          activeBorder: 'border-indigo-500',
+          btnCol: 'bg-indigo-600 hover:bg-indigo-700',
+          labelLeft: '기본 동선 & 캠프 빌드 (레드/칼부 스타트 등)',
+          placeholderLeft: '예) 1. 칼날부리(강타 없이) -> 2. 레드 -> 3. 돌거북 (강타 사용) -> 4. 바텀 3렙 갱킹 찔러보고 아닐 시 칼바위 카정...',
+          labelRight: '교전 팁 & 카운터 상성 가이드',
+          placeholderRight: '예) 상대 카직스인 경우 6렙 전 정글 1:1 맞딜 주의. 렌즈 들고 벽 너머 시야 체크 필수. 리신 Q-음파 아꼈다가 카직스 도약 후 맞추기.'
+        },
+        valorant: {
+          title: '발로란트',
+          sub: '척후대(Initiator) 오답노트',
+          color: 'from-rose-600 to-red-800',
+          textColor: 'text-rose-400',
+          bgLight: 'bg-rose-950/20',
+          borderCol: 'border-rose-500/30',
+          activeBorder: 'border-rose-500',
+          btnCol: 'bg-rose-600 hover:bg-rose-700',
+          labelLeft: '맵별 각독 및 정보 화살/리콘 위치',
+          placeholderLeft: '예) 바인드 A 사이트 공격 시: 샤워실 뒤쪽 등지고 램프 깊숙한 곳 튕김 2회 풀차지로 발사하면 우측 구석 다 찍힘.',
+          labelRight: '메인 조합 시너지 & 스킬 연계 전술',
+          placeholderRight: '예) 제트 연막 대시 타이밍에 맞춰서 섬광/리콘 날려주기. 우리 팀 사이트 진입 전 적 연막에 리콘 박아서 격파용 연사 준비하기.'
+        },
+        overwatch: {
+          title: '오버워치 2',
+          sub: '돌격(Tanker) 영웅 트레이닝',
+          color: 'from-amber-500 to-orange-700',
+          textColor: 'text-amber-400',
+          bgLight: 'bg-amber-950/20',
+          borderCol: 'border-amber-500/30',
+          activeBorder: 'border-amber-500',
+          btnCol: 'bg-amber-600 hover:bg-amber-700',
+          labelLeft: '진입 루트 & 포지셔닝 (거점/고지대)',
+          placeholderLeft: '예) 왕의 길 수비 시 A거점 우측 이층 방에서 대기 후 상대 아나/바티스트 포킹 타이밍에 맞춰 뒷라인 뛰어들기.',
+          labelRight: '영웅별 카운터 대처 및 꿀팁',
+          placeholderRight: '예) 상대가 바스티온을 픽할 경우 포탑 모드 돌입 시 방벽/디펜스 매트릭스로 즉시 아군 보호 후, 포탑 모드 쿨타임일 때 역공 들어가기.'
+        }
+      };
+
+      const currentConfig = gameConfig[selectedGame];
+
+      return (
+        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500 selection:text-white">
+          {/* 글로벌 토스트 팝업 */}
+          {toastMessage && (
+            <div className="fixed bottom-6 right-6 z-50 bg-slate-800 text-white border border-slate-700 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce">
+              <CheckCircle className="w-5 h-5 text-emerald-400" />
+              <span className="font-medium text-sm">{toastMessage}</span>
+            </div>
+          )}
+
+          {/* 상단 네비게이션 헤더 */}
+          <header className={`bg-gradient-to-r ${currentConfig.color} shadow-lg py-6 px-4 sm:px-8 border-b border-white/10 transition-colors duration-500`}>
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3">
+                  <Gamepad2 className="w-8 h-8 text-white animate-pulse" />
+                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">GAMING NOTE</h1>
+                </div>
+                <p className="text-white/80 text-xs sm:text-sm mt-1 font-medium">
+                  나만의 전용 오답노트 & 전술 플레이 그라운드
+                </p>
+              </div>
+
+              {/* 게임 선택 버튼 세트 */}
+              <div className="flex bg-black/30 p-1.5 rounded-2xl border border-white/10 self-start md:self-center">
+                <button
+                  onClick={() => setSelectedGame('lol')}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
+                    selectedGame === 'lol' 
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
+                      : 'text-slate-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  LOL (정글)
+                </button>
+                <button
+                  onClick={() => setSelectedGame('valorant')}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
+                    selectedGame === 'valorant' 
+                      ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30' 
+                      : 'text-slate-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  VALORANT (척후대)
+                </button>
+                <button
+                  onClick={() => setSelectedGame('overwatch')}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
+                    selectedGame === 'overwatch' 
+                      ? 'bg-amber-600 text-white shadow-md shadow-amber-600/30' 
+                      : 'text-slate-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  OW 2 (돌격)
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* 메인 콘텐츠 영역 */}
+          <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            {/* 왼쪽 사이드바: 캐릭터 목록 */}
+            <section className="lg:col-span-4 flex flex-col gap-6">
+              <div className="bg-slate-900/85 rounded-2xl p-5 border border-slate-800 shadow-xl backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+                  <h2 className="text-lg font-bold flex items-center gap-2">
+                    <BookOpen className={`w-5 h-5 ${currentConfig.textColor}`} />
+                    캐릭터 선택
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleRestoreDefaults}
+                      className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors flex items-center gap-1 text-xs"
+                      title="새로운 영웅 리스트 전체 복원하기"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      기본 복원
+                    </button>
+                    <span className="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded-full font-mono">
+                      {(characters[selectedGame] || []).length}명
+                    </span>
+                  </div>
+                </div>
+
+                {/* 캐릭터 리스트 */}
+                <div className="space-y-2 max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
+                  {(characters[selectedGame] || []).map((char) => {
+                    const isSelected = selectedCharId === char.id;
+                    return (
+                      <div
+                        key={char.id}
+                        onClick={() => setSelectedCharId(char.id)}
+                        className={`group w-full text-left p-3.5 rounded-xl cursor-pointer transition-all flex items-center justify-between border ${
+                          isSelected 
+                            ? `${currentConfig.activeBorder} bg-gradient-to-r ${currentConfig.color} text-white shadow-lg` 
+                            : 'border-slate-800 hover:border-slate-700 bg-slate-950/50 hover:bg-slate-900'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{char.image}</span>
+                          <div>
+                            <div className="font-bold text-sm sm:text-base">{char.name}</div>
+                            <div className={`text-xs ${isSelected ? 'text-white/85' : 'text-slate-400 group-hover:text-slate-300'}`}>
+                              {char.role}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {isSelected && <ChevronRight className="w-5 h-5 text-white" />}
+                          {/* 커스텀 캐릭터이거나 특정 조건에서 개별 삭제 */}
+                          {char.id.startsWith('custom_') && (
+                            <button
+                              onClick={(e) => handleDeleteCharacter(char.id, e)}
+                              className="p-1 rounded-lg hover:bg-black/20 text-slate-400 hover:text-red-400 transition-colors"
+                              title="캐릭터 삭제"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {(characters[selectedGame] || []).length === 0 && (
+                    <div className="text-center py-8 text-slate-500 text-sm">
+                      등록된 캐릭터가 없습니다. 아래에서 새로 추가해보세요!
+                    </div>
+                  )}
+                </div>
+
+                {/* 새로운 커스텀 캐릭터 추가 폼 */}
+                <form onSubmit={handleAddCharacter} className="mt-5 pt-5 border-t border-slate-800">
+                  <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">캐릭터 직접 추가</h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-4 gap-2">
+                      <select
+                        value={newCharEmoji}
+                        onChange={(e) => setNewCharEmoji(e.target.value)}
+                        className="col-span-1 bg-slate-950 border border-slate-800 rounded-xl text-center text-xl focus:outline-none focus:border-slate-600"
+                      >
+                        <option value="🎮">🎮</option>
+                        <option value="🔥">🔥</option>
+                        <option value="❄️">❄️</option>
+                        <option value="⚡">⚡</option>
+                        <option value="🎯">🎯</option>
+                        <option value="🗡️">🗡️</option>
+                        <option value="🛡️">🛡️</option>
+                        <option value="🏹">🏹</option>
+                        <option value="🦊">🦊</option>
+                        <option value="👻">👻</option>
+                      </select>
+                      <input
+                        type="text"
+                        placeholder="이름 (예: 바드)"
+                        value={newCharName}
+                        onChange={(e) => setNewCharName(e.target.value)}
+                        maxLength={10}
+                        className="col-span-3 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 placeholder:text-slate-600"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="역할/특성 (예: 유틸 정글)"
+                        value={newCharRole}
+                        onChange={(e) => setNewCharRole(e.target.value)}
+                        maxLength={18}
+                        className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 placeholder:text-slate-600"
+                      />
+                      <button
+                        type="submit"
+                        className={`px-3 py-2 rounded-xl text-white font-bold flex items-center justify-center transition-all ${currentConfig.btnCol}`}
+                      >
+                        <Plus className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </section>
+
+            {/* 오른쪽 메인: 디테일 메모 & 오답노트 작성 공간 */}
+            <section className="lg:col-span-8 flex flex-col gap-6">
+              {currentCharacter ? (
+                <>
+                  {/* 캐릭터 헤더 정보 */}
+                  <div className="bg-slate-900/85 rounded-2xl p-6 border border-slate-800 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <span className="text-4xl bg-slate-950 p-3 rounded-2xl border border-slate-800 shadow-inner">{currentCharacter.image}</span>
+                      <div>
+                        <div className="flex items-center gap-2.5">
+                          <h2 className="text-2xl font-black text-white">{currentCharacter.name}</h2>
+                          <span className="text-xs bg-indigo-950 text-indigo-300 font-bold border border-indigo-500/20 px-2.5 py-1 rounded-full uppercase">
+                            {currentConfig.sub}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-400 mt-1">{currentCharacter.role}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 파트 1: 포지션 고유 메모 (빌드/동선 & 꿀팁) */}
+                  <div className="bg-slate-900/85 rounded-2xl p-6 border border-slate-800 shadow-xl">
+                    <div className="flex items-center justify-between mb-5 pb-2 border-b border-slate-800">
+                      <h3 className="font-bold text-lg flex items-center gap-2">
+                        <FileText className={`w-5 h-5 ${currentConfig.textColor}`} />
+                        {currentCharacter.name} 핵심 기본 전술 메모
+                      </h3>
+                      <button
+                        onClick={handleSaveTextMemos}
+                        className={`px-4 py-2 rounded-xl text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md ${currentConfig.btnCol}`}
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        저장하기
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {/* 왼쪽 영역 */}
+                      <div className="flex flex-col gap-2">
+                        <label className="text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                          <MapIcon className="w-4 h-4 text-emerald-400" />
+                          {currentConfig.labelLeft}
+                        </label>
+                        <textarea
+                          value={tempPathMemo}
+                          onChange={(e) => setTempPathMemo(e.target.value)}
+                          placeholder={currentConfig.placeholderLeft}
+                          rows={6}
+                          className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 placeholder:text-slate-600 resize-none leading-relaxed"
+                        />
+                      </div>
+
+                      {/* 오른쪽 영역 */}
+                      <div className="flex flex-col gap-2">
+                        <label className="text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                          <Award className="w-4 h-4 text-amber-400" />
+                          {currentConfig.labelRight}
+                        </label>
+                        <textarea
+                          value={tempTipMemo}
+                          onChange={(e) => setTempTipMemo(e.target.value)}
+                          placeholder={currentConfig.placeholderRight}
+                          rows={6}
+                          className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 placeholder:text-slate-600 resize-none leading-relaxed"
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-3 text-right">
+                      <span className="text-[11px] text-slate-500">
+                        💡 텍스트를 작성한 후 우측 상단의 [저장하기] 버튼을 꼭 눌러주세요.
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 파트 2: 플레이 기록 & 스스로의 평가 (오답노트) */}
+                  <div className="bg-slate-900/85 rounded-2xl p-6 border border-slate-800 shadow-xl">
+                    <h3 className="font-bold text-lg mb-4 pb-2 border-b border-slate-800 flex items-center gap-2">
+                      <Clock className={`w-5 h-5 ${currentConfig.textColor}`} />
+                      실전 플레이 피드백 & 셀프 평가
+                    </h3>
+
+                    {/* 플레이 기록 추가 폼 */}
+                    <form onSubmit={handleAddEvaluation} className="bg-slate-950/60 border border-slate-800/80 p-4 rounded-xl mb-6 flex flex-col gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* 날짜 선택 */}
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-400 mb-1.5">플레이 날짜</label>
+                          <input
+                            type="date"
+                            value={evalDate}
+                            onChange={(e) => setEvalDate(e.target.value)}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                        {/* 만족도 별점 */}
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-semibold text-slate-400 mb-1.5">나의 플레이 점수</label>
+                          <div className="flex items-center gap-2 h-9">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                type="button"
+                                onClick={() => setEvalRating(star)}
+                                className="text-2xl transition-transform hover:scale-115 focus:outline-none animate-none"
+                              >
+                                <span className={star <= evalRating ? 'text-amber-400' : 'text-slate-600'}>★</span>
+                              </button>
+                            ))}
+                            <span className="text-xs text-slate-400 ml-2 font-mono">({evalRating}/5점)</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 피드백 내용 */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1.5">플레이 피드백 (오답노트 및 소감)</label>
+                        <textarea
+                          value={evalFeedback}
+                          onChange={(e) => setEvalFeedback(e.target.value)}
+                          placeholder="예) 아군이 카정들어갔을 때 백업이 한발 늦어서 적 서포터에게 킬을 헌납함. 다음엔 미니맵을 2초 주기로 계속 주시하자."
+                          rows={3}
+                          className="w-full bg-slate-900 border border-slate-800 rounded-lg p-3 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 placeholder:text-slate-600 resize-none"
+                        />
+                      </div>
+
+                      {/* 투두리스트 리스트 기입 */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1.5">💡 이 플레이로 깨달은 앞으로의 할 일 (줄바꿈으로 구분)</label>
+                        <textarea
+                          value={evalTodos}
+                          onChange={(e) => setEvalTodos(e.target.value)}
+                          placeholder="예)&#10;정글 동선 짤 때 상대방 역버프 여부 무조건 무시하고 들어가기X&#10;용 둥지 안 제어 와드 꼼꼼히 확인하기"
+                          rows={2}
+                          className="w-full bg-slate-900 border border-slate-800 rounded-lg p-3 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 placeholder:text-slate-600 resize-none font-mono"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        className={`w-full py-2.5 rounded-lg text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 ${currentConfig.btnCol}`}
+                      >
+                        <Plus className="w-4 h-4" />
+                        오늘의 플레이 기록 등록하기
+                      </button>
+                    </form>
+
+                    {/* 기록된 플레이 피드백 목록 */}
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                      {currentEvaluations.map((ev) => (
+                        <div 
+                          key={ev.id} 
+                          className="bg-slate-950/50 border border-slate-800/60 rounded-xl p-4 transition-all hover:border-slate-700 relative group/card"
+                        >
+                          <button
+                            onClick={() => handleDeleteEvaluation(ev.id)}
+                            className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-900 hover:bg-red-950/40 text-slate-500 hover:text-red-400 transition-all opacity-0 group-hover/card:opacity-100"
+                            title="기록 삭제"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+
+                          {/* 날짜 및 별점 */}
+                          <div className="flex flex-wrap items-center gap-3 mb-2.5">
+                            <span className="text-xs bg-slate-900 px-2.5 py-1 rounded-full text-indigo-300 font-mono font-bold">
+                              {ev.date}
+                            </span>
+                            <div className="flex gap-0.5 text-sm text-amber-400">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <span key={i} className={i < ev.rating ? 'opacity-100' : 'opacity-20'}>★</span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* 피드백 본문 */}
+                          <p className="text-slate-300 text-sm whitespace-pre-line leading-relaxed mb-4">
+                            {ev.feedback}
+                          </p>
+
+                          {/* 연계된 투두리스트 피드백 */}
+                          {ev.todos && ev.todos.length > 0 && (
+                            <div className="border-t border-slate-900/80 pt-3 mt-3">
+                              <h4 className="text-xs font-bold text-indigo-400 mb-2 flex items-center gap-1.5">
+                                <CheckCircle className="w-3.5 h-3.5" />
+                                실천 리스트 (To-Do)
+                              </h4>
+                              <div className="space-y-1.5">
+                                {ev.todos.map((todo) => (
+                                  <div 
+                                    key={todo.id} 
+                                    onClick={() => handleToggleTodo(ev.id, todo.id)}
+                                    className="flex items-center gap-2.5 cursor-pointer group/todo select-none"
+                                  >
+                                    <div className={`w-4 h-4 rounded flex items-center justify-center transition-all border ${
+                                      todo.completed 
+                                        ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
+                                        : 'border-slate-700 group-hover/todo:border-slate-500'
+                                    }`}>
+                                      {todo.completed && <span className="text-[10px]">✓</span>}
+                                    </div>
+                                    <span className={`text-xs transition-colors ${
+                                      todo.completed 
+                                        ? 'line-through text-slate-500' 
+                                        : 'text-slate-300 group-hover/todo:text-white'
+                                    }`}>
+                                      {todo.text}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+
+                      {currentEvaluations.length === 0 && (
+                        <div className="text-center py-12 bg-slate-950/20 border border-dashed border-slate-800 rounded-xl text-slate-500">
+                          <Award className="w-10 h-10 mx-auto text-slate-600 mb-2" />
+                          아직 기록된 플레이 평가가 없습니다.<br />
+                          오늘의 플레이 소감과 실천 리스트를 작성하여 나만의 성장 노트를 쌓아보세요!
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center py-20 bg-slate-900/50 rounded-2xl border border-slate-800/60 text-slate-500">
+                  <Gamepad2 className="w-16 h-16 text-slate-700 mb-4 animate-pulse" />
+                  <p className="text-lg font-bold">선택된 캐릭터가 없습니다</p>
+                  <p className="text-sm text-slate-600 mt-1">왼쪽 패널에서 캐릭터를 선택하거나 새로운 캐릭터를 추가해주세요.</p>
+                </div>
+              )}
+            </section>
+          </main>
+
+          {/* 스크롤바 커스텀 CSS */}
+          <style>{`
+            .custom-scrollbar::-webkit-scrollbar {
+              width: 6px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+              background: rgba(15, 23, 42, 0.3);
+              border-radius: 9999px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+              background: rgba(148, 163, 184, 0.2);
+              border-radius: 9999px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: rgba(148, 163, 184, 0.4);
+            }
+          `}</style>
+        </div>
+      );
+    }
+
+    // React 애플리케이션을 가상 DOM 노드에 장착합니다
+    const container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
+  </script>
+</body>
+</html>
