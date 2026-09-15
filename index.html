@@ -14,27 +14,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 
     <script>
-        import { initializeApp } from "firebase/app";
-        import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-        const firebaseConfig = {
-              apiKey: "AIzaSyA2ECbZumISupaSbfmOwz4h21oLSbNv_zo",
-              authDomain: "gaming-c38f9.firebaseapp.com",
-              databaseURL: "https://gaming-c38f9-default-rtdb.firebaseio.com",
-              projectId: "gaming-c38f9",
-              storageBucket: "gaming-c38f9.firebasestorage.app",
-              messagingSenderId: "666444670157",
-              appId: "1:666444670157:web:6760ba5dd4a9aa56287584",
-              measurementId: "G-LSPG0X90R7"
-        };
-
-// Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         tailwind.config = {
             theme: {
                 extend: {
@@ -133,6 +112,11 @@
 
         <!-- Header Actions -->
         <div class="flex items-center gap-2 sm:gap-3">
+            <div id="cloudSyncStatus" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-700/60" title="Firebase 클라우드 실시간 동기화 상태">
+                <i class="fa-solid fa-cloud-check text-xs"></i>
+                <span id="cloudSyncText">클라우드 연동됨</span>
+            </div>
+
             <button onclick="fetchDataDragonChampions(true)" class="bg-lol-gold/10 hover:bg-lol-gold/20 text-lol-gold border border-lol-gold/40 hover:border-lol-gold px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all" title="최신 롤 챔피언 데이터 동기화">
                 <i class="fa-solid fa-arrows-rotate"></i> <span class="hidden sm:inline">전체 챔프 자동 동기화</span>
             </button>
@@ -604,10 +588,21 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        
-        // Initial Champions Master Data (Includes key champions & Roak)
+    <!-- JAVASCRIPT LOGIC WITH FIREBASE INTEGRATION -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase Configuration & State
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'lol-strategy-hub';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+        let app, auth, db;
+        let currentUser = null;
+        let isSyncing = false;
+
+        // Initial Champions Master Data
         const DEFAULT_CHAMPIONS = [
             { id: 'roak', name: '로크', title: '데마시아의 신규 챔피언', avatar: 'https://placehold.co/100x100/0A1428/C8AA6E?text=Roak', lanes: ['TOP', 'MID'] },
             { id: 'mel', name: '멜', title: '녹서스의 정치가', avatar: 'https://placehold.co/100x100/0A1428/C8AA6E?text=Mel', lanes: ['MID', 'SUP'] },
@@ -628,11 +623,107 @@
             selectedChampId: 'roak',
             currentFilterLane: 'ALL',
             searchQuery: '',
-            tempPhotoData: '', // Temporary base64 data for photo upload modal
-            notes: {},       // { champId: { startItems, coreItems, runes, spells, skillOrder, tips } }
-            matchups: {},    // { champId: [ { id, opponentId, difficulty, note } ] }
-            reviews: {}      // { champId: [ { id, result, opponentId, kda, cs, rating, good, bad, date } ] }
+            tempPhotoData: '',
+            notes: {},
+            matchups: {},
+            reviews: {}
         };
+
+        async function initFirebase() {
+            try {
+                if (Object.keys(firebaseConfig).length > 0) {
+                    app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+
+                    // Authentication handler
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    onAuthStateChanged(auth, (user) => {
+                        if (user) {
+                            currentUser = user;
+                            setupFirestoreSync(user.uid);
+                        }
+                    });
+                } else {
+                    console.warn("Firebase config not available. Falling back to LocalStorage.");
+                    updateSyncStatusUI(false, "로컬 모드");
+                }
+            } catch (err) {
+                console.error("Firebase init failed:", err);
+                updateSyncStatusUI(false, "오프라인 저장");
+            }
+        }
+
+        function setupFirestoreSync(userId) {
+            if (!userId || !db) return;
+            // Strict path requirement: /artifacts/{appId}/users/{userId}/user_data/dashboard_state
+            const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'user_data', 'dashboard_state');
+
+            onSnapshot(userDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data) {
+                        if (data.champions && data.champions.length > 0) state.champions = data.champions;
+                        if (data.notes) state.notes = data.notes;
+                        if (data.matchups) state.matchups = data.matchups;
+                        if (data.reviews) state.reviews = data.reviews;
+
+                        ensureSpecialChampionsExist();
+                        renderChampions();
+                        selectChampion(state.selectedChampId || 'roak');
+                        updateSyncStatusUI(true, "클라우드 동기화됨");
+                    }
+                } else {
+                    // Seed initial data if document doesn't exist yet
+                    saveToFirestore();
+                }
+            }, (error) => {
+                console.error("Firestore onSnapshot error:", error);
+                updateSyncStatusUI(false, "동기화 오류");
+            });
+        }
+
+        async function saveToFirestore() {
+            saveToLocalStorage(); // Local fallback
+            if (!auth || !auth.currentUser || !db) return;
+
+            try {
+                updateSyncStatusUI(true, "저장 중...");
+                const userId = auth.currentUser.uid;
+                const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'user_data', 'dashboard_state');
+
+                await setDoc(userDocRef, {
+                    champions: state.champions || [],
+                    notes: state.notes || {},
+                    matchups: state.matchups || {},
+                    reviews: state.reviews || {},
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+
+                updateSyncStatusUI(true, "클라우드 저장 완료");
+            } catch (err) {
+                console.error("Firestore save failed:", err);
+                updateSyncStatusUI(false, "저장 실패 (로컬 보관)");
+            }
+        }
+
+        function updateSyncStatusUI(isSuccess, message = "클라우드 연동됨") {
+            const el = document.getElementById('cloudSyncStatus');
+            const textEl = document.getElementById('cloudSyncText');
+            if (!el || !textEl) return;
+
+            textEl.innerText = message;
+            if (isSuccess) {
+                el.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-700/60";
+            } else {
+                el.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-950/80 text-amber-400 border border-amber-700/60";
+            }
+        }
 
         async function initApp() {
             loadFromLocalStorage();
@@ -641,10 +732,8 @@
                 state.champions = JSON.parse(JSON.stringify(DEFAULT_CHAMPIONS));
             }
 
-            // Always ensure Roak & Special Champions exist in the roster
             ensureSpecialChampionsExist();
 
-            // Seed initial sample data for Roak & Zyra if empty
             if (!state.notes['roak']) {
                 state.notes['roak'] = {
                     startItems: '도란의 검 + 1포션 / 부패물약',
@@ -679,9 +768,11 @@
             renderChampions();
             selectChampion(state.selectedChampId || 'roak');
 
-            // Automatically fetch all 160+ official champions from Riot DataDragon API
+            // Initialize Firebase Cloud Connection
+            await initFirebase();
+
+            // Fetch DataDragon official champs
             await fetchDataDragonChampions(false);
-            saveToLocalStorage();
         }
 
         function ensureSpecialChampionsExist() {
@@ -700,22 +791,18 @@
 
         async function fetchDataDragonChampions(userInitiated = false) {
             try {
-                // Fetch latest DataDragon version
                 const verRes = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
                 const versions = await verRes.json();
                 const latestVersion = versions[0] || '14.24.1';
 
-                // Fetch Korean champion data
                 const champRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${latestVersion}/data/ko_KR/champion.json`);
                 const champData = await champRes.json();
                 const riotChamps = champData.data;
 
-                // Map DataDragon Champions into state
                 Object.keys(riotChamps).forEach(key => {
                     const item = riotChamps[key];
                     const id = item.id.toLowerCase();
                     
-                    // Map primary tags to lanes
                     const lanes = [];
                     if (item.tags.includes('Fighter')) lanes.push('TOP', 'JUG');
                     if (item.tags.includes('Tank') && !lanes.includes('TOP')) lanes.push('TOP', 'SUP');
@@ -748,14 +835,13 @@
 
                 ensureSpecialChampionsExist();
 
-                // Sort champions Korean Name order (keeping Roak at top)
                 state.champions.sort((a, b) => {
                     if (a.id === 'roak') return -1;
                     if (b.id === 'roak') return 1;
                     return a.name.localeCompare(b.name, 'ko');
                 });
 
-                saveToLocalStorage();
+                saveToFirestore();
                 renderChampions();
 
                 if (userInitiated) {
@@ -885,7 +971,7 @@
                 champ.lanes.push(lane);
             }
 
-            saveToLocalStorage();
+            saveToFirestore();
             selectChampion(champId);
         }
 
@@ -900,8 +986,8 @@
                 tips: document.getElementById('noteTips').value
             };
 
-            saveToLocalStorage();
-            showToast('공략 노트가 안전하게 저장되었습니다.');
+            saveToFirestore();
+            showToast('공략 노트가 클라우드에 안전하게 저장되었습니다.');
         }
 
         function handlePhotoFileSelect(event) {
@@ -928,10 +1014,10 @@
                 champ.avatar = urlInput;
             }
 
-            saveToLocalStorage();
+            saveToFirestore();
             selectChampion(state.selectedChampId);
             closeModal('changePhotoModal');
-            showToast(`${champ.name} 챔피언 사진이 변경되었습니다!`);
+            showToast(`${champ.name} 챔피언 사진이 변경 및 저장되었습니다!`);
         }
 
         function resetToDefaultPhoto() {
@@ -945,7 +1031,7 @@
                 champ.avatar = `https://placehold.co/100x100/0A1428/C8AA6E?text=${encodeURIComponent(champ.name)}`;
             }
 
-            saveToLocalStorage();
+            saveToFirestore();
             selectChampion(state.selectedChampId);
             closeModal('changePhotoModal');
             showToast('기본 프로필 사진으로 복원되었습니다.');
@@ -1019,18 +1105,18 @@
                 note: note
             });
 
-            saveToLocalStorage();
+            saveToFirestore();
             renderMatchups();
             closeModal('addMatchupModal');
             document.getElementById('matchupNoteText').value = '';
-            showToast('상대법 정보가 등록되었습니다.');
+            showToast('상대법 정보가 등록 및 저장되었습니다.');
         }
 
         function deleteMatchup(id) {
             const champId = state.selectedChampId;
             if (!state.matchups[champId]) return;
             state.matchups[champId] = state.matchups[champId].filter(m => m.id !== id);
-            saveToLocalStorage();
+            saveToFirestore();
             renderMatchups();
             showToast('상대법이 삭제되었습니다.');
         }
@@ -1117,7 +1203,7 @@
                 date: dateStr
             });
 
-            saveToLocalStorage();
+            saveToFirestore();
             renderReviews();
             updateHeaderStats();
             closeModal('addReviewModal');
@@ -1126,37 +1212,17 @@
             document.getElementById('revCs').value = '';
             document.getElementById('revGood').value = '';
             document.getElementById('revBad').value = '';
-            showToast('경기 피드백 일지가 추가되었습니다.');
+            showToast('경기 피드백 일지가 클라우드에 등록되었습니다.');
         }
 
         function deleteReview(id) {
             const champId = state.selectedChampId;
             if (!state.reviews[champId]) return;
             state.reviews[champId] = state.reviews[champId].filter(r => r.id !== id);
-            saveToLocalStorage();
+            saveToFirestore();
             renderReviews();
             updateHeaderStats();
             showToast('리뷰가 삭제되었습니다.');
-        }
-
-        function updateHeaderStats() {
-            const list = state.reviews[state.selectedChampId] || [];
-            const count = list.length;
-            const wins = list.filter(r => r.result === 'WIN').length;
-            const winRate = count > 0 ? Math.round((wins / count) * 100) : 0;
-
-            let totalRating = 0;
-            list.forEach(r => totalRating += parseFloat(r.rating || 5));
-            const avgRating = count > 0 ? (totalRating / count).toFixed(1) : '0.0';
-
-            document.getElementById('statReviewCount').innerText = `${count}판`;
-            document.getElementById('statWinRate').innerText = `${winRate}%`;
-            document.getElementById('statAvgKda').innerText = `${avgRating} ★`;
-
-            document.getElementById('revStatTotal').innerText = `${count}판`;
-            document.getElementById('revStatWinLoss').innerText = `${wins}승 ${count - wins}패`;
-            document.getElementById('revStatRate').innerText = `${winRate}%`;
-            document.getElementById('revStatRating').innerText = `${avgRating} / 5.0`;
         }
 
         function addNewChampion() {
@@ -1180,7 +1246,7 @@
             };
 
             state.champions.unshift(newChamp);
-            saveToLocalStorage();
+            saveToFirestore();
             renderChampions();
             selectChampion(id);
             closeModal('addChampModal');
@@ -1191,109 +1257,25 @@
             showToast(`${name} 챔피언이 성공적으로 추가되었습니다!`);
         }
 
-        function setLaneFilter(lane) {
-            state.currentFilterLane = lane;
-            document.querySelectorAll('.lane-tab').forEach(b => {
-                b.className = 'lane-tab py-1.5 rounded text-center text-slate-400 hover:text-slate-200';
-            });
-            const activeBtn = document.getElementById(`filter-${lane}`);
-            if (activeBtn) {
-                activeBtn.className = 'lane-tab active py-1.5 rounded text-center font-bold text-lol-gold bg-lol-gold/10 border border-lol-gold/30';
-            }
-            renderChampions();
-        }
-
-        function filterChampions() {
-            state.searchQuery = document.getElementById('champSearch').value;
-            renderChampions();
-        }
-
-        function switchTab(tabKey) {
-            document.querySelectorAll('.main-tab').forEach(t => {
-                t.className = 'main-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all shrink-0';
-            });
-            document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
-
-            document.getElementById(`tab-btn-${tabKey}`).className = 'main-tab active px-4 py-2.5 border-b-2 border-lol-gold text-lol-gold flex items-center gap-2 transition-all shrink-0';
-            document.getElementById(`pane-${tabKey}`).classList.remove('hidden');
-        }
-
-        function openModal(id) {
-            if (id === 'changePhotoModal') {
-                const champ = state.champions.find(c => c.id === state.selectedChampId);
-                if (champ) {
-                    document.getElementById('photoModalChampName').innerText = champ.name;
-                    document.getElementById('modalPhotoPreview').src = champ.avatar;
-                    document.getElementById('photoUrlInput').value = champ.avatar.startsWith('data:') ? '' : champ.avatar;
-                    state.tempPhotoData = '';
-                }
-            }
-
-            if (id === 'addMatchupModal' || id === 'addReviewModal') {
-                const selects = [document.getElementById('matchupOpponentSelect'), document.getElementById('revOpponent')];
-                selects.forEach(sel => {
-                    if (!sel) return;
-                    sel.innerHTML = '';
-                    state.champions.forEach(c => {
-                        if (c.id !== state.selectedChampId) {
-                            const opt = document.createElement('option');
-                            opt.value = c.id;
-                            opt.innerText = `${c.name} (${c.title || ''})`;
-                            sel.appendChild(opt);
-                        }
-                    });
-                });
-            }
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        function showToast(msg) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-5 right-5 bg-lol-gold text-lol-bg font-bold px-4 py-2.5 rounded-lg shadow-2xl z-50 text-xs flex items-center gap-2 border border-white/20';
-            toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${msg}`;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2500);
-        }
-
-        function saveToLocalStorage() {
-            localStorage.setItem('lol_strategy_db', JSON.stringify(state));
-        }
-
-        function loadFromLocalStorage() {
-            const data = localStorage.getItem('lol_strategy_db');
-            if (data) {
-                try {
-                    state = JSON.parse(data);
-                } catch (e) {
-                    console.error('Failed to parse state from localStorage', e);
-                }
-            }
-        }
-
-        function exportData() {
-            const jsonStr = JSON.stringify(state, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `lol_strategy_notes_${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
-            showToast('데이터 파일이 다운로드되었습니다.');
-        }
-
-        function confirmResetData() {
-            openModal('resetConfirmModal');
-        }
-
-        function executeResetData() {
-            localStorage.removeItem('lol_strategy_db');
-            closeModal('resetConfirmModal');
-            location.reload();
-        }
+        // Global Window Exposure for HTML Event Handlers
+        window.fetchDataDragonChampions = fetchDataDragonChampions;
+        window.saveBuildNotes = saveBuildNotes;
+        window.saveMatchup = saveMatchup;
+        window.deleteMatchup = deleteMatchup;
+        window.saveReview = saveReview;
+        window.deleteReview = deleteReview;
+        window.addNewChampion = addNewChampion;
+        window.handlePhotoFileSelect = handlePhotoFileSelect;
+        window.saveChampionPhoto = saveChampionPhoto;
+        window.resetToDefaultPhoto = resetToDefaultPhoto;
+        window.setLaneFilter = setLaneFilter;
+        window.filterChampions = filterChampions;
+        window.switchTab = switchTab;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.exportData = exportData;
+        window.confirmResetData = confirmResetData;
+        window.executeResetData = executeResetData;
 
         window.onload = function() {
             initApp();
