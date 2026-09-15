@@ -31,7 +31,7 @@
                 extend: {
                     colors: {
                         lol: {
-                            bg: '#010A13',
+                            bg: '#000000',
                             bgPanel: '#091428',
                             bgDark: '#0A1428',
                             gold: '#C8AA6E',
@@ -54,16 +54,18 @@
         }
     </script>
     <style>
-        html, body {
+        /* Force absolute Pitch Black (#000000) background across the entire viewport */
+        html, body, main {
             background-color: #000000 !important;
         }
+
         /* Custom Hextech scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #010A13;
+            background: #000000;
         }
         ::-webkit-scrollbar-thumb {
             background: #1E2B3C;
@@ -80,14 +82,14 @@
         }
 
         .hextech-card {
-            background: linear-gradient(180deg, rgba(9, 20, 40, 0.95) 0%, rgba(1, 10, 19, 0.95) 100%);
+            background: linear-gradient(180deg, rgba(9, 20, 40, 0.95) 0%, rgba(0, 0, 0, 0.95) 100%);
             border: 1px solid rgba(200, 170, 110, 0.35);
         }
 
-        /* High Visibility Input Styling (White Box + Pitch Black Text) */
+        /* High Visibility Input Styling (Pure White Box + Pitch Black Text) */
         .lol-white-input {
             background-color: #FFFFFF !important;
-            color: #0F172A !important; /* Extremely sharp slate-900 black text */
+            color: #0F172A !important; /* Sharp slate-900 black text */
             font-weight: 600 !important;
             border: 2px solid #CBD5E1 !important;
         }
@@ -104,7 +106,7 @@
         }
     </style>
 </head>
-<body class="bg-lol-bg text-slate-200 font-sans min-h-screen flex flex-col antialiased selection:bg-lol-gold selection:text-lol-bg">
+<body class="bg-black text-slate-200 font-sans min-h-screen flex flex-col antialiased selection:bg-lol-gold selection:text-lol-bg">
 
     <!-- TOP HEADER -->
     <header class="h-16 border-b border-lol-border/80 bg-lol-bgPanel/90 backdrop-blur-md px-4 lg:px-8 flex items-center justify-between sticky top-0 z-40">
@@ -131,14 +133,14 @@
             <button onclick="exportData()" class="bg-lol-bgDark hover:bg-slate-800 text-slate-300 border border-lol-border px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all" title="데이터 백업">
                 <i class="fa-solid fa-download"></i> <span class="hidden md:inline">내보내기</span>
             </button>
-            <button onclick="resetData()" class="text-xs text-slate-500 hover:text-red-400 p-1.5 transition-colors" title="데이터 초기화">
+            <button onclick="confirmResetData()" class="text-xs text-slate-500 hover:text-red-400 p-1.5 transition-colors" title="데이터 초기화">
                 <i class="fa-solid fa-rotate-right"></i>
             </button>
         </div>
     </header>
 
     <!-- MAIN CONTENT CONTAINER -->
-    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden bg-black">
         
         <!-- SIDEBAR: CHAMPION DIRECTORY & LANE FILTERS -->
         <aside class="w-full md:w-80 lg:w-96 border-r border-lol-border/80 bg-lol-bgPanel flex flex-col shrink-0">
@@ -153,7 +155,7 @@
                 </div>
 
                 <!-- Lane Selection Tabs -->
-                <div class="grid grid-cols-6 gap-1 bg-lol-bg/80 p-1 rounded-lg border border-lol-border/60 text-xs">
+                <div class="grid grid-cols-6 gap-1 bg-black p-1 rounded-lg border border-lol-border/60 text-xs">
                     <button onclick="setLaneFilter('ALL')" id="filter-ALL" class="lane-tab active py-1.5 rounded text-center font-bold text-lol-gold bg-lol-gold/10 border border-lol-gold/30">ALL</button>
                     <button onclick="setLaneFilter('TOP')" id="filter-TOP" class="lane-tab py-1.5 rounded text-center text-slate-400 hover:text-slate-200">탑</button>
                     <button onclick="setLaneFilter('JUG')" id="filter-JUG" class="lane-tab py-1.5 rounded text-center text-slate-400 hover:text-slate-200">정글</button>
@@ -164,13 +166,13 @@
             </div>
 
             <!-- Champion List Scrollable Container -->
-            <div id="champListContainer" class="flex-1 overflow-y-auto p-3 space-y-1.5 max-h-[40vh] md:max-h-[calc(100vh-10rem)]">
+            <div id="champListContainer" class="flex-1 overflow-y-auto p-3 space-y-1.5 max-h-[40vh] md:max-h-[calc(100vh-10rem)] bg-lol-bgPanel">
                 <!-- Dynamically populated via JS -->
             </div>
         </aside>
 
         <!-- MAIN DETAIL VIEW -->
-        <main class="flex-1 overflow-y-auto bg-lol-bg flex flex-col p-4 md:p-6 space-y-6">
+        <main class="flex-1 overflow-y-auto bg-black flex flex-col p-4 md:p-6 space-y-6">
             
             <!-- CHAMPION BANNER HEADER -->
             <div id="champHeaderBanner" class="hextech-card rounded-2xl p-5 md:p-6 border border-lol-gold/40 relative overflow-hidden">
@@ -247,10 +249,10 @@
             <div id="pane-strategy" class="tab-pane space-y-6">
                 
                 <!-- Quick Save Action Notification Bar -->
-                <div class="flex justify-between items-center bg-lol-bgPanel/60 border border-lol-border p-3 rounded-xl">
+                <div class="flex justify-between items-center bg-lol-bgPanel/80 border border-lol-border p-3 rounded-xl">
                     <p class="text-xs text-slate-300 flex items-center gap-2">
                         <i class="fa-solid fa-circle-info text-lol-gold"></i> 
-                        시작 아이템, 코어 빌드, 룬, 스킬 순서를 아래 <strong class="text-slate-900 bg-white px-1.5 py-0.5 rounded border border-amber-400">흰색 입력창</strong>에 선명하게 기록하세요.
+                        시작 아이템, 코어 빌드, 룬, 스킬 순서를 아래 <strong class="text-slate-900 bg-white px-1.5 py-0.5 rounded border border-amber-400 font-bold">흰색 입력창</strong>에 선명하게 기록하세요.
                     </p>
                     <button onclick="saveBuildNotes()" class="bg-gradient-to-r from-lol-goldDark to-lol-gold hover:from-lol-gold hover:to-lol-goldLight text-lol-bg font-bold px-4 py-2 rounded-lg text-xs shadow flex items-center gap-1.5 transition-all">
                         <i class="fa-solid fa-floppy-disk"></i> 공략 저장하기
@@ -380,9 +382,8 @@
         </main>
     </div>
 
-    
-    <!-- MODAL: CHANGE CHAMPION PHOTO (NEW FEATURE) -->
-    <div id="changePhotoModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <!-- MODAL: CHANGE CHAMPION PHOTO -->
+    <div id="changePhotoModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-lol-bgPanel border border-lol-gold/70 rounded-xl w-full max-w-md p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-lol-border pb-3">
                 <h3 class="text-base font-bold text-lol-gold flex items-center gap-2">
@@ -431,7 +432,7 @@
     </div>
 
     <!-- MODAL 1: ADD CUSTOM CHAMPION -->
-    <div id="addChampModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="addChampModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-lol-bgPanel border border-lol-gold/60 rounded-xl w-full max-w-md p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-lol-border pb-3">
                 <h3 class="text-base font-bold text-lol-gold flex items-center gap-2">
@@ -474,7 +475,7 @@
     </div>
 
     <!-- MODAL 2: ADD COUNTER MATCHUP -->
-    <div id="addMatchupModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="addMatchupModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-lol-bgPanel border border-lol-gold/60 rounded-xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-lol-border pb-3">
                 <h3 class="text-base font-bold text-lol-gold flex items-center gap-2">
@@ -512,7 +513,7 @@
     </div>
 
     <!-- MODAL 3: ADD PLAY REVIEW FEEDBACK -->
-    <div id="addReviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="addReviewModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-lol-bgPanel border border-lol-blue/60 rounded-xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-lol-border pb-3">
                 <h3 class="text-base font-bold text-lol-blue flex items-center gap-2">
@@ -575,6 +576,21 @@
             <div class="flex justify-end gap-2 pt-2 border-t border-lol-border/60">
                 <button onclick="closeModal('addReviewModal')" class="px-3.5 py-1.5 rounded-lg border border-lol-border text-slate-400 text-xs">취소</button>
                 <button onclick="saveReview()" class="px-4 py-1.5 bg-lol-blue text-lol-bg font-bold rounded-lg text-xs shadow">리뷰 저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: CONFIRM RESET -->
+    <div id="resetConfirmModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-lol-bgPanel border border-red-500/60 rounded-xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
+            <div class="text-center space-y-2">
+                <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i>
+                <h3 class="text-base font-bold text-white">데이터 초기화 확인</h3>
+                <p class="text-xs text-slate-400">저장된 모든 공략, 상대법 팁, 플레이 리뷰 및 사용자 지정 라인 정보가 삭제됩니다. 계속하시겠습니까?</p>
+            </div>
+            <div class="flex justify-center gap-3 pt-2">
+                <button onclick="closeModal('resetConfirmModal')" class="px-4 py-1.5 rounded-lg border border-lol-border text-slate-300 text-xs">취소</button>
+                <button onclick="executeResetData()" class="px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs shadow">초기화 진행</button>
             </div>
         </div>
     </div>
@@ -685,9 +701,7 @@
                 const champData = await champRes.json();
                 const riotChamps = champData.data;
 
-                let addedCount = 0;
-                
-                // Map DataDragon Champions into our state
+                // Map DataDragon Champions into state
                 Object.keys(riotChamps).forEach(key => {
                     const item = riotChamps[key];
                     const id = item.id.toLowerCase();
@@ -702,7 +716,6 @@
                     if (item.tags.includes('Support')) lanes.push('SUP');
                     if (lanes.length === 0) lanes.push('MID');
 
-                    // Check if champion already exists
                     const existingIndex = state.champions.findIndex(c => c.id === id || c.name === item.name);
                     const avatarUrl = `https://ddragon.leagueoflegends.com/cdn/${latestVersion}/img/champion/${item.id}.png`;
 
@@ -714,9 +727,7 @@
                             avatar: avatarUrl,
                             lanes: Array.from(new Set(lanes))
                         });
-                        addedCount++;
                     } else {
-                        // Keep custom base64 images if manually set by user, otherwise use high-res sprite
                         if (!state.champions[existingIndex].avatar.startsWith('data:')) {
                             state.champions[existingIndex].avatar = avatarUrl;
                         }
@@ -742,9 +753,9 @@
                     showToast(`라이엇 공식 챔피언 동기화 완료! (총 ${state.champions.length}개 챔피언)`);
                 }
             } catch (err) {
-                console.warn('DataDragon API fetch failed, fallback to local dataset:', err);
+                console.warn('DataDragon API fetch failed:', err);
                 if (userInitiated) {
-                    showToast('네트워크 오류로 온라인 동기화에 실패했습니다.');
+                    showToast('네트워크 연결 상태를 확인해주세요.');
                 }
             }
         }
@@ -780,9 +791,8 @@
                 }`;
                 card.onclick = () => selectChampion(c.id);
 
-                // Lane Pills
                 const lanePills = (c.lanes || []).map(l => 
-                    `<span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-lol-bg border border-lol-border text-slate-300">${l}</span>`
+                    `<span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-black border border-lol-border text-slate-300">${l}</span>`
                 ).join('');
 
                 card.innerHTML = `
@@ -812,13 +822,13 @@
             state.selectedChampId = id;
             renderChampions();
 
-            // Update Banner
+            // Update Banner Header
             document.getElementById('bannerChampName').innerText = champ.name;
             document.getElementById('bannerChampTitle').innerText = champ.title ? `— ${champ.title}` : '';
             document.getElementById('bannerChampImg').src = champ.avatar;
             document.getElementById('bannerChampRoleBadge').innerText = (champ.lanes && champ.lanes[0]) || 'MID';
 
-            // Render Banner Interactive Position Tags (Allow adding Zyra to Jungle etc with 1-click!)
+            // Render Banner Interactive Position Tags
             const laneBadgesContainer = document.getElementById('bannerLaneBadges');
             laneBadgesContainer.innerHTML = '';
             
@@ -847,13 +857,8 @@
             document.getElementById('noteSkillOrder').value = notes.skillOrder || '';
             document.getElementById('noteTips').value = notes.tips || '';
 
-            // Populate Matchups
             renderMatchups();
-
-            // Populate Reviews
             renderReviews();
-
-            // Update Stats
             updateHeaderStats();
         }
 
@@ -887,10 +892,9 @@
             };
 
             saveToLocalStorage();
-            showToast('공략 노트가 저장되었습니다.');
+            showToast('공략 노트가 안전하게 저장되었습니다.');
         }
 
-        // Photo Upload Handling
         function handlePhotoFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -978,7 +982,7 @@
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </div>
-                    <p class="text-xs text-slate-200 bg-lol-inputBg p-3 rounded-lg border border-lol-border/60 leading-relaxed font-medium">
+                    <p class="text-xs text-slate-900 bg-white p-3 rounded-lg border border-slate-300 leading-relaxed font-semibold">
                         ${m.note}
                     </p>
                 `;
@@ -992,7 +996,7 @@
             const note = document.getElementById('matchupNoteText').value;
 
             if (!note.trim()) {
-                alert('대응 전략 내용을 입력해 주세요.');
+                showToast('대응 전략 내용을 입력해 주세요.');
                 return;
             }
 
@@ -1010,6 +1014,7 @@
             renderMatchups();
             closeModal('addMatchupModal');
             document.getElementById('matchupNoteText').value = '';
+            showToast('상대법 정보가 등록되었습니다.');
         }
 
         function deleteMatchup(id) {
@@ -1018,6 +1023,7 @@
             state.matchups[champId] = state.matchups[champId].filter(m => m.id !== id);
             saveToLocalStorage();
             renderMatchups();
+            showToast('상대법이 삭제되었습니다.');
         }
 
         function renderReviews() {
@@ -1107,11 +1113,11 @@
             updateHeaderStats();
             closeModal('addReviewModal');
 
-            // Clear inputs
             document.getElementById('revKda').value = '';
             document.getElementById('revCs').value = '';
             document.getElementById('revGood').value = '';
             document.getElementById('revBad').value = '';
+            showToast('경기 피드백 일지가 추가되었습니다.');
         }
 
         function deleteReview(id) {
@@ -1121,6 +1127,7 @@
             saveToLocalStorage();
             renderReviews();
             updateHeaderStats();
+            showToast('리뷰가 삭제되었습니다.');
         }
 
         function updateHeaderStats() {
@@ -1137,7 +1144,6 @@
             document.getElementById('statWinRate').innerText = `${winRate}%`;
             document.getElementById('statAvgKda').innerText = `${avgRating} ★`;
 
-            // Update Feedback Tab Stats Bar
             document.getElementById('revStatTotal').innerText = `${count}판`;
             document.getElementById('revStatWinLoss').innerText = `${wins}승 ${count - wins}패`;
             document.getElementById('revStatRate').innerText = `${winRate}%`;
@@ -1151,7 +1157,7 @@
             const customAvatar = document.getElementById('newChampAvatar').value.trim();
 
             if (!name) {
-                alert('챔피언 이름을 입력해 주세요.');
+                showToast('챔피언 이름을 입력해 주세요.');
                 return;
             }
 
@@ -1173,6 +1179,7 @@
             document.getElementById('newChampName').value = '';
             document.getElementById('newChampTitle').value = '';
             document.getElementById('newChampAvatar').value = '';
+            showToast(`${name} 챔피언이 성공적으로 추가되었습니다!`);
         }
 
         function setLaneFilter(lane) {
@@ -1213,7 +1220,6 @@
                 }
             }
 
-            // Populate Opponent Select options dynamically
             if (id === 'addMatchupModal' || id === 'addReviewModal') {
                 const selects = [document.getElementById('matchupOpponentSelect'), document.getElementById('revOpponent')];
                 selects.forEach(sel => {
@@ -1267,13 +1273,17 @@
             a.href = url;
             a.download = `lol_strategy_notes_${new Date().toISOString().slice(0,10)}.json`;
             a.click();
+            showToast('데이터 파일이 다운로드되었습니다.');
         }
 
-        function resetData() {
-            if (confirm('모든 공략 및 플레이 리뷰, 챔피언 사진 데이터를 초기화하시겠습니까?')) {
-                localStorage.removeItem('lol_strategy_db');
-                location.reload();
-            }
+        function confirmResetData() {
+            openModal('resetConfirmModal');
+        }
+
+        function executeResetData() {
+            localStorage.removeItem('lol_strategy_db');
+            closeModal('resetConfirmModal');
+            location.reload();
         }
 
         window.onload = function() {
