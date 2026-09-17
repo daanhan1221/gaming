@@ -14,18 +14,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 
     <script>
-        import { initializeApp } from "firebase/app";
-        import { getAnalytics } from "firebase/analytics";
-        const firebaseConfig = {
-          apiKey: "AIzaSyA2ECbZumISupaSbfmOwz4h21oLSbNv_zo",
-          authDomain: "gaming-c38f9.firebaseapp.com",
-          databaseURL: "https://gaming-c38f9-default-rtdb.firebaseio.com",
-          projectId: "gaming-c38f9",
-          storageBucket: "gaming-c38f9.firebasestorage.app",
-          messagingSenderId: "666444670157",
-          appId: "1:666444670157:web:6760ba5dd4a9aa56287584",
-          measurementId: "G-LSPG0X90R7"
-        };
         tailwind.config = {
             theme: {
                 extend: {
@@ -128,6 +116,10 @@
                 <i class="fa-solid fa-cloud-check text-xs"></i>
                 <span id="cloudSyncText">클라우드 연동됨</span>
             </div>
+
+            <button onclick="openModal('syncCodeModal')" class="bg-lol-blue/20 hover:bg-lol-blue/30 text-lol-blue border border-lol-blue/50 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm" title="스마트폰 & PC 실시간 연동">
+                <i class="fa-solid fa-mobile-screen-button"></i> <span class="hidden sm:inline">기기 연동 (<span id="headerSyncCodeDisplay" class="text-white font-mono">불러오는 중...</span>)</span>
+            </button>
 
             <button onclick="fetchDataDragonChampions(true)" class="bg-lol-gold/10 hover:bg-lol-gold/20 text-lol-gold border border-lol-gold/40 hover:border-lol-gold px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all" title="최신 롤 챔피언 데이터 동기화">
                 <i class="fa-solid fa-arrows-rotate"></i> <span class="hidden sm:inline">전체 챔프 자동 동기화</span>
@@ -600,21 +592,69 @@
         </div>
     </div>
 
+    <!-- MODAL 5: DEVICE SYNC CODE MODAL -->
+    <div id="syncCodeModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-lol-bgPanel border border-lol-blue/70 rounded-xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-lol-border pb-3">
+                <h3 class="text-base font-bold text-lol-blue flex items-center gap-2">
+                    <i class="fa-solid fa-mobile-screen-button"></i> PC &amp; 스마트폰 실시간 기기 연동
+                </h3>
+                <button onclick="closeModal('syncCodeModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="space-y-3 text-xs">
+                <div class="bg-lol-bgDark p-3 rounded-lg border border-lol-border text-slate-300 leading-relaxed">
+                    <p class="font-bold text-lol-gold mb-1"><i class="fa-solid fa-circle-info"></i> 스마트폰에서 동기화하는 방법</p>
+                    <p class="text-[11px] text-slate-400">
+                        Firebase에서 부여받은 고유 키(UID) 또는 임의의 연동 코드로 PC와 모바일을 **실시간 연동**할 수 있습니다.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-slate-200 font-bold mb-1">현재 동기화 코드 (Sync Code / Firebase Key)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="syncCodeInput" placeholder="예: Firebase UID 또는 연동 코드" 
+                               class="w-full lol-white-input rounded-lg p-2.5 text-xs font-mono font-bold tracking-wider">
+                        <button onclick="applySyncCode()" class="px-4 py-2 bg-lol-blue text-lol-bg font-bold rounded-lg text-xs shrink-0 hover:bg-teal-300 transition-colors">
+                            연동하기
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-1">
+                    <button onclick="useFirebaseUidAsSyncCode()" class="text-emerald-400 hover:underline text-xs font-semibold flex items-center gap-1" title="Firebase 내 계정 고유 Key로 설정">
+                        <i class="fa-solid fa-key"></i> 내 Firebase 고유 키 사용
+                    </button>
+                    <button onclick="generateRandomSyncCode()" class="text-lol-gold hover:underline text-xs font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-dice"></i> 새로 생성하기
+                    </button>
+                    <button onclick="copySyncCode()" class="text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-copy"></i> 코드 복사
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-lol-border/60">
+                <button onclick="closeModal('syncCodeModal')" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">닫기</button>
+            </div>
+        </div>
+    </div>
+
     <!-- JAVASCRIPT LOGIC WITH FIREBASE INTEGRATION -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global Firebase Configuration & State
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'lol-strategy-hub';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
 
         let app, auth, db;
         let currentUser = null;
-        let isSyncing = false;
+        let activeSnapshotUnsubscribe = null;
+        let currentSyncCode = localStorage.getItem('lol_hub_sync_code') || '';
 
-        // Initial Champions Master Data
+        // Default Champion Preset Data
         const DEFAULT_CHAMPIONS = [
             { id: 'roak', name: '로크', title: '데마시아의 신규 챔피언', avatar: 'https://placehold.co/100x100/0A1428/C8AA6E?text=Roak', lanes: ['TOP', 'MID'] },
             { id: 'mel', name: '멜', title: '녹서스의 정치가', avatar: 'https://placehold.co/100x100/0A1428/C8AA6E?text=Mel', lanes: ['MID', 'SUP'] },
@@ -648,12 +688,22 @@
                     auth = getAuth(app);
                     db = getFirestore(app);
 
-                    // Authentication handler
+                    let userCredential;
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
+                        userCredential = await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
-                        await signInAnonymously(auth);
+                        userCredential = await signInAnonymously(auth);
                     }
+
+                    currentUser = userCredential.user;
+
+                    // Use Firebase's unique key (currentUser.uid) as sync code if none saved yet
+                    if (!currentSyncCode) {
+                        currentSyncCode = currentUser.uid;
+                        localStorage.setItem('lol_hub_sync_code', currentSyncCode);
+                    }
+
+                    setupFirestoreSync(currentUser.uid);
 
                     onAuthStateChanged(auth, (user) => {
                         if (user) {
@@ -662,21 +712,32 @@
                         }
                     });
                 } else {
-                    console.warn("Firebase config not available. Falling back to LocalStorage.");
+                    console.warn("Firebase config not available. Falling back to local storage.");
+                    if (!currentSyncCode) currentSyncCode = 'LOCAL-' + Math.floor(100000 + Math.random() * 900000);
                     updateSyncStatusUI(false, "로컬 모드");
+                    updateSyncCodeDisplay();
                 }
             } catch (err) {
                 console.error("Firebase init failed:", err);
+                if (!currentSyncCode) currentSyncCode = 'LOCAL-' + Math.floor(100000 + Math.random() * 900000);
                 updateSyncStatusUI(false, "오프라인 저장");
+                updateSyncCodeDisplay();
             }
         }
 
         function setupFirestoreSync(userId) {
-            if (!userId || !db) return;
-            // Strict path requirement: /artifacts/{appId}/users/{userId}/user_data/dashboard_state
-            const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'user_data', 'dashboard_state');
+            if (!db || !currentSyncCode) return;
 
-            onSnapshot(userDocRef, (docSnap) => {
+            updateSyncCodeDisplay();
+
+            // Strict Public Path: /artifacts/{appId}/public/data/dashboards/{currentSyncCode}
+            const dashboardDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboards', currentSyncCode);
+
+            if (activeSnapshotUnsubscribe) {
+                activeSnapshotUnsubscribe();
+            }
+
+            activeSnapshotUnsubscribe = onSnapshot(dashboardDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     if (data) {
@@ -688,10 +749,9 @@
                         ensureSpecialChampionsExist();
                         renderChampions();
                         selectChampion(state.selectedChampId || 'roak');
-                        updateSyncStatusUI(true, "클라우드 동기화됨");
+                        updateSyncStatusUI(true, `[${currentSyncCode.substring(0, 8)}...] 실시간 연동 중`);
                     }
                 } else {
-                    // Seed initial data if document doesn't exist yet
                     saveToFirestore();
                 }
             }, (error) => {
@@ -701,15 +761,15 @@
         }
 
         async function saveToFirestore() {
-            saveToLocalStorage(); // Local fallback
-            if (!auth || !auth.currentUser || !db) return;
+            saveToLocalStorage();
+            if (!auth || !auth.currentUser || !db || !currentSyncCode) return;
 
             try {
                 updateSyncStatusUI(true, "저장 중...");
-                const userId = auth.currentUser.uid;
-                const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'user_data', 'dashboard_state');
+                const dashboardDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboards', currentSyncCode);
 
-                await setDoc(userDocRef, {
+                await setDoc(dashboardDocRef, {
+                    syncCode: currentSyncCode,
                     champions: state.champions || [],
                     notes: state.notes || {},
                     matchups: state.matchups || {},
@@ -717,11 +777,66 @@
                     updatedAt: new Date().toISOString()
                 }, { merge: true });
 
-                updateSyncStatusUI(true, "클라우드 저장 완료");
+                updateSyncStatusUI(true, `[${currentSyncCode.substring(0, 8)}...] 저장 완료`);
             } catch (err) {
                 console.error("Firestore save failed:", err);
                 updateSyncStatusUI(false, "저장 실패 (로컬 보관)");
             }
+        }
+
+        function updateSyncCodeDisplay() {
+            const displayEl = document.getElementById('headerSyncCodeDisplay');
+            const inputEl = document.getElementById('syncCodeInput');
+            const shortCode = currentSyncCode ? (currentSyncCode.length > 12 ? currentSyncCode.substring(0, 10) + '...' : currentSyncCode) : '미설정';
+            if (displayEl) displayEl.innerText = shortCode;
+            if (inputEl) inputEl.value = currentSyncCode;
+        }
+
+        function applySyncCode() {
+            const inputVal = document.getElementById('syncCodeInput').value.trim();
+            if (!inputVal) {
+                showToast('동기화 코드를 입력해 주세요.');
+                return;
+            }
+
+            currentSyncCode = inputVal;
+            localStorage.setItem('lol_hub_sync_code', currentSyncCode);
+            updateSyncCodeDisplay();
+
+            if (currentUser) {
+                setupFirestoreSync(currentUser.uid);
+            }
+
+            closeModal('syncCodeModal');
+            showToast(`연동 코드가 적용되었습니다! (${currentSyncCode})`);
+        }
+
+        function useFirebaseUidAsSyncCode() {
+            if (currentUser && currentUser.uid) {
+                document.getElementById('syncCodeInput').value = currentUser.uid;
+                showToast('Firebase 내 계정 고유 키(UID)가 입력되었습니다.');
+            } else {
+                showToast('Firebase 인증 정보를 불러오는 중입니다.');
+            }
+        }
+
+        function generateRandomSyncCode() {
+            const newCode = 'LOL-' + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('syncCodeInput').value = newCode;
+        }
+
+        function copySyncCode() {
+            const code = document.getElementById('syncCodeInput').value;
+            if (!code) return;
+
+            const tempInput = document.createElement('input');
+            tempInput.value = code;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast(`동기화 코드가 복사되었습니다!`);
         }
 
         function updateSyncStatusUI(isSuccess, message = "클라우드 연동됨") {
@@ -780,10 +895,7 @@
             renderChampions();
             selectChampion(state.selectedChampId || 'roak');
 
-            // Initialize Firebase Cloud Connection
             await initFirebase();
-
-            // Fetch DataDragon official champs
             await fetchDataDragonChampions(false);
         }
 
@@ -857,7 +969,7 @@
                 renderChampions();
 
                 if (userInitiated) {
-                    showToast(`라이엇 공식 챔피언 동기화 완료! (총 ${state.champions.length}개 챔피언)`);
+                    showToast(`라이엇 공식 챔피언 동기화 완료! (총 ${state.champions.length}개)`);
                 }
             } catch (err) {
                 console.warn('DataDragon API fetch failed:', err);
@@ -869,6 +981,7 @@
 
         function renderChampions() {
             const container = document.getElementById('champListContainer');
+            if (!container) return;
             container.innerHTML = '';
 
             const filtered = state.champions.filter(c => {
@@ -920,6 +1033,22 @@
 
                 container.appendChild(card);
             });
+
+            updateOpponentSelects();
+        }
+
+        function updateOpponentSelects() {
+            const matchSelect = document.getElementById('matchupOpponentSelect');
+            const revSelect = document.getElementById('revOpponent');
+            if (!matchSelect || !revSelect) return;
+
+            const optionsHtml = state.champions
+                .filter(c => c.id !== state.selectedChampId)
+                .map(c => `<option value="${c.id}">vs ${c.name} (${c.title || c.lanes[0] || 'MID'})</option>`)
+                .join('');
+
+            matchSelect.innerHTML = optionsHtml;
+            revSelect.innerHTML = optionsHtml;
         }
 
         function selectChampion(id) {
@@ -929,13 +1058,11 @@
             state.selectedChampId = id;
             renderChampions();
 
-            // Update Banner Header
             document.getElementById('bannerChampName').innerText = champ.name;
             document.getElementById('bannerChampTitle').innerText = champ.title ? `— ${champ.title}` : '';
             document.getElementById('bannerChampImg').src = champ.avatar;
             document.getElementById('bannerChampRoleBadge').innerText = (champ.lanes && champ.lanes[0]) || 'MID';
 
-            // Render Banner Interactive Position Tags
             const laneBadgesContainer = document.getElementById('bannerLaneBadges');
             laneBadgesContainer.innerHTML = '';
             
@@ -955,7 +1082,6 @@
                 laneBadgesContainer.appendChild(tag);
             });
 
-            // Populate Strategy Form Inputs
             const notes = state.notes[id] || {};
             document.getElementById('noteStartItems').value = notes.startItems || '';
             document.getElementById('noteCoreItems').value = notes.coreItems || '';
@@ -1051,6 +1177,7 @@
 
         function renderMatchups() {
             const container = document.getElementById('matchupListContainer');
+            if (!container) return;
             const list = state.matchups[state.selectedChampId] || [];
             document.getElementById('matchupBadgeCount').innerText = list.length;
 
@@ -1135,6 +1262,7 @@
 
         function renderReviews() {
             const container = document.getElementById('reviewListContainer');
+            if (!container) return;
             const list = state.reviews[state.selectedChampId] || [];
             document.getElementById('reviewBadgeCount').innerText = list.length;
 
@@ -1237,6 +1365,57 @@
             showToast('리뷰가 삭제되었습니다.');
         }
 
+        function updateHeaderStats() {
+            const reviews = state.reviews[state.selectedChampId] || [];
+            const count = reviews.length;
+
+            document.getElementById('statReviewCount').innerText = `${count}판`;
+            document.getElementById('revStatTotal').innerText = `${count}판`;
+
+            if (count === 0) {
+                document.getElementById('statWinRate').innerText = '0%';
+                document.getElementById('statAvgKda').innerText = '0.0';
+                document.getElementById('revStatWinLoss').innerText = '0승 0패';
+                document.getElementById('revStatRate').innerText = '0%';
+                document.getElementById('revStatRating').innerText = '0.0 / 5.0';
+                return;
+            }
+
+            let wins = 0;
+            let totalRating = 0;
+            let totalKills = 0, totalDeaths = 0, totalAssists = 0;
+
+            reviews.forEach(r => {
+                if (r.result === 'WIN') wins++;
+                totalRating += parseFloat(r.rating || 5);
+
+                if (r.kda && r.kda.includes('/')) {
+                    const parts = r.kda.split('/').map(n => parseFloat(n.trim()) || 0);
+                    if (parts.length === 3) {
+                        totalKills += parts[0];
+                        totalDeaths += parts[1];
+                        totalAssists += parts[2];
+                    }
+                }
+            });
+
+            const winRate = Math.round((wins / count) * 100);
+            const avgRating = (totalRating / count).toFixed(1);
+            
+            let kdaRatio = '0.0';
+            if (totalDeaths === 0) {
+                kdaRatio = (totalKills + totalAssists) > 0 ? 'Perfect' : '0.0';
+            } else {
+                kdaRatio = ((totalKills + totalAssists) / totalDeaths).toFixed(2);
+            }
+
+            document.getElementById('statWinRate').innerText = `${winRate}%`;
+            document.getElementById('statAvgKda').innerText = kdaRatio;
+            document.getElementById('revStatWinLoss').innerText = `${wins}승 ${count - wins}패`;
+            document.getElementById('revStatRate').innerText = `${winRate}%`;
+            document.getElementById('revStatRating').innerText = `${avgRating} / 5.0`;
+        }
+
         function addNewChampion() {
             const name = document.getElementById('newChampName').value.trim();
             const title = document.getElementById('newChampTitle').value.trim();
@@ -1269,7 +1448,121 @@
             showToast(`${name} 챔피언이 성공적으로 추가되었습니다!`);
         }
 
-        // Global Window Exposure for HTML Event Handlers
+        function setLaneFilter(lane) {
+            state.currentFilterLane = lane;
+            document.querySelectorAll('.lane-tab').forEach(tab => {
+                tab.className = 'lane-tab py-1.5 rounded text-center text-slate-400 hover:text-slate-200';
+            });
+            const activeTab = document.getElementById(`filter-${lane}`);
+            if (activeTab) {
+                activeTab.className = 'lane-tab active py-1.5 rounded text-center font-bold text-lol-gold bg-lol-gold/10 border border-lol-gold/30';
+            }
+            renderChampions();
+        }
+
+        function filterChampions() {
+            state.searchQuery = document.getElementById('champSearch').value.trim();
+            renderChampions();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.main-tab').forEach(el => {
+                el.className = 'main-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all shrink-0';
+            });
+
+            document.getElementById(`pane-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+            if (activeBtn) {
+                activeBtn.className = 'main-tab active px-4 py-2.5 border-b-2 border-lol-gold text-lol-gold flex items-center gap-2 transition-all shrink-0';
+            }
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+
+            if (id === 'changePhotoModal') {
+                const champ = state.champions.find(c => c.id === state.selectedChampId);
+                if (champ) {
+                    document.getElementById('photoModalChampName').innerText = champ.name;
+                    document.getElementById('modalPhotoPreview').src = champ.avatar;
+                    document.getElementById('photoUrlInput').value = '';
+                    state.tempPhotoData = '';
+                }
+            } else if (id === 'syncCodeModal') {
+                updateSyncCodeDisplay();
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('lol_hub_state', JSON.stringify(state));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('lol_hub_state');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                } catch (e) {
+                    console.error('LocalStorage load failed:', e);
+                }
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-5 right-5 bg-lol-bgDark border border-lol-gold text-lol-goldLight px-4 py-3 rounded-xl shadow-2xl text-xs font-bold z-50 flex items-center gap-2 transition-all animate-bounce';
+            toast.innerHTML = `<i class="fa-solid fa-bell text-lol-gold"></i> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `lol_strategy_backup_${Date.now()}.json`);
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            dlAnchorElem.remove();
+            showToast('데이터가 JSON 백업 파일로 내보내졌습니다.');
+        }
+
+        function confirmResetData() {
+            openModal('resetConfirmModal');
+        }
+
+        function executeResetData() {
+            localStorage.removeItem('lol_hub_state');
+            state = {
+                champions: JSON.parse(JSON.stringify(DEFAULT_CHAMPIONS)),
+                selectedChampId: 'roak',
+                currentFilterLane: 'ALL',
+                searchQuery: '',
+                tempPhotoData: '',
+                notes: {},
+                matchups: {},
+                reviews: {}
+            };
+            saveToFirestore();
+            renderChampions();
+            selectChampion('roak');
+            closeModal('resetConfirmModal');
+            showToast('모든 데이터가 성공적으로 초기화되었습니다.');
+        }
+
+        // Window Object Global Mappings
         window.fetchDataDragonChampions = fetchDataDragonChampions;
         window.saveBuildNotes = saveBuildNotes;
         window.saveMatchup = saveMatchup;
@@ -1288,6 +1581,10 @@
         window.exportData = exportData;
         window.confirmResetData = confirmResetData;
         window.executeResetData = executeResetData;
+        window.applySyncCode = applySyncCode;
+        window.useFirebaseUidAsSyncCode = useFirebaseUidAsSyncCode;
+        window.generateRandomSyncCode = generateRandomSyncCode;
+        window.copySyncCode = copySyncCode;
 
         window.onload = function() {
             initApp();
