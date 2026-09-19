@@ -652,13 +652,15 @@
         // Firebase 콘솔(https://console.firebase.google.com/) -> 프로젝트 설정에서 복사한
         // 발급 키(apiKey, projectId 등)를 아래 객체에 붙여넣으면 클라우드 연동이 활성화됩니다.
         // =========================================================================
-        const MY_FIREBASE_CONFIG = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+        const firebaseConfig = {
+          apiKey: "AIzaSyA2ECbZumISupaSbfmOwz4h21oLSbNv_zo",
+          authDomain: "gaming-c38f9.firebaseapp.com",
+          databaseURL: "https://gaming-c38f9-default-rtdb.firebaseio.com",
+          projectId: "gaming-c38f9",
+          storageBucket: "gaming-c38f9.firebasestorage.app",
+          messagingSenderId: "666444670157",
+          appId: "1:666444670157:web:6760ba5dd4a9aa56287584",
+          measurementId: "G-LSPG0X90R7"
         };
 
         const isCustomConfigValid = MY_FIREBASE_CONFIG.apiKey && !MY_FIREBASE_CONFIG.apiKey.includes("YOUR_API_KEY");
