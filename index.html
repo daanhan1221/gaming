@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LoL Strategy & Feedback Dashboard</title>
+    <title>LoL Strategy & Canvas Tactics Hub</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -92,22 +92,40 @@
             color: #64748B !important;
             font-weight: 400 !important;
         }
+
+        /* Canvas cursor styles */
+        .cursor-draw { cursor: crosshair; }
+        .cursor-pointer-tool { cursor: pointer; }
+
+        .team-blue-glow { box-shadow: 0 0 8px rgba(10, 200, 185, 0.8); }
+        .team-red-glow { box-shadow: 0 0 8px rgba(230, 57, 70, 0.8); }
     </style>
 </head>
 <body class="bg-black text-slate-200 font-sans min-h-screen flex flex-col antialiased selection:bg-lol-gold selection:text-lol-bg">
 
     <!-- TOP HEADER -->
-    <header class="h-16 border-b border-lol-border/80 bg-lol-bgPanel/90 backdrop-blur-md px-4 lg:px-8 flex items-center justify-between sticky top-0 z-40">
+    <header class="h-16 border-b border-lol-border/80 bg-lol-bgPanel/90 backdrop-blur-md px-4 lg:px-6 flex items-center justify-between sticky top-0 z-40">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-lol-goldLight via-lol-gold to-lol-goldDark flex items-center justify-center text-lol-bg shadow-md">
-                <i class="fa-solid fa-shield-halved text-xl"></i>
+                <i class="fa-solid fa-map-location-dot text-xl"></i>
             </div>
             <div>
-                <h1 class="font-lol font-bold text-xl lg:text-2xl tracking-wider gold-gradient-text uppercase">
-                    LoL Strategy &amp; Feedback Hub
+                <h1 class="font-lol font-bold text-lg lg:text-xl tracking-wider gold-gradient-text uppercase flex items-center gap-2">
+                    LoL Strategy &amp; Canvas Hub
                 </h1>
-                <p class="text-xs text-slate-400 -mt-1 hidden sm:block">챔피언 공략 작성 &amp; 사진 변경 &amp; 플레이 피드백 노하우</p>
+                <p class="text-xs text-slate-400 -mt-1 hidden sm:block">전술 지도 캔버스 drawing &amp; 챔피언 데이터 피드백</p>
             </div>
+        </div>
+
+        <!-- MODE SWITCH TABS IN HEADER -->
+        <div class="flex items-center bg-black/80 border border-lol-border p-1 rounded-xl">
+            <button onclick="switchAppMode('hub')" id="modeBtnHub" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-lol-gold text-black shadow">
+                <i class="fa-solid fa-book-bookmark"></i> <span class="hidden md:inline">공략 &amp; 일지 모드</span>
+            </button>
+            <button onclick="switchAppMode('canvas')" id="modeBtnCanvas" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-paintbrush"></i> <span class="hidden md:inline">전술 지도 캔버스</span>
+                <span class="bg-lol-blue/30 text-lol-blue text-[10px] px-1.5 py-0.2 rounded-full border border-lol-blue/40 font-mono">CANVAS</span>
+            </button>
         </div>
 
         <!-- Header Actions -->
@@ -118,17 +136,17 @@
             </div>
 
             <button onclick="openModal('syncCodeModal')" class="bg-lol-blue/20 hover:bg-lol-blue/30 text-lol-blue border border-lol-blue/50 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm" title="스마트폰 & PC 실시간 연동">
-                <i class="fa-solid fa-mobile-screen-button"></i> <span class="hidden sm:inline">기기 연동 (<span id="headerSyncCodeDisplay" class="text-white font-mono">불러오는 중...</span>)</span>
+                <i class="fa-solid fa-mobile-screen-button"></i> <span class="hidden lg:inline">기기 연동 (<span id="headerSyncCodeDisplay" class="text-white font-mono">불러오는 중...</span>)</span>
             </button>
 
             <button onclick="fetchDataDragonChampions(true)" class="bg-lol-gold/10 hover:bg-lol-gold/20 text-lol-gold border border-lol-gold/40 hover:border-lol-gold px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all" title="최신 롤 챔피언 데이터 동기화">
-                <i class="fa-solid fa-arrows-rotate"></i> <span class="hidden sm:inline">전체 챔프 자동 동기화</span>
+                <i class="fa-solid fa-arrows-rotate"></i> <span class="hidden xl:inline">전체 동기화</span>
             </button>
             <button onclick="openModal('addChampModal')" class="bg-lol-gold/10 hover:bg-lol-gold/20 text-lol-gold border border-lol-gold/40 hover:border-lol-gold px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
-                <i class="fa-solid fa-user-plus"></i> <span class="hidden sm:inline">신규/커스텀 챔프 추가</span>
+                <i class="fa-solid fa-user-plus"></i> <span class="hidden xl:inline">신규 챔프</span>
             </button>
             <button onclick="exportData()" class="bg-lol-bgDark hover:bg-slate-800 text-slate-300 border border-lol-border px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all" title="데이터 백업">
-                <i class="fa-solid fa-download"></i> <span class="hidden md:inline">내보내기</span>
+                <i class="fa-solid fa-download"></i>
             </button>
             <button onclick="confirmResetData()" class="text-xs text-slate-500 hover:text-red-400 p-1.5 transition-colors" title="데이터 초기화">
                 <i class="fa-solid fa-rotate-right"></i>
@@ -163,13 +181,13 @@
             </div>
 
             <!-- Champion List Scrollable Container -->
-            <div id="champListContainer" class="flex-1 overflow-y-auto p-3 space-y-1.5 max-h-[40vh] md:max-h-[calc(100vh-10rem)] bg-lol-bgPanel">
+            <div id="champListContainer" class="flex-1 overflow-y-auto p-3 space-y-1.5 max-h-[35vh] md:max-h-[calc(100vh-10rem)] bg-lol-bgPanel">
                 <!-- Dynamically populated via JS -->
             </div>
         </aside>
 
-        <!-- MAIN DETAIL VIEW -->
-        <main class="flex-1 overflow-y-auto bg-black flex flex-col p-4 md:p-6 space-y-6">
+        <!-- VIEW 1: CHAMPION STRATEGY & FEEDBACK HUB -->
+        <main id="appViewHub" class="flex-1 overflow-y-auto bg-black flex flex-col p-4 md:p-6 space-y-6">
             
             <!-- CHAMPION BANNER HEADER -->
             <div id="champHeaderBanner" class="hextech-card rounded-2xl p-5 md:p-6 border border-lol-gold/40 relative overflow-hidden">
@@ -202,7 +220,7 @@
                             <!-- QUICK LANE ASSIGNMENT TOGGLE TAGS -->
                             <div class="mt-2.5 flex flex-wrap items-center gap-1.5">
                                 <span class="text-xs text-slate-400 mr-1 font-semibold flex items-center gap-1">
-                                    <i class="fa-solid fa-tags text-lol-gold"></i> 포지션 지정 (클릭하여 챔프 라인 추가/제거):
+                                    <i class="fa-solid fa-tags text-lol-gold"></i> 포지션 지정:
                                 </span>
                                 <div id="bannerLaneBadges" class="flex flex-wrap gap-1">
                                     <!-- Dynamic lane tags -->
@@ -257,7 +275,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    
                     <!-- Starting Items & Core Items -->
                     <div class="bg-lol-bgPanel border border-lol-border/80 rounded-xl p-4 space-y-4 shadow-md">
                         <h3 class="text-sm font-bold text-lol-gold flex items-center gap-2 border-b border-lol-border/60 pb-2">
@@ -265,7 +282,7 @@
                         </h3>
                         <div>
                             <label class="text-xs text-slate-300 font-semibold mb-1.5 block">시작 아이템 조합</label>
-                            <input type="text" id="noteStartItems" placeholder="예: 도란의 검 + 1포션 / 정글 도란의 칼날 / 부패물약" 
+                            <input type="text" id="noteStartItems" placeholder="예: 도란의 검 + 1포션 / 정글 도란의 칼날" 
                                    class="w-full lol-white-input rounded-lg p-2.5 text-xs">
                         </div>
                         <div>
@@ -308,7 +325,6 @@
                                       class="w-full lol-white-input rounded-lg p-2.5 text-xs resize-none leading-relaxed"></textarea>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -334,7 +350,6 @@
 
             <!-- CONTENT TAB 3: PLAY FEEDBACK & REVIEW JOURNAL -->
             <div id="pane-reviews" class="tab-pane hidden space-y-6">
-                
                 <!-- Feedback Header & Stats -->
                 <div class="bg-lol-bgPanel border border-lol-border/80 p-4 md:p-5 rounded-xl space-y-3">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -375,7 +390,142 @@
                     <!-- Dynamic Review Cards -->
                 </div>
             </div>
+        </main>
 
+        <!-- VIEW 2: INTERACTIVE TACTICAL CANVAS MODE -->
+        <main id="appViewCanvas" class="flex-1 hidden bg-slate-950 flex flex-col xl:flex-row overflow-hidden relative">
+            
+            <!-- CANVAS TOOLBAR & CHAMPION TOKEN PALETTE -->
+            <div class="w-full xl:w-72 border-b xl:border-b-0 xl:border-r border-lol-border bg-lol-bgPanel p-3 flex flex-col space-y-3 shrink-0 overflow-y-auto">
+                <div class="flex items-center justify-between border-b border-lol-border/60 pb-2">
+                    <span class="font-bold text-xs text-lol-gold flex items-center gap-1.5">
+                        <i class="fa-solid fa-pen-ruler"></i> 전술 캔버스 도구함
+                    </span>
+                    <button onclick="clearMapCanvas()" class="text-[11px] text-rose-400 hover:text-rose-300 font-semibold bg-rose-950/50 border border-rose-800 px-2 py-0.5 rounded">
+                        <i class="fa-solid fa-trash-can"></i> 전체 지우기
+                    </button>
+                </div>
+
+                <!-- Drawing Tool Selector -->
+                <div class="grid grid-cols-3 gap-1.5 bg-black p-1 rounded-xl border border-lol-border/80">
+                    <button onclick="setCanvasTool('brush')" id="tool-brush" class="tool-btn active p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 bg-lol-gold text-black shadow">
+                        <i class="fa-solid fa-paintbrush text-sm"></i>
+                        <span>자유 그리기</span>
+                    </button>
+                    <button onclick="setCanvasTool('arrow')" id="tool-arrow" class="tool-btn p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-arrow-right-long text-sm"></i>
+                        <span>이동 화살표</span>
+                    </button>
+                    <button onclick="setCanvasTool('ping')" id="tool-ping" class="tool-btn p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-eye text-sm"></i>
+                        <span>와드 / 핑</span>
+                    </button>
+                </div>
+
+                <!-- Ping Sub-Type Selector (Only when ping tool active) -->
+                <div id="pingTypeContainer" class="hidden grid-cols-4 gap-1 bg-lol-bgDark p-1 rounded-lg border border-lol-border text-[11px]">
+                    <button onclick="setPingType('ward_stealth')" id="ping-ward_stealth" class="ping-sub-btn active p-1 text-center font-bold text-yellow-300 bg-yellow-950/60 border border-yellow-600 rounded">노란와드</button>
+                    <button onclick="setPingType('ward_control')" id="ping-ward_control" class="ping-sub-btn p-1 text-center font-bold text-rose-300 text-slate-400 rounded">제어와드</button>
+                    <button onclick="setPingType('ping_danger')" id="ping-ping_danger" class="ping-sub-btn p-1 text-center font-bold text-red-400 text-slate-400 rounded">위험핑</button>
+                    <button onclick="setPingType('ping_assist')" id="ping-ping_assist" class="ping-sub-btn p-1 text-center font-bold text-cyan-300 text-slate-400 rounded">지원핑</button>
+                </div>
+
+                <!-- Color & Brush Size Settings -->
+                <div class="space-y-2 bg-black/40 p-2.5 rounded-xl border border-lol-border/60">
+                    <label class="text-[11px] text-slate-300 font-bold block">선 색상 선택</label>
+                    <div class="flex items-center gap-2">
+                        <button onclick="setCanvasColor('#C8AA6E')" class="w-6 h-6 rounded-full bg-[#C8AA6E] border-2 border-white focus:scale-110 shadow" title="골드"></button>
+                        <button onclick="setCanvasColor('#0AC8B9')" class="w-6 h-6 rounded-full bg-[#0AC8B9] border-2 border-transparent focus:scale-110 shadow" title="블루팀 청록"></button>
+                        <button onclick="setCanvasColor('#E63946')" class="w-6 h-6 rounded-full bg-[#E63946] border-2 border-transparent focus:scale-110 shadow" title="레드팀 빨강"></button>
+                        <button onclick="setCanvasColor('#FACC15')" class="w-6 h-6 rounded-full bg-[#FACC15] border-2 border-transparent focus:scale-110 shadow" title="노랑 와드"></button>
+                        <button onclick="setCanvasColor('#10B981')" class="w-6 h-6 rounded-full bg-[#10B981] border-2 border-transparent focus:scale-110 shadow" title="초록 시야"></button>
+                        <button onclick="setCanvasColor('#FFFFFF')" class="w-6 h-6 rounded-full bg-white border-2 border-transparent focus:scale-110 shadow" title="흰색"></button>
+                    </div>
+
+                    <div class="pt-2">
+                        <div class="flex justify-between text-[11px] text-slate-300 font-bold">
+                            <span>선 굵기:</span>
+                            <span id="brushSizeVal" class="text-lol-gold font-mono">4px</span>
+                        </div>
+                        <input type="range" id="brushSizeInput" min="2" max="16" value="4" oninput="setBrushSize(this.value)"
+                               class="w-full accent-lol-gold cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- CHAMPION TOKEN DRAG PALETTE -->
+                <div class="flex-1 flex flex-col space-y-2 min-h-[160px]">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[11px] font-bold text-slate-300">
+                            <i class="fa-solid fa-chess-knight text-lol-gold"></i> 맵에 챔피언 토큰 배치
+                        </span>
+                        <span class="text-[10px] text-slate-500">클릭 또는 드래그</span>
+                    </div>
+
+                    <!-- Team Selector for Placing Champions -->
+                    <div class="grid grid-cols-2 gap-1 text-[11px] font-bold">
+                        <button onclick="setPlacementTeam('blue')" id="teamBlueBtn" class="py-1 rounded bg-teal-950 text-lol-blue border border-lol-blue text-center">
+                            블루팀 (Blue)
+                        </button>
+                        <button onclick="setPlacementTeam('red')" id="teamRedBtn" class="py-1 rounded bg-rose-950 text-rose-400 border border-transparent opacity-60 text-center">
+                            레드팀 (Red)
+                        </button>
+                    </div>
+
+                    <!-- Selected Champion Token Spawner -->
+                    <div class="bg-black/80 border border-lol-gold/40 p-2.5 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <img id="canvasTokenPreviewImg" src="" class="w-9 h-9 rounded-lg border border-lol-gold object-cover">
+                            <div>
+                                <p id="canvasTokenPreviewName" class="text-xs font-bold text-slate-100">선택 챔프</p>
+                                <p class="text-[10px] text-slate-400">클릭 시 맵 중앙에 배치</p>
+                            </div>
+                        </div>
+                        <button onclick="spawnSelectedChampToken()" class="px-3 py-1.5 bg-lol-gold text-black font-bold text-xs rounded-lg shadow hover:bg-amber-300 transition-colors">
+                            + 맵 배치
+                        </button>
+                    </div>
+
+                    <p class="text-[10px] text-slate-400 leading-tight">
+                        💡 팁: 맵에 올려진 챔피언 토큰 아이콘을 마우스로 드래그하면 자유롭게 위치를 옮길 수 있습니다. Double-click 토큰 삭제.
+                    </p>
+                </div>
+
+                <!-- Canvas Control Actions -->
+                <div class="pt-2 border-t border-lol-border flex gap-2">
+                    <button onclick="undoCanvasLastPath()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-rotate-left"></i> 실행 취소
+                    </button>
+                    <button onclick="exportCanvasImage()" class="flex-1 bg-lol-blue text-black font-bold py-1.5 rounded-lg text-xs shadow hover:bg-teal-300 flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-camera"></i> 캡처 저장
+                    </button>
+                </div>
+            </div>
+
+            <!-- TACTICAL CANVAS INTERACTIVE DISPLAY BOARD -->
+            <div class="flex-1 p-3 md:p-5 flex flex-col items-center justify-center relative overflow-hidden bg-black">
+                
+                <!-- Map Header Status Overlay -->
+                <div class="w-full max-w-2xl mb-2 flex items-center justify-between text-xs text-slate-400 bg-lol-bgPanel/80 backdrop-blur px-3 py-1.5 rounded-lg border border-lol-border">
+                    <span class="flex items-center gap-1.5 font-semibold text-slate-200">
+                        <i class="fa-solid fa-map text-lol-gold"></i> 소환사의 협곡 전술 판판
+                    </span>
+                    <span class="text-[11px] text-lol-gold">
+                        현재 모드: <strong id="canvasModeStatusText">자유 그리기 (Free Draw)</strong>
+                    </span>
+                </div>
+
+                <!-- Canvas Container wrapper -->
+                <div id="canvasMapWrapper" class="relative w-full max-w-2xl aspect-square bg-slate-900 rounded-2xl border-2 border-lol-gold/50 shadow-2xl overflow-hidden cursor-draw">
+                    
+                    <!-- HTML5 CANVAS LAYER -->
+                    <canvas id="tacticalMapCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
+
+                    <!-- DRAGGABLE CHAMPION TOKENS OVERLAY CONTAINER -->
+                    <div id="champTokensLayer" class="absolute inset-0 z-20 pointer-events-none">
+                        <!-- Dynamic champion token elements inserted here -->
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -459,7 +609,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-slate-300 font-semibold mb-1">챔피언 사진 URL (선택, 나중에 직접 업로드 가능)</label>
+                    <label class="block text-slate-300 font-semibold mb-1">챔피언 사진 URL (선택)</label>
                     <input type="text" id="newChampAvatar" placeholder="https://example.com/photo.png (비워두면 자동 생성)" 
                            class="w-full lol-white-input rounded-lg p-2.5 text-xs">
                 </div>
@@ -498,7 +648,7 @@
                 </div>
                 <div>
                     <label class="block text-slate-300 font-semibold mb-1">핵심 대응 전략 &amp; 주의사항</label>
-                    <textarea id="matchupNoteText" rows="4" placeholder="예: 3렙 전 딜교환 금지. 주요 핵심 스킬(Q/E) 빠졌을 때 진입. 6렙 이후 콤보 폭딜 조심." 
+                    <textarea id="matchupNoteText" rows="4" placeholder="예: 3렙 전 딜교환 금지. 주요 핵심 스킬(Q/E) 빠졌을 때 진입." 
                               class="w-full lol-white-input rounded-lg p-2.5 text-xs resize-none leading-relaxed"></textarea>
                 </div>
             </div>
@@ -560,13 +710,13 @@
 
                 <div>
                     <label class="block text-emerald-400 font-bold mb-1">👍 잘한 점 (칭찬 &amp; 긍정적 플레이)</label>
-                    <textarea id="revGood" rows="2" placeholder="예: 라인전 딜교 이득을 바탕으로 첫 바위게 합류 빨랐음. 궁극기 적중률 훌륭함." 
+                    <textarea id="revGood" rows="2" placeholder="예: 첫 바위게 합류 빨랐음. 궁극기 적중률 훌륭함." 
                               class="w-full lol-white-input rounded-lg p-2.5 text-xs resize-none"></textarea>
                 </div>
 
                 <div>
                     <label class="block text-rose-400 font-bold mb-1">👎 아쉬운 점 / 실수 (반성 &amp; 피드백)</label>
-                    <textarea id="revBad" rows="2" placeholder="예: 15분경 와드 없이 무리하게 시야 잡다가 잘림. 사이드 밀 때 미니맵 주시 부족." 
+                    <textarea id="revBad" rows="2" placeholder="예: 15분경 와드 없이 무리하게 시야 잡다가 잘림." 
                               class="w-full lol-white-input rounded-lg p-2.5 text-xs resize-none"></textarea>
                 </div>
             </div>
@@ -583,7 +733,7 @@
             <div class="text-center space-y-2">
                 <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i>
                 <h3 class="text-base font-bold text-white">데이터 초기화 확인</h3>
-                <p class="text-xs text-slate-400">저장된 모든 공략, 상대법 팁, 플레이 리뷰 및 사용자 지정 라인 정보가 삭제됩니다. 계속하시겠습니까?</p>
+                <p class="text-xs text-slate-400">저장된 모든 공략, 상대법 팁, 플레이 리뷰 및 캔버스 데이터가 삭제됩니다. 계속하시겠습니까?</p>
             </div>
             <div class="flex justify-center gap-3 pt-2">
                 <button onclick="closeModal('resetConfirmModal')" class="px-4 py-1.5 rounded-lg border border-lol-border text-slate-300 text-xs">취소</button>
@@ -607,7 +757,7 @@
                     <p class="font-bold text-lol-gold mb-1"><i class="fa-solid fa-circle-info"></i> 직접 숫자를 정해서 연동하는 방법</p>
                     <p class="text-[11px] text-slate-400">
                         원하는 **숫자나 비밀번호(예: 1234, 7777, 2026 등)**를 직접 입력하고 <strong>[이 번호로 연동]</strong>을 누르세요.<br>
-                        다른 기기(스마트폰/PC)에서도 **동일한 숫자**를 입력하면 두 기기가 실시간으로 데이터를 공유합니다!
+                        다른 기기에서도 동일한 숫자를 입력하면 두 기기가 실시간으로 데이터를 공유합니다!
                     </p>
                 </div>
 
@@ -623,11 +773,11 @@
                 </div>
 
                 <div class="flex items-center justify-between pt-1">
-                    <button onclick="useFirebaseUidAsSyncCode()" class="text-emerald-400 hover:underline text-xs font-semibold flex items-center gap-1" title="Firebase 내 계정 고유 Key로 설정">
+                    <button onclick="useFirebaseUidAsSyncCode()" class="text-emerald-400 hover:underline text-xs font-semibold flex items-center gap-1">
                         <i class="fa-solid fa-key"></i> 내 고유 Key 사용
                     </button>
                     <button onclick="generateRandomSyncCode()" class="text-lol-gold hover:underline text-xs font-semibold flex items-center gap-1">
-                        <i class="fa-solid fa-dice"></i> 6자리 랜덤 번호 생성
+                        <i class="fa-solid fa-dice"></i> 6자리 번호 생성
                     </button>
                     <button onclick="copySyncCode()" class="text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1">
                         <i class="fa-solid fa-copy"></i> 번호 복사
@@ -641,17 +791,15 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WITH FIREBASE INTEGRATION & ROBUST LOAD HANDLING -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // =========================================================================
-        // 🔑 [사용자 지정 FIREBASE 설정]
-        // Firebase 콘솔(https://console.firebase.google.com/) -> 프로젝트 설정에서 복사한
-        // 발급 키(apiKey, projectId 등)를 아래 객체에 붙여넣으면 클라우드 연동이 활성화됩니다.
+        // 🔑 FIREBASE CONFIGURATION
         // =========================================================================
+        const MY_FIREBASE_CONFIG = {
         const firebaseConfig = {
           apiKey: "AIzaSyA2ECbZumISupaSbfmOwz4h21oLSbNv_zo",
           authDomain: "gaming-c38f9.firebaseapp.com",
@@ -699,6 +847,18 @@
             matchups: {},
             reviews: {}
         };
+
+        // Canvas state variables
+        let canvas, ctx;
+        let isDrawing = false;
+        let startX = 0, startY = 0;
+        let canvasTool = 'brush'; // 'brush', 'arrow', 'ping'
+        let pingType = 'ward_stealth'; // 'ward_stealth', 'ward_control', 'ping_danger', 'ping_assist'
+        let strokeColor = '#C8AA6E';
+        let strokeWidth = 4;
+        let placementTeam = 'blue';
+        let canvasDrawings = []; // Array of drawn paths/items
+        let canvasTokens = []; // Placed champion tokens
 
         async function initFirebase() {
             try {
@@ -800,78 +960,6 @@
             }
         }
 
-        function updateSyncCodeDisplay() {
-            const displayEl = document.getElementById('headerSyncCodeDisplay');
-            const inputEl = document.getElementById('syncCodeInput');
-            const shortCode = currentSyncCode ? (currentSyncCode.length > 12 ? currentSyncCode.substring(0, 10) + '...' : currentSyncCode) : '미설정';
-            if (displayEl) displayEl.innerText = shortCode;
-            if (inputEl) inputEl.value = currentSyncCode;
-        }
-
-        function applySyncCode() {
-            const inputVal = document.getElementById('syncCodeInput').value.trim();
-            if (!inputVal) {
-                showToast('연동할 숫자가 입력되지 않았습니다.');
-                return;
-            }
-
-            currentSyncCode = inputVal;
-            localStorage.setItem('lol_hub_sync_code', currentSyncCode);
-            updateSyncCodeDisplay();
-
-            if (currentUser && db) {
-                setupFirestoreSync(currentUser.uid);
-                saveToFirestore();
-            } else {
-                saveToLocalStorage();
-            }
-
-            closeModal('syncCodeModal');
-            showToast(`연동 번호 [${currentSyncCode}] (으)로 기기 동기화가 설정되었습니다!`);
-        }
-
-        function useFirebaseUidAsSyncCode() {
-            if (currentUser && currentUser.uid) {
-                document.getElementById('syncCodeInput').value = currentUser.uid;
-                showToast('Firebase 내 계정 고유 키(UID)가 입력되었습니다.');
-            } else {
-                showToast('Firebase 인증 정보를 불러오는 중입니다.');
-            }
-        }
-
-        function generateRandomSyncCode() {
-            const newCode = String(Math.floor(100000 + Math.random() * 900000));
-            document.getElementById('syncCodeInput').value = newCode;
-            showToast(`랜덤 6자리 숫자(${newCode})가 입력되었습니다. [이 번호로 연동]을 누르세요.`);
-        }
-
-        function copySyncCode() {
-            const code = document.getElementById('syncCodeInput').value;
-            if (!code) return;
-
-            const tempInput = document.createElement('input');
-            tempInput.value = code;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-
-            showToast(`동기화 코드가 복사되었습니다!`);
-        }
-
-        function updateSyncStatusUI(isSuccess, message = "클라우드 연동됨") {
-            const el = document.getElementById('cloudSyncStatus');
-            const textEl = document.getElementById('cloudSyncText');
-            if (!el || !textEl) return;
-
-            textEl.innerText = message;
-            if (isSuccess) {
-                el.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-700/60";
-            } else {
-                el.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-950/80 text-amber-400 border border-amber-700/60";
-            }
-        }
-
         async function initApp() {
             loadFromLocalStorage();
             
@@ -892,28 +980,9 @@
                 };
             }
 
-            if (!state.notes['zyra']) {
-                state.notes['zyra'] = {
-                    startItems: '도란의 반지 + 2포션 (미드/서폿) / 정글 도란의 칼날 (정글)',
-                    coreItems: '1코어: 리안드리의 고통\n2코어: 라일라이의 수정홀\n3코어: 존야의 모래시계 or 악마의 포옹',
-                    runes: '메인: 신비로운 유성 - 마나순환 팔찌 - 깨달음 - 주문 작열\n보조: 비스킷 배달 - 우주적 통찰력',
-                    spells: '점멸 + 강타 (정글) / 점멸 + 점화 (서폿)',
-                    skillOrder: 'E -> Q -> W (1렙 Q, 2렙 E, 3렙 W)',
-                    tips: '정글 자이라 활용법: 식물 사거리를 이용해 무피해 정글링 가능. E 속박 후 W 식물 소환으로 높은 한타 영향력 발휘.'
-                };
-                
-                state.matchups['zyra'] = [
-                    { id: 'm1', opponentId: 'zed', difficulty: '어려움', note: '6렙 이후 제드 궁극기 진입시 존야 타임 조절 필수. 거리유지 철저.' },
-                    { id: 'm2', opponentId: 'thresh', difficulty: '쉬움', note: '쓰레쉬 사슬 날아올 때 W 식물로 스킬 방어(몸빵) 가능.' }
-                ];
-
-                state.reviews['zyra'] = [
-                    { id: 'r1', result: 'WIN', opponentId: 'leesin', kda: '7/2/11', cs: '165 (6.8)', rating: '5', good: '정글 자이라로 바위게 컨트롤 완승 및 봇 갱킹 성공.', bad: '20분경 전령 앞에서 위치 선정 미흡.', date: '2026.09.11' }
-                ];
-            }
-
             renderChampions();
             selectChampion(state.selectedChampId || 'roak');
+            initTacticalCanvas();
 
             initFirebase().catch(e => console.warn(e));
             fetchDataDragonChampions(false).catch(e => console.warn(e));
@@ -971,9 +1040,6 @@
                         if (!state.champions[existingIndex].avatar.startsWith('data:')) {
                             state.champions[existingIndex].avatar = avatarUrl;
                         }
-                        if (!state.champions[existingIndex].title) {
-                            state.champions[existingIndex].title = item.title;
-                        }
                     }
                 });
 
@@ -993,9 +1059,7 @@
                 }
             } catch (err) {
                 console.warn('DataDragon API fetch failed:', err);
-                if (userInitiated) {
-                    showToast('네트워크 연결 상태를 확인해주세요.');
-                }
+                if (userInitiated) showToast('네트워크 연결 상태를 확인해주세요.');
             }
         }
 
@@ -1055,20 +1119,7 @@
             });
 
             updateOpponentSelects();
-        }
-
-        function updateOpponentSelects() {
-            const matchSelect = document.getElementById('matchupOpponentSelect');
-            const revSelect = document.getElementById('revOpponent');
-            if (!matchSelect || !revSelect) return;
-
-            const optionsHtml = state.champions
-                .filter(c => c.id !== state.selectedChampId)
-                .map(c => `<option value="${c.id}">vs ${c.name} (${c.title || (c.lanes && c.lanes[0]) || 'MID'})</option>`)
-                .join('');
-
-            matchSelect.innerHTML = optionsHtml;
-            revSelect.innerHTML = optionsHtml;
+            updateCanvasTokenPreview();
         }
 
         function selectChampion(id) {
@@ -1113,6 +1164,494 @@
             renderMatchups();
             renderReviews();
             updateHeaderStats();
+            updateCanvasTokenPreview();
+        }
+
+        function initTacticalCanvas() {
+            canvas = document.getElementById('tacticalMapCanvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Canvas mouse events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+
+            // Touch support
+            canvas.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                startDrawing({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => e.preventDefault() });
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                const touch = e.touches[0];
+                draw({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => e.preventDefault() });
+            });
+            canvas.addEventListener('touchend', stopDrawing);
+
+            redrawCanvas();
+        }
+
+        function resizeCanvas() {
+            const wrapper = document.getElementById('canvasMapWrapper');
+            if (!wrapper || !canvas) return;
+            
+            const rect = wrapper.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            redrawCanvas();
+        }
+
+        function drawSummonersRiftBackground() {
+            if (!ctx || !canvas) return;
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // Deep dark map base
+            ctx.fillStyle = '#0a141d';
+            ctx.fillRect(0, 0, w, h);
+
+            // Lane paths (Top, Mid, Bottom)
+            ctx.strokeStyle = '#1a2b3c';
+            ctx.lineWidth = w * 0.08;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Top Lane
+            ctx.beginPath();
+            ctx.moveTo(w * 0.1, h * 0.9);
+            ctx.lineTo(w * 0.1, h * 0.1);
+            ctx.lineTo(w * 0.9, h * 0.1);
+            ctx.stroke();
+
+            // Mid Lane
+            ctx.beginPath();
+            ctx.moveTo(w * 0.15, h * 0.85);
+            ctx.lineTo(w * 0.85, h * 0.15);
+            ctx.stroke();
+
+            // Bottom Lane
+            ctx.beginPath();
+            ctx.moveTo(w * 0.1, h * 0.9);
+            ctx.lineTo(w * 0.9, h * 0.9);
+            ctx.lineTo(w * 0.9, h * 0.1);
+            ctx.stroke();
+
+            // River Path
+            ctx.strokeStyle = '#034358';
+            ctx.lineWidth = w * 0.06;
+            ctx.beginPath();
+            ctx.moveTo(w * 0.1, h * 0.3);
+            ctx.lineTo(w * 0.9, h * 0.7);
+            ctx.stroke();
+
+            // Dragon Pit & Baron Pit Circles
+            ctx.fillStyle = '#162b3a';
+            ctx.beginPath();
+            ctx.arc(w * 0.65, h * 0.65, w * 0.05, 0, Math.PI * 2); // Dragon Pit
+            ctx.fill();
+            ctx.strokeStyle = '#785A28';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(w * 0.35, h * 0.35, w * 0.05, 0, Math.PI * 2); // Baron Pit
+            ctx.fill();
+            ctx.stroke();
+
+            // Blue Nexus Base (Bottom Left) & Red Nexus Base (Top Right)
+            ctx.fillStyle = 'rgba(10, 200, 185, 0.25)';
+            ctx.beginPath();
+            ctx.arc(w * 0.12, h * 0.88, w * 0.09, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(230, 57, 70, 0.25)';
+            ctx.beginPath();
+            ctx.arc(w * 0.88, h * 0.12, w * 0.09, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Label Text
+            ctx.fillStyle = 'rgba(200, 170, 110, 0.4)';
+            ctx.font = `bold ${Math.max(10, w * 0.025)}px Rajdhani`;
+            ctx.textAlign = 'center';
+            ctx.fillText('SUMMONER\'S RIFT TACTICAL MAP', w * 0.5, h * 0.05);
+            ctx.fillText('BARON', w * 0.35, h * 0.35 + 4);
+            ctx.fillText('DRAGON', w * 0.65, h * 0.65 + 4);
+        }
+
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            const coords = getCanvasCoords(e);
+            isDrawing = true;
+            startX = coords.x;
+            startY = coords.y;
+
+            if (canvasTool === 'ping') {
+                placePingOnCanvas(coords.x, coords.y);
+                isDrawing = false;
+            } else if (canvasTool === 'brush') {
+                canvasDrawings.push({
+                    type: 'brush',
+                    color: strokeColor,
+                    width: strokeWidth,
+                    points: [{ x: coords.x, y: coords.y }]
+                });
+            }
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const coords = getCanvasCoords(e);
+
+            if (canvasTool === 'brush') {
+                const currentPath = canvasDrawings[canvasDrawings.length - 1];
+                if (currentPath && currentPath.type === 'brush') {
+                    currentPath.points.push({ x: coords.x, y: coords.y });
+                    redrawCanvas();
+                }
+            } else if (canvasTool === 'arrow') {
+                redrawCanvas();
+                drawArrow(ctx, startX, startY, coords.x, coords.y, strokeColor, strokeWidth);
+            }
+        }
+
+        function stopDrawing(e) {
+            if (!isDrawing) return;
+            isDrawing = false;
+
+            if (canvasTool === 'arrow' && e) {
+                const coords = getCanvasCoords(e);
+                canvasDrawings.push({
+                    type: 'arrow',
+                    fromX: startX,
+                    fromY: startY,
+                    toX: coords.x,
+                    toY: coords.y,
+                    color: strokeColor,
+                    width: strokeWidth
+                });
+                redrawCanvas();
+            }
+        }
+
+        function drawArrow(context, fromx, fromy, tox, toy, color, width) {
+            const headlen = width * 3.5;
+            const dx = tox - fromx;
+            const dy = toy - fromy;
+            const angle = Math.atan2(dy, dx);
+
+            context.beginPath();
+            context.strokeStyle = color;
+            context.fillStyle = color;
+            context.lineWidth = width;
+            context.moveTo(fromx, fromy);
+            context.lineTo(tox, toy);
+            context.stroke();
+
+            context.beginPath();
+            context.moveTo(tox, toy);
+            context.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+            context.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+            context.lineTo(tox, toy);
+            context.fill();
+        }
+
+        function placePingOnCanvas(x, y) {
+            canvasDrawings.push({
+                type: 'ping',
+                pingType: pingType,
+                x: x,
+                y: y
+            });
+            redrawCanvas();
+        }
+
+        function redrawCanvas() {
+            if (!ctx || !canvas) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawSummonersRiftBackground();
+
+            canvasDrawings.forEach(item => {
+                if (item.type === 'brush') {
+                    ctx.beginPath();
+                    ctx.strokeStyle = item.color;
+                    ctx.lineWidth = item.width;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    item.points.forEach((pt, idx) => {
+                        if (idx === 0) ctx.moveTo(pt.x, pt.y);
+                        else ctx.lineTo(pt.x, pt.y);
+                    });
+                    ctx.stroke();
+                } else if (item.type === 'arrow') {
+                    drawArrow(ctx, item.fromX, item.fromY, item.toX, item.toY, item.color, item.width);
+                } else if (item.type === 'ping') {
+                    drawPingMarker(ctx, item.x, item.y, item.pingType);
+                }
+            });
+        }
+
+        function drawPingMarker(context, x, y, type) {
+            context.save();
+            context.translate(x, y);
+
+            if (type === 'ward_stealth') {
+                context.fillStyle = '#FACC15';
+                context.beginPath();
+                context.arc(0, 0, 10, 0, Math.PI * 2);
+                context.fill();
+                context.strokeStyle = '#000';
+                context.lineWidth = 2;
+                context.stroke();
+                context.fillStyle = '#000';
+                context.font = 'bold 10px sans-serif';
+                context.textAlign = 'center';
+                context.fillText('W', 0, 3.5);
+            } else if (type === 'ward_control') {
+                context.fillStyle = '#E63946';
+                context.beginPath();
+                context.arc(0, 0, 10, 0, Math.PI * 2);
+                context.fill();
+                context.strokeStyle = '#FFF';
+                context.lineWidth = 2;
+                context.stroke();
+                context.fillStyle = '#FFF';
+                context.font = 'bold 10px sans-serif';
+                context.textAlign = 'center';
+                context.fillText('C', 0, 3.5);
+            } else if (type === 'ping_danger') {
+                context.fillStyle = '#EF4444';
+                context.beginPath();
+                context.moveTo(0, -12);
+                context.lineTo(10, 8);
+                context.lineTo(-10, 8);
+                context.closePath();
+                context.fill();
+                context.fillStyle = '#FFF';
+                context.font = 'bold 11px sans-serif';
+                context.textAlign = 'center';
+                context.fillText('!', 0, 5);
+            } else if (type === 'ping_assist') {
+                context.fillStyle = '#06B6D4';
+                context.beginPath();
+                context.arc(0, 0, 10, 0, Math.PI * 2);
+                context.fill();
+                context.fillStyle = '#FFF';
+                context.font = 'bold 10px sans-serif';
+                context.textAlign = 'center';
+                context.fillText('FLAG', 0, 3.5);
+            }
+            context.restore();
+        }
+
+        function setCanvasTool(tool) {
+            canvasTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.className = 'tool-btn p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 text-slate-400 hover:text-white';
+            });
+
+            const activeBtn = document.getElementById(`tool-${tool}`);
+            if (activeBtn) {
+                activeBtn.className = 'tool-btn active p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 bg-lol-gold text-black shadow';
+            }
+
+            const pingContainer = document.getElementById('pingTypeContainer');
+            const statusText = document.getElementById('canvasModeStatusText');
+
+            if (tool === 'ping') {
+                pingContainer.classList.remove('hidden');
+                pingContainer.classList.add('grid');
+                statusText.innerText = '와드 / 핑 위치 클릭 (Place Ward/Ping)';
+            } else {
+                pingContainer.classList.add('hidden');
+                pingContainer.classList.remove('grid');
+                statusText.innerText = tool === 'brush' ? '자유 그리기 (Freehand Brush)' : '이동 화살표 그리기 (Arrow Tool)';
+            }
+        }
+
+        function setPingType(pType) {
+            pingType = pType;
+            document.querySelectorAll('.ping-sub-btn').forEach(btn => {
+                btn.className = 'ping-sub-btn p-1 text-center font-bold text-slate-400 rounded';
+            });
+            const active = document.getElementById(`ping-${pType}`);
+            if (active) {
+                active.className = 'ping-sub-btn active p-1 text-center font-bold text-yellow-300 bg-yellow-950/60 border border-yellow-600 rounded';
+            }
+        }
+
+        function setCanvasColor(color) {
+            strokeColor = color;
+            showToast(`그리기 색상이 변경되었습니다.`);
+        }
+
+        function setBrushSize(size) {
+            strokeWidth = parseInt(size, 10);
+            document.getElementById('brushSizeVal').innerText = `${size}px`;
+        }
+
+        function setPlacementTeam(team) {
+            placementTeam = team;
+            const blueBtn = document.getElementById('teamBlueBtn');
+            const redBtn = document.getElementById('teamRedBtn');
+
+            if (team === 'blue') {
+                blueBtn.className = 'py-1 rounded bg-teal-950 text-lol-blue border border-lol-blue text-center';
+                redBtn.className = 'py-1 rounded bg-rose-950 text-rose-400 border border-transparent opacity-60 text-center';
+            } else {
+                blueBtn.className = 'py-1 rounded bg-teal-950 text-lol-blue border border-transparent opacity-60 text-center';
+                redBtn.className = 'py-1 rounded bg-rose-950 text-rose-400 border border-rose-500 text-center';
+            }
+        }
+
+        function updateCanvasTokenPreview() {
+            const champ = state.champions.find(c => c.id === state.selectedChampId);
+            if (!champ) return;
+
+            document.getElementById('canvasTokenPreviewImg').src = champ.avatar;
+            document.getElementById('canvasTokenPreviewName').innerText = champ.name;
+        }
+
+        function spawnSelectedChampToken() {
+            const champ = state.champions.find(c => c.id === state.selectedChampId);
+            if (!champ) return;
+
+            const tokenLayer = document.getElementById('champTokensLayer');
+            if (!tokenLayer) return;
+
+            const tokenId = 'token_' + Date.now();
+            const isBlue = placementTeam === 'blue';
+
+            const tokenEl = document.createElement('div');
+            tokenEl.id = tokenId;
+            tokenEl.className = `absolute pointer-events-auto cursor-grab w-10 h-10 rounded-full border-2 ${
+                isBlue ? 'border-lol-blue team-blue-glow' : 'border-rose-500 team-red-glow'
+            } bg-black shadow-2xl flex items-center justify-center transition-transform hover:scale-110`;
+            tokenEl.style.left = '45%';
+            tokenEl.style.top = '45%';
+
+            tokenEl.innerHTML = `
+                <img src="${champ.avatar}" class="w-full h-full rounded-full object-cover">
+                <span class="absolute -bottom-4 text-[9px] font-bold px-1 rounded bg-black/90 text-white border border-slate-700 whitespace-nowrap">
+                    ${champ.name}
+                </span>
+            `;
+
+            // Make Draggable
+            let isDragging = false;
+            let offsetLeft = 0, offsetTop = 0;
+
+            tokenEl.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                tokenEl.style.cursor = 'grabbing';
+                const rect = tokenEl.getBoundingClientRect();
+                offsetLeft = e.clientX - rect.left;
+                offsetTop = e.clientY - rect.top;
+                e.stopPropagation();
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const wrapperRect = document.getElementById('canvasMapWrapper').getBoundingClientRect();
+                let x = e.clientX - wrapperRect.left - offsetLeft;
+                let y = e.clientY - wrapperRect.top - offsetTop;
+
+                // Clamp inside wrapper bounds
+                x = Math.max(0, Math.min(wrapperRect.width - 40, x));
+                y = Math.max(0, Math.min(wrapperRect.height - 40, y));
+
+                tokenEl.style.left = `${x}px`;
+                tokenEl.style.top = `${y}px`;
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    tokenEl.style.cursor = 'grab';
+                }
+            });
+
+            // Double click to remove
+            tokenEl.addEventListener('dblclick', () => {
+                tokenEl.remove();
+                showToast(`${champ.name} 토큰이 맵에서 제거되었습니다.`);
+            });
+
+            tokenLayer.appendChild(tokenEl);
+            showToast(`${champ.name} 챔피언 토큰이 맵에 배치되었습니다! (드래그하여 위치 이동)`);
+        }
+
+        function clearMapCanvas() {
+            canvasDrawings = [];
+            const tokenLayer = document.getElementById('champTokensLayer');
+            if (tokenLayer) tokenLayer.innerHTML = '';
+            redrawCanvas();
+            showToast('전술 캔버스가 모두 초기화되었습니다.');
+        }
+
+        function undoCanvasLastPath() {
+            canvasDrawings.pop();
+            redrawCanvas();
+            showToast('마지막 전술 경로가 취소되었습니다.');
+        }
+
+        function exportCanvasImage() {
+            if (!canvas) return;
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `lol_tactical_plan_${Date.now()}.png`;
+            link.href = dataUrl;
+            link.click();
+            showToast('전술 지도 캔버스가 이미지로 저장되었습니다!');
+        }
+
+        function switchAppMode(mode) {
+            const hubMain = document.getElementById('appViewHub');
+            const canvasMain = document.getElementById('appViewCanvas');
+            const btnHub = document.getElementById('modeBtnHub');
+            const btnCanvas = document.getElementById('modeBtnCanvas');
+
+            if (mode === 'canvas') {
+                hubMain.classList.add('hidden');
+                canvasMain.classList.remove('hidden');
+                canvasMain.classList.add('flex');
+                
+                btnCanvas.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-lol-blue text-black shadow';
+                btnHub.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white';
+                
+                setTimeout(resizeCanvas, 100);
+            } else {
+                canvasMain.classList.add('hidden');
+                canvasMain.classList.remove('flex');
+                hubMain.classList.remove('hidden');
+
+                btnHub.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-lol-gold text-black shadow';
+                btnCanvas.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white';
+            }
+        }
+
+        function updateOpponentSelects() {
+            const matchSelect = document.getElementById('matchupOpponentSelect');
+            const revSelect = document.getElementById('revOpponent');
+            if (!matchSelect || !revSelect) return;
+
+            const optionsHtml = state.champions
+                .filter(c => c.id !== state.selectedChampId)
+                .map(c => `<option value="${c.id}">vs ${c.name} (${c.title || (c.lanes && c.lanes[0]) || 'MID'})</option>`)
+                .join('');
+
+            matchSelect.innerHTML = optionsHtml;
+            revSelect.innerHTML = optionsHtml;
         }
 
         function toggleChampLane(champId, lane) {
@@ -1175,7 +1714,7 @@
             saveToFirestore();
             selectChampion(state.selectedChampId);
             closeModal('changePhotoModal');
-            showToast(`${champ.name} 챔피언 사진이 변경 및 저장되었습니다!`);
+            showToast(`${champ.name} 챔피언 사진이 변경되었습니다!`);
         }
 
         function resetToDefaultPhoto() {
@@ -1268,7 +1807,7 @@
             renderMatchups();
             closeModal('addMatchupModal');
             document.getElementById('matchupNoteText').value = '';
-            showToast('상대법 정보가 등록 및 저장되었습니다.');
+            showToast('상대법 정보가 등록되었습니다.');
         }
 
         function deleteMatchup(id) {
@@ -1372,7 +1911,7 @@
             document.getElementById('revCs').value = '';
             document.getElementById('revGood').value = '';
             document.getElementById('revBad').value = '';
-            showToast('경기 피드백 일지가 클라우드에 등록되었습니다.');
+            showToast('경기 피드백 일지가 등록되었습니다.');
         }
 
         function deleteReview(id) {
@@ -1522,6 +2061,78 @@
             if (modal) modal.classList.add('hidden');
         }
 
+        function updateSyncCodeDisplay() {
+            const displayEl = document.getElementById('headerSyncCodeDisplay');
+            const inputEl = document.getElementById('syncCodeInput');
+            const shortCode = currentSyncCode ? (currentSyncCode.length > 12 ? currentSyncCode.substring(0, 10) + '...' : currentSyncCode) : '미설정';
+            if (displayEl) displayEl.innerText = shortCode;
+            if (inputEl) inputEl.value = currentSyncCode;
+        }
+
+        function applySyncCode() {
+            const inputVal = document.getElementById('syncCodeInput').value.trim();
+            if (!inputVal) {
+                showToast('연동할 숫자가 입력되지 않았습니다.');
+                return;
+            }
+
+            currentSyncCode = inputVal;
+            localStorage.setItem('lol_hub_sync_code', currentSyncCode);
+            updateSyncCodeDisplay();
+
+            if (currentUser && db) {
+                setupFirestoreSync(currentUser.uid);
+                saveToFirestore();
+            } else {
+                saveToLocalStorage();
+            }
+
+            closeModal('syncCodeModal');
+            showToast(`연동 번호 [${currentSyncCode}] (으)로 기기 동기화가 설정되었습니다!`);
+        }
+
+        function useFirebaseUidAsSyncCode() {
+            if (currentUser && currentUser.uid) {
+                document.getElementById('syncCodeInput').value = currentUser.uid;
+                showToast('Firebase 고유 키(UID)가 입력되었습니다.');
+            } else {
+                showToast('Firebase 인증 정보를 불러오는 중입니다.');
+            }
+        }
+
+        function generateRandomSyncCode() {
+            const newCode = String(Math.floor(100000 + Math.random() * 900000));
+            document.getElementById('syncCodeInput').value = newCode;
+            showToast(`랜덤 6자리 숫자(${newCode})가 입력되었습니다.`);
+        }
+
+        function copySyncCode() {
+            const code = document.getElementById('syncCodeInput').value;
+            if (!code) return;
+
+            const tempInput = document.createElement('input');
+            tempInput.value = code;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast(`동기화 코드가 복사되었습니다!`);
+        }
+
+        function updateSyncStatusUI(isSuccess, message = "클라우드 연동됨") {
+            const el = document.getElementById('cloudSyncStatus');
+            const textEl = document.getElementById('cloudSyncText');
+            if (!el || !textEl) return;
+
+            textEl.innerText = message;
+            if (isSuccess) {
+                el.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-700/60";
+            } else {
+                el.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-950/80 text-amber-400 border border-amber-700/60";
+            }
+        }
+
         function saveToLocalStorage() {
             localStorage.setItem('lol_hub_state', JSON.stringify(state));
         }
@@ -1578,11 +2189,13 @@
             saveToFirestore();
             renderChampions();
             selectChampion('roak');
+            clearMapCanvas();
             closeModal('resetConfirmModal');
             showToast('모든 데이터가 성공적으로 초기화되었습니다.');
         }
 
         // Window Object Global Mappings
+        window.switchAppMode = switchAppMode;
         window.fetchDataDragonChampions = fetchDataDragonChampions;
         window.saveBuildNotes = saveBuildNotes;
         window.saveMatchup = saveMatchup;
@@ -1606,7 +2219,18 @@
         window.generateRandomSyncCode = generateRandomSyncCode;
         window.copySyncCode = copySyncCode;
 
-        // Ensure robust launch regardless of script load timing
+        // Canvas Functions
+        window.setCanvasTool = setCanvasTool;
+        window.setPingType = setPingType;
+        window.setCanvasColor = setCanvasColor;
+        window.setBrushSize = setBrushSize;
+        window.setPlacementTeam = setPlacementTeam;
+        window.spawnSelectedChampToken = spawnSelectedChampToken;
+        window.clearMapCanvas = clearMapCanvas;
+        window.undoCanvasLastPath = undoCanvasLastPath;
+        window.exportCanvasImage = exportCanvasImage;
+
+        // Launch app on load
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             initApp();
         } else {
