@@ -14,7 +14,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 
     <script>
-        
         tailwind.config = {
             theme: {
                 extend: {
@@ -605,32 +604,33 @@
             
             <div class="space-y-3 text-xs">
                 <div class="bg-lol-bgDark p-3 rounded-lg border border-lol-border text-slate-300 leading-relaxed">
-                    <p class="font-bold text-lol-gold mb-1"><i class="fa-solid fa-circle-info"></i> 스마트폰에서 동기화하는 방법</p>
+                    <p class="font-bold text-lol-gold mb-1"><i class="fa-solid fa-circle-info"></i> 직접 숫자를 정해서 연동하는 방법</p>
                     <p class="text-[11px] text-slate-400">
-                        Firebase에서 부여받은 고유 키(UID) 또는 임의의 연동 코드로 PC와 모바일을 **실시간 연동**할 수 있습니다.
+                        원하는 **숫자나 비밀번호(예: 1234, 7777, 2026 등)**를 직접 입력하고 <strong>[이 번호로 연동]</strong>을 누르세요.<br>
+                        다른 기기(스마트폰/PC)에서도 **동일한 숫자**를 입력하면 두 기기가 실시간으로 데이터를 공유합니다!
                     </p>
                 </div>
 
                 <div>
-                    <label class="block text-slate-200 font-bold mb-1">현재 동기화 코드 (Sync Code / Firebase Key)</label>
+                    <label class="block text-slate-200 font-bold mb-1">사용할 커스텀 연동 숫자 / 번호 입력</label>
                     <div class="flex gap-2">
-                        <input type="text" id="syncCodeInput" placeholder="예: Firebase UID 또는 연동 코드" 
+                        <input type="text" id="syncCodeInput" placeholder="예: 123456 또는 원하는 숫자 입력" 
                                class="w-full lol-white-input rounded-lg p-2.5 text-xs font-mono font-bold tracking-wider">
-                        <button onclick="applySyncCode()" class="px-4 py-2 bg-lol-blue text-lol-bg font-bold rounded-lg text-xs shrink-0 hover:bg-teal-300 transition-colors">
-                            연동하기
+                        <button onclick="applySyncCode()" class="px-4 py-2 bg-lol-blue text-lol-bg font-bold rounded-lg text-xs shrink-0 hover:bg-teal-300 transition-colors flex items-center gap-1">
+                            <i class="fa-solid fa-link"></i> 이 번호로 연동
                         </button>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between pt-1">
                     <button onclick="useFirebaseUidAsSyncCode()" class="text-emerald-400 hover:underline text-xs font-semibold flex items-center gap-1" title="Firebase 내 계정 고유 Key로 설정">
-                        <i class="fa-solid fa-key"></i> 내 Firebase 고유 키 사용
+                        <i class="fa-solid fa-key"></i> 내 고유 Key 사용
                     </button>
                     <button onclick="generateRandomSyncCode()" class="text-lol-gold hover:underline text-xs font-semibold flex items-center gap-1">
-                        <i class="fa-solid fa-dice"></i> 새로 생성하기
+                        <i class="fa-solid fa-dice"></i> 6자리 랜덤 번호 생성
                     </button>
                     <button onclick="copySyncCode()" class="text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1">
-                        <i class="fa-solid fa-copy"></i> 코드 복사
+                        <i class="fa-solid fa-copy"></i> 번호 복사
                     </button>
                 </div>
             </div>
@@ -647,8 +647,25 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'lol-strategy-hub';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        // =========================================================================
+        // 🔑 [사용자 지정 FIREBASE 설정]
+        // Firebase 콘솔(https://console.firebase.google.com/) -> 프로젝트 설정에서 복사한
+        // 발급 키(apiKey, projectId 등)를 아래 객체에 그대로 붙여넣으세요.
+        // =========================================================================
+        const MY_FIREBASE_CONFIG = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // 직접 입력한 키가 유효한지 감지하여 우선 적용하고, 없을 경우 로컬/시스템 설정으로 유연하게 동작합니다.
+        const isCustomConfigValid = MY_FIREBASE_CONFIG.apiKey && !MY_FIREBASE_CONFIG.apiKey.includes("YOUR_API_KEY");
+        const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const firebaseConfig = isCustomConfigValid ? MY_FIREBASE_CONFIG : envConfig;
+        const appId = isCustomConfigValid ? (MY_FIREBASE_CONFIG.projectId || 'lol-strategy-hub') : (typeof __app_id !== 'undefined' ? __app_id : 'lol-strategy-hub');
 
         let app, auth, db;
         let currentUser = null;
@@ -796,7 +813,7 @@
         function applySyncCode() {
             const inputVal = document.getElementById('syncCodeInput').value.trim();
             if (!inputVal) {
-                showToast('동기화 코드를 입력해 주세요.');
+                showToast('연동할 숫자가 입력되지 않았습니다.');
                 return;
             }
 
@@ -804,12 +821,15 @@
             localStorage.setItem('lol_hub_sync_code', currentSyncCode);
             updateSyncCodeDisplay();
 
-            if (currentUser) {
+            if (currentUser && db) {
                 setupFirestoreSync(currentUser.uid);
+                saveToFirestore();
+            } else {
+                saveToLocalStorage();
             }
 
             closeModal('syncCodeModal');
-            showToast(`연동 코드가 적용되었습니다! (${currentSyncCode})`);
+            showToast(`연동 번호 [${currentSyncCode}] (으)로 기기 동기화가 설정되었습니다!`);
         }
 
         function useFirebaseUidAsSyncCode() {
@@ -822,8 +842,9 @@
         }
 
         function generateRandomSyncCode() {
-            const newCode = 'LOL-' + Math.floor(100000 + Math.random() * 900000);
+            const newCode = String(Math.floor(100000 + Math.random() * 900000));
             document.getElementById('syncCodeInput').value = newCode;
+            showToast(`랜덤 6자리 숫자(${newCode})가 입력되었습니다. [이 번호로 연동]을 누르세요.`);
         }
 
         function copySyncCode() {
@@ -1591,29 +1612,5 @@
             initApp();
         };
     </script>
-    <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyA2ECbZumISupaSbfmOwz4h21oLSbNv_zo",
-    authDomain: "gaming-c38f9.firebaseapp.com",
-    databaseURL: "https://gaming-c38f9-default-rtdb.firebaseio.com",
-    projectId: "gaming-c38f9",
-    storageBucket: "gaming-c38f9.firebasestorage.app",
-    messagingSenderId: "666444670157",
-    appId: "1:666444670157:web:6760ba5dd4a9aa56287584",
-    measurementId: "G-LSPG0X90R7"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 </body>
 </html>
