@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>LoL Strategy & Canvas Tactics Hub</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -42,9 +42,12 @@
         }
     </script>
     <style>
-        /* Force absolute Pitch Black (#000000) background across the entire viewport */
-        html, body, main {
+        /* Force absolute Pitch Black background across viewport */
+        html, body {
             background-color: #000000 !important;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
         }
 
         /* Custom Hextech scrollbar */
@@ -74,10 +77,9 @@
             border: 1px solid rgba(200, 170, 110, 0.35);
         }
 
-        /* High Visibility Input Styling (Pure White Box + Pitch Black Text) */
         .lol-white-input {
             background-color: #FFFFFF !important;
-            color: #0F172A !important; /* Sharp slate-900 black text */
+            color: #0F172A !important;
             font-weight: 600 !important;
             border: 2px solid #CBD5E1 !important;
         }
@@ -93,12 +95,13 @@
             font-weight: 400 !important;
         }
 
-        /* Canvas cursor styles */
         .cursor-draw { cursor: crosshair; }
-        .cursor-pointer-tool { cursor: pointer; }
-
-        .team-blue-glow { box-shadow: 0 0 8px rgba(10, 200, 185, 0.8); }
-        .team-red-glow { box-shadow: 0 0 8px rgba(230, 57, 70, 0.8); }
+        
+        .map-bg {
+            background-image: radial-gradient(#1e293b 1px, transparent 1px), radial-gradient(#0f172a 1px, #020617 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
     </style>
 </head>
 <body class="bg-black text-slate-200 font-sans min-h-screen flex flex-col antialiased selection:bg-lol-gold selection:text-lol-bg">
@@ -132,7 +135,7 @@
         <div class="flex items-center gap-2 sm:gap-3">
             <div id="cloudSyncStatus" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-700/60" title="Firebase 클라우드 실시간 동기화 상태">
                 <i class="fa-solid fa-cloud-check text-xs"></i>
-                <span id="cloudSyncText">동기화 준비됨</span>
+                <span id="cloudSyncText">동기화 완료</span>
             </div>
 
             <button onclick="openModal('syncCodeModal')" class="bg-lol-blue/20 hover:bg-lol-blue/30 text-lol-blue border border-lol-blue/50 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm" title="스마트폰 & PC 실시간 연동">
@@ -162,7 +165,6 @@
             
             <!-- Search & Lane Filter Header -->
             <div class="p-4 border-b border-lol-border/60 space-y-3 bg-lol-bgDark/50">
-                <!-- Search Input with High Contrast White Box -->
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm z-10"></i>
                     <input type="text" id="champSearch" oninput="filterChampions()" placeholder="챔피언 검색 (예: 자이라, 가렌, 로크)" 
@@ -193,9 +195,7 @@
             <div id="champHeaderBanner" class="hextech-card rounded-2xl p-5 md:p-6 border border-lol-gold/40 relative overflow-hidden">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
                     
-                    <!-- Champ Avatar + Info + Photo Upload Trigger -->
                     <div class="flex items-center gap-4">
-                        <!-- Clickable Champion Image Container for Photo Upload -->
                         <div class="relative group cursor-pointer" onclick="openModal('changePhotoModal')" title="클릭하여 챔피언 사진 변경">
                             <img id="bannerChampImg" src="" alt="Champion" 
                                  class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border-2 border-lol-gold shadow-lg bg-lol-bgDark transition-transform group-hover:scale-105"
@@ -217,7 +217,6 @@
                                 </button>
                             </div>
                             
-                            <!-- QUICK LANE ASSIGNMENT TOGGLE TAGS -->
                             <div class="mt-2.5 flex flex-wrap items-center gap-1.5">
                                 <span class="text-xs text-slate-400 mr-1 font-semibold flex items-center gap-1">
                                     <i class="fa-solid fa-tags text-lol-gold"></i> 포지션 지정:
@@ -262,8 +261,6 @@
 
             <!-- CONTENT TAB 1: STRATEGY & BUILD NOTES -->
             <div id="pane-strategy" class="tab-pane space-y-6">
-                
-                <!-- Quick Save Action Notification Bar -->
                 <div class="flex justify-between items-center bg-lol-bgPanel/80 border border-lol-border p-3 rounded-xl">
                     <p class="text-xs text-slate-300 flex items-center gap-2">
                         <i class="fa-solid fa-circle-info text-lol-gold"></i> 
@@ -275,7 +272,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <!-- Starting Items & Core Items -->
                     <div class="bg-lol-bgPanel border border-lol-border/80 rounded-xl p-4 space-y-4 shadow-md">
                         <h3 class="text-sm font-bold text-lol-gold flex items-center gap-2 border-b border-lol-border/60 pb-2">
                             <i class="fa-solid fa-shield-cat text-lol-gold"></i> 시작 아이템 &amp; 추천 빌드
@@ -292,7 +288,6 @@
                         </div>
                     </div>
 
-                    <!-- Runes & Spells -->
                     <div class="bg-lol-bgPanel border border-lol-border/80 rounded-xl p-4 space-y-4 shadow-md">
                         <h3 class="text-sm font-bold text-lol-gold flex items-center gap-2 border-b border-lol-border/60 pb-2">
                             <i class="fa-solid fa-wand-magic-sparkles text-lol-gold"></i> 룬 &amp; 소환사 주문
@@ -309,7 +304,6 @@
                         </div>
                     </div>
 
-                    <!-- Skill Order & Core Gameplay Tips -->
                     <div class="bg-lol-bgPanel border border-lol-border/80 rounded-xl p-4 space-y-4 shadow-md md:col-span-2 lg:col-span-1">
                         <h3 class="text-sm font-bold text-lol-gold flex items-center gap-2 border-b border-lol-border/60 pb-2">
                             <i class="fa-solid fa-bolt text-lol-gold"></i> 스킬 순서 &amp; 라인/정글 동선 팁
@@ -342,7 +336,6 @@
                     </button>
                 </div>
 
-                <!-- Matchup List Cards Grid -->
                 <div id="matchupListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Dynamic Matchup Cards -->
                 </div>
@@ -350,7 +343,6 @@
 
             <!-- CONTENT TAB 3: PLAY FEEDBACK & REVIEW JOURNAL -->
             <div id="pane-reviews" class="tab-pane hidden space-y-6">
-                <!-- Feedback Header & Stats -->
                 <div class="bg-lol-bgPanel border border-lol-border/80 p-4 md:p-5 rounded-xl space-y-3">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <div>
@@ -364,7 +356,6 @@
                         </button>
                     </div>
 
-                    <!-- Statistics Summary Bar -->
                     <div id="reviewStatsBar" class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-lol-border/60 text-xs">
                         <div class="bg-lol-bgDark/80 p-2.5 rounded-lg border border-lol-border">
                             <span class="text-slate-400 block text-[10px]">총 경기 수</span>
@@ -385,7 +376,6 @@
                     </div>
                 </div>
 
-                <!-- Review Feed Container -->
                 <div id="reviewListContainer" class="space-y-3">
                     <!-- Dynamic Review Cards -->
                 </div>
@@ -395,7 +385,6 @@
         <!-- VIEW 2: INTERACTIVE TACTICAL CANVAS MODE -->
         <main id="appViewCanvas" class="flex-1 hidden bg-slate-950 flex flex-col xl:flex-row overflow-hidden relative">
             
-            <!-- CANVAS TOOLBAR & CHAMPION TOKEN PALETTE -->
             <div class="w-full xl:w-72 border-b xl:border-b-0 xl:border-r border-lol-border bg-lol-bgPanel p-3 flex flex-col space-y-3 shrink-0 overflow-y-auto">
                 <div class="flex items-center justify-between border-b border-lol-border/60 pb-2">
                     <span class="font-bold text-xs text-lol-gold flex items-center gap-1.5">
@@ -406,7 +395,6 @@
                     </button>
                 </div>
 
-                <!-- Drawing Tool Selector -->
                 <div class="grid grid-cols-3 gap-1.5 bg-black p-1 rounded-xl border border-lol-border/80">
                     <button onclick="setCanvasTool('brush')" id="tool-brush" class="tool-btn active p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 bg-lol-gold text-black shadow">
                         <i class="fa-solid fa-paintbrush text-sm"></i>
@@ -422,15 +410,13 @@
                     </button>
                 </div>
 
-                <!-- Ping Sub-Type Selector (Only when ping tool active) -->
-                <div id="pingTypeContainer" class="hidden grid-cols-4 gap-1 bg-lol-bgDark p-1 rounded-lg border border-lol-border text-[11px]">
+                <div id="pingTypeContainer" class="hidden grid grid-cols-4 gap-1 bg-lol-bgDark p-1 rounded-lg border border-lol-border text-[11px]">
                     <button onclick="setPingType('ward_stealth')" id="ping-ward_stealth" class="ping-sub-btn active p-1 text-center font-bold text-yellow-300 bg-yellow-950/60 border border-yellow-600 rounded">노란와드</button>
                     <button onclick="setPingType('ward_control')" id="ping-ward_control" class="ping-sub-btn p-1 text-center font-bold text-rose-300 text-slate-400 rounded">제어와드</button>
                     <button onclick="setPingType('ping_danger')" id="ping-ping_danger" class="ping-sub-btn p-1 text-center font-bold text-red-400 text-slate-400 rounded">위험핑</button>
                     <button onclick="setPingType('ping_assist')" id="ping-ping_assist" class="ping-sub-btn p-1 text-center font-bold text-cyan-300 text-slate-400 rounded">지원핑</button>
                 </div>
 
-                <!-- Color & Brush Size Settings -->
                 <div class="space-y-2 bg-black/40 p-2.5 rounded-xl border border-lol-border/60">
                     <label class="text-[11px] text-slate-300 font-bold block">선 색상 선택</label>
                     <div class="flex items-center gap-2">
@@ -452,7 +438,6 @@
                     </div>
                 </div>
 
-                <!-- CHAMPION TOKEN DRAG PALETTE -->
                 <div class="flex-1 flex flex-col space-y-2 min-h-[160px]">
                     <div class="flex justify-between items-center">
                         <span class="text-[11px] font-bold text-slate-300">
@@ -461,7 +446,6 @@
                         <span class="text-[10px] text-slate-500">클릭 또는 드래그</span>
                     </div>
 
-                    <!-- Team Selector for Placing Champions -->
                     <div class="grid grid-cols-2 gap-1 text-[11px] font-bold">
                         <button onclick="setPlacementTeam('blue')" id="teamBlueBtn" class="py-1 rounded bg-teal-950 text-lol-blue border border-lol-blue text-center">
                             블루팀 (Blue)
@@ -471,7 +455,6 @@
                         </button>
                     </div>
 
-                    <!-- Selected Champion Token Spawner -->
                     <div class="bg-black/80 border border-lol-gold/40 p-2.5 rounded-xl flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <img id="canvasTokenPreviewImg" src="" class="w-9 h-9 rounded-lg border border-lol-gold object-cover">
@@ -486,11 +469,10 @@
                     </div>
 
                     <p class="text-[10px] text-slate-400 leading-tight">
-                        💡 팁: 맵에 올려진 챔피언 토큰 아이콘을 마우스로 드래그하면 자유롭게 위치를 옮길 수 있습니다. Double-click 토큰 삭제.
+                        💡 팁: 맵에 올려진 챔피언 토큰 아이콘을 마우스로 드래그하면 자유롭게 위치를 옮길 수 있습니다. 더블 클릭 시 토큰 삭제.
                     </p>
                 </div>
 
-                <!-- Canvas Control Actions -->
                 <div class="pt-2 border-t border-lol-border flex gap-2">
                     <button onclick="undoCanvasLastPath()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
                         <i class="fa-solid fa-rotate-left"></i> 실행 취소
@@ -501,29 +483,19 @@
                 </div>
             </div>
 
-            <!-- TACTICAL CANVAS INTERACTIVE DISPLAY BOARD -->
             <div class="flex-1 p-3 md:p-5 flex flex-col items-center justify-center relative overflow-hidden bg-black">
-                
-                <!-- Map Header Status Overlay -->
                 <div class="w-full max-w-2xl mb-2 flex items-center justify-between text-xs text-slate-400 bg-lol-bgPanel/80 backdrop-blur px-3 py-1.5 rounded-lg border border-lol-border">
                     <span class="flex items-center gap-1.5 font-semibold text-slate-200">
-                        <i class="fa-solid fa-map text-lol-gold"></i> 소환사의 협곡 전술 판판
+                        <i class="fa-solid fa-map text-lol-gold"></i> 소환사의 협곡 전술 판
                     </span>
                     <span class="text-[11px] text-lol-gold">
                         현재 모드: <strong id="canvasModeStatusText">자유 그리기 (Free Draw)</strong>
                     </span>
                 </div>
 
-                <!-- Canvas Container wrapper -->
-                <div id="canvasMapWrapper" class="relative w-full max-w-2xl aspect-square bg-slate-900 rounded-2xl border-2 border-lol-gold/50 shadow-2xl overflow-hidden cursor-draw">
-                    
-                    <!-- HTML5 CANVAS LAYER -->
+                <div id="canvasMapWrapper" class="relative w-full max-w-2xl aspect-square bg-slate-900 rounded-2xl border-2 border-lol-gold/50 shadow-2xl overflow-hidden cursor-draw map-bg">
                     <canvas id="tacticalMapCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
-
-                    <!-- DRAGGABLE CHAMPION TOKENS OVERLAY CONTAINER -->
-                    <div id="champTokensLayer" class="absolute inset-0 z-20 pointer-events-none">
-                        <!-- Dynamic champion token elements inserted here -->
-                    </div>
+                    <div id="champTokensLayer" class="absolute inset-0 z-20 pointer-events-none"></div>
                 </div>
             </div>
         </main>
@@ -540,7 +512,6 @@
             </div>
             
             <div class="space-y-4 text-xs">
-                <!-- Current Photo Preview -->
                 <div class="flex items-center gap-3 bg-lol-bgDark p-3 rounded-lg border border-lol-border">
                     <img id="modalPhotoPreview" src="" class="w-14 h-14 rounded-lg object-cover border border-lol-gold">
                     <div>
@@ -549,7 +520,6 @@
                     </div>
                 </div>
 
-                <!-- Option A: File Upload -->
                 <div>
                     <label class="block text-slate-300 font-bold mb-1">1. 이미지 파일 직접 업로드 (내 컴퓨터)</label>
                     <input type="file" id="photoFileInput" accept="image/*" onchange="handlePhotoFileSelect(event)" 
@@ -558,7 +528,6 @@
 
                 <div class="text-center text-slate-500 font-bold">- 또는 -</div>
 
-                <!-- Option B: Image URL -->
                 <div>
                     <label class="block text-slate-300 font-bold mb-1">2. 웹 이미지 URL 주소 입력</label>
                     <input type="text" id="photoUrlInput" placeholder="https://example.com/champion.png" 
@@ -797,24 +766,21 @@
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // =========================================================================
-        // 🔑 FIREBASE CONFIGURATION
+        // 🔑 FIREBASE CONFIGURATION & HYBRID DATA ENGINE
         // =========================================================================
-        const MY_FIREBASE_CONFIG = {
         const firebaseConfig = {
-          apiKey: "AIzaSyA2ECbZumISupaSbfmOwz4h21oLSbNv_zo",
-          authDomain: "gaming-c38f9.firebaseapp.com",
-          databaseURL: "https://gaming-c38f9-default-rtdb.firebaseio.com",
-          projectId: "gaming-c38f9",
-          storageBucket: "gaming-c38f9.firebasestorage.app",
-          messagingSenderId: "666444670157",
-          appId: "1:666444670157:web:6760ba5dd4a9aa56287584",
-          measurementId: "G-LSPG0X90R7"
+            apiKey: "AIzaSyA2ECbZumISupaSbfmOwz4h21oLSbNv_zo",
+            authDomain: "gaming-c38f9.firebaseapp.com",
+            databaseURL: "https://gaming-c38f9-default-rtdb.firebaseio.com",
+            projectId: "gaming-c38f9",
+            storageBucket: "gaming-c38f9.firebasestorage.app",
+            messagingSenderId: "666444670157",
+            appId: "1:666444670157:web:6760ba5dd4a9aa56287584",
+            measurementId: "G-LSPG0X90R7"
         };
 
-        const isCustomConfigValid = MY_FIREBASE_CONFIG.apiKey && !MY_FIREBASE_CONFIG.apiKey.includes("YOUR_API_KEY");
-        const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const firebaseConfig = isCustomConfigValid ? MY_FIREBASE_CONFIG : envConfig;
-        const appId = isCustomConfigValid ? (MY_FIREBASE_CONFIG.projectId || 'lol-strategy-hub') : (typeof __app_id !== 'undefined' ? __app_id : 'lol-strategy-hub');
+        const envAppId = typeof __app_id !== 'undefined' ? __app_id : 'lol-strategy-hub';
+        const appId = firebaseConfig.projectId || envAppId;
 
         let app, auth, db;
         let currentUser = null;
@@ -853,16 +819,16 @@
         let isDrawing = false;
         let startX = 0, startY = 0;
         let canvasTool = 'brush'; // 'brush', 'arrow', 'ping'
-        let pingType = 'ward_stealth'; // 'ward_stealth', 'ward_control', 'ping_danger', 'ping_assist'
+        let pingType = 'ward_stealth'; 
         let strokeColor = '#C8AA6E';
         let strokeWidth = 4;
         let placementTeam = 'blue';
-        let canvasDrawings = []; // Array of drawn paths/items
-        let canvasTokens = []; // Placed champion tokens
+        let canvasDrawings = []; 
+        let canvasTokens = [];
 
         async function initFirebase() {
             try {
-                if (Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey) {
+                if (firebaseConfig && firebaseConfig.apiKey) {
                     app = initializeApp(firebaseConfig);
                     auth = getAuth(app);
                     db = getFirestore(app);
@@ -881,28 +847,30 @@
                         localStorage.setItem('lol_hub_sync_code', currentSyncCode);
                     }
 
-                    setupFirestoreSync(currentUser.uid);
+                    setupFirestoreSync();
 
                     onAuthStateChanged(auth, (user) => {
                         if (user) {
                             currentUser = user;
-                            setupFirestoreSync(user.uid);
+                            setupFirestoreSync();
                         }
                     });
                 } else {
-                    if (!currentSyncCode) currentSyncCode = 'LOCAL-' + Math.floor(100000 + Math.random() * 900000);
-                    updateSyncStatusUI(false, "로컬 모드");
-                    updateSyncCodeDisplay();
+                    fallbackLocalMode("파이어베이스 설정 오류");
                 }
             } catch (err) {
                 console.warn("Firebase fallback to local mode:", err);
-                if (!currentSyncCode) currentSyncCode = 'LOCAL-' + Math.floor(100000 + Math.random() * 900000);
-                updateSyncStatusUI(false, "로컬 오프라인 모드");
-                updateSyncCodeDisplay();
+                fallbackLocalMode("로컬 오프라인 모드");
             }
         }
 
-        function setupFirestoreSync(userId) {
+        function fallbackLocalMode(msg) {
+            if (!currentSyncCode) currentSyncCode = 'LOCAL-' + Math.floor(100000 + Math.random() * 900000);
+            updateSyncStatusUI(false, msg);
+            updateSyncCodeDisplay();
+        }
+
+        function setupFirestoreSync() {
             if (!db || !currentSyncCode) return;
 
             updateSyncCodeDisplay();
@@ -916,764 +884,249 @@
             activeSnapshotUnsubscribe = onSnapshot(dashboardDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    if (data) {
-                        if (data.champions && data.champions.length > 0) state.champions = data.champions;
-                        if (data.notes) state.notes = data.notes;
-                        if (data.matchups) state.matchups = data.matchups;
-                        if (data.reviews) state.reviews = data.reviews;
-
-                        ensureSpecialChampionsExist();
-                        renderChampions();
-                        selectChampion(state.selectedChampId || 'roak');
-                        updateSyncStatusUI(true, `[${currentSyncCode.substring(0, 8)}...] 실시간 연동 중`);
+                    if (data && data.state) {
+                        mergeSyncedState(data.state);
+                        updateSyncStatusUI(true, "실시간 동기화됨");
                     }
                 } else {
-                    saveToFirestore();
+                    saveStateToCloud();
                 }
-            }, (error) => {
-                console.warn("Firestore snapshot notice:", error);
+            }, (err) => {
+                console.warn("Firestore listener error:", err);
                 updateSyncStatusUI(false, "로컬 보관 모드");
             });
         }
 
-        async function saveToFirestore() {
-            saveToLocalStorage();
-            if (!auth || !auth.currentUser || !db || !currentSyncCode) return;
+        function updateSyncStatusUI(isSynced, text) {
+            const statusEl = document.getElementById('cloudSyncStatus');
+            const textEl = document.getElementById('cloudSyncText');
+            if (statusEl && textEl) {
+                statusEl.classList.remove('hidden');
+                textEl.innerText = text;
+                if (isSynced) {
+                    statusEl.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-700/60";
+                } else {
+                    statusEl.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-950/80 text-amber-400 border border-amber-700/60";
+                }
+            }
+        }
 
+        function updateSyncCodeDisplay() {
+            const el = document.getElementById('headerSyncCodeDisplay');
+            if (el) {
+                el.innerText = currentSyncCode || '불러오는 중...';
+            }
+            const inputEl = document.getElementById('syncCodeInput');
+            if (inputEl) {
+                inputEl.value = currentSyncCode;
+            }
+        }
+
+        async function saveStateToCloud() {
+            saveLocalBackup();
+            if (!db || !currentSyncCode || !currentUser) return;
             try {
-                updateSyncStatusUI(true, "저장 중...");
                 const dashboardDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboards', currentSyncCode);
-
                 await setDoc(dashboardDocRef, {
+                    updatedAt: new Date().toISOString(),
                     syncCode: currentSyncCode,
-                    champions: state.champions || [],
-                    notes: state.notes || {},
-                    matchups: state.matchups || {},
-                    reviews: state.reviews || {},
-                    updatedAt: new Date().toISOString()
+                    state: state,
+                    canvasDrawings: canvasDrawings,
+                    canvasTokens: canvasTokens
                 }, { merge: true });
-
-                updateSyncStatusUI(true, `[${currentSyncCode.substring(0, 8)}...] 저장 완료`);
             } catch (err) {
-                console.warn("Firestore save fallback:", err);
-                updateSyncStatusUI(false, "로컬 보관 완료");
+                console.warn("Failed saving to cloud:", err);
             }
         }
 
-        async function initApp() {
-            loadFromLocalStorage();
-            
-            if (!state.champions || state.champions.length === 0) {
-                state.champions = JSON.parse(JSON.stringify(DEFAULT_CHAMPIONS));
-            }
-
-            ensureSpecialChampionsExist();
-
-            if (!state.notes['roak']) {
-                state.notes['roak'] = {
-                    startItems: '도란의 검 + 1포션 / 부패물약',
-                    coreItems: '1코어: 삼위일체\n2코어: 스테락의 도전\n3코어: 죽음의 무도',
-                    runes: '메인: 정복자 - 승전보 - 전설: 민첩함 - 최후의 저항\n보조: 뼈 파괴자 - 과잉성장',
-                    spells: '점멸 + 순간이동 / 점멸 + 점화',
-                    skillOrder: 'Q -> E -> W (1렙 Q, 2렙 E)',
-                    tips: '로크 라인전: 패시브 분노 활용한 3타 딜교환이 핵심. 6렙 이후 궁극기 진입시 한타 파괴력 극대화.'
-                };
-            }
-
-            renderChampions();
-            selectChampion(state.selectedChampId || 'roak');
-            initTacticalCanvas();
-
-            initFirebase().catch(e => console.warn(e));
-            fetchDataDragonChampions(false).catch(e => console.warn(e));
-        }
-
-        function ensureSpecialChampionsExist() {
-            const specials = [
-                { id: 'roak', name: '로크', title: '데마시아의 신규 챔피언', avatar: 'https://placehold.co/100x100/0A1428/C8AA6E?text=Roak', lanes: ['TOP', 'MID'] },
-                { id: 'mel', name: '멜', title: '녹서스의 정치가', avatar: 'https://placehold.co/100x100/0A1428/C8AA6E?text=Mel', lanes: ['MID', 'SUP'] },
-                { id: 'ambessa', name: '암베사', title: '녹서스의 군주', avatar: 'https://placehold.co/100x100/0A1428/C8AA6E?text=Ambessa', lanes: ['TOP', 'JUG'] }
-            ];
-
-            specials.forEach(sp => {
-                if (!state.champions.some(c => c.id === sp.id)) {
-                    state.champions.unshift(sp);
-                }
-            });
-        }
-
-        async function fetchDataDragonChampions(userInitiated = false) {
+        function saveLocalBackup() {
             try {
-                const verRes = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
-                const versions = await verRes.json();
-                const latestVersion = versions[0] || '14.24.1';
-
-                const champRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${latestVersion}/data/ko_KR/champion.json`);
-                const champData = await champRes.json();
-                const riotChamps = champData.data;
-
-                Object.keys(riotChamps).forEach(key => {
-                    const item = riotChamps[key];
-                    const id = item.id.toLowerCase();
-                    
-                    const lanes = [];
-                    if (item.tags.includes('Fighter')) lanes.push('TOP', 'JUG');
-                    if (item.tags.includes('Tank') && !lanes.includes('TOP')) lanes.push('TOP', 'SUP');
-                    if (item.tags.includes('Mage')) lanes.push('MID');
-                    if (item.tags.includes('Assassin') && !lanes.includes('MID')) lanes.push('MID', 'JUG');
-                    if (item.tags.includes('Marksman')) lanes.push('ADC');
-                    if (item.tags.includes('Support')) lanes.push('SUP');
-                    if (lanes.length === 0) lanes.push('MID');
-
-                    const existingIndex = state.champions.findIndex(c => c.id === id || c.name === item.name);
-                    const avatarUrl = `https://ddragon.leagueoflegends.com/cdn/${latestVersion}/img/champion/${item.id}.png`;
-
-                    if (existingIndex === -1) {
-                        state.champions.push({
-                            id: id,
-                            name: item.name,
-                            title: item.title,
-                            avatar: avatarUrl,
-                            lanes: Array.from(new Set(lanes))
-                        });
-                    } else {
-                        if (!state.champions[existingIndex].avatar.startsWith('data:')) {
-                            state.champions[existingIndex].avatar = avatarUrl;
-                        }
-                    }
-                });
-
-                ensureSpecialChampionsExist();
-
-                state.champions.sort((a, b) => {
-                    if (a.id === 'roak') return -1;
-                    if (b.id === 'roak') return 1;
-                    return a.name.localeCompare(b.name, 'ko');
-                });
-
-                saveToFirestore();
-                renderChampions();
-
-                if (userInitiated) {
-                    showToast(`라이엇 공식 챔피언 동기화 완료! (총 ${state.champions.length}개)`);
-                }
-            } catch (err) {
-                console.warn('DataDragon API fetch failed:', err);
-                if (userInitiated) showToast('네트워크 연결 상태를 확인해주세요.');
+                localStorage.setItem('lol_hub_local_state', JSON.stringify(state));
+                localStorage.setItem('lol_hub_canvas_drawings', JSON.stringify(canvasDrawings));
+                localStorage.setItem('lol_hub_canvas_tokens', JSON.stringify(canvasTokens));
+            } catch (e) {
+                console.warn("LocalStorage error:", e);
             }
         }
 
-        function renderChampions() {
+        function loadLocalBackup() {
+            try {
+                const savedState = localStorage.getItem('lol_hub_local_state');
+                if (savedState) {
+                    state = JSON.parse(savedState);
+                } else {
+                    state.champions = [...DEFAULT_CHAMPIONS];
+                }
+                const savedDrawings = localStorage.getItem('lol_hub_canvas_drawings');
+                if (savedDrawings) canvasDrawings = JSON.parse(savedDrawings);
+                
+                const savedTokens = localStorage.getItem('lol_hub_canvas_tokens');
+                if (savedTokens) canvasTokens = JSON.parse(savedTokens);
+            } catch (e) {
+                state.champions = [...DEFAULT_CHAMPIONS];
+            }
+        }
+
+        function mergeSyncedState(remoteState) {
+            if (!remoteState) return;
+            state = { ...state, ...remoteState };
+            renderAllUI();
+        }
+
+        function renderAllUI() {
+            renderChampionList();
+            renderSelectedChampionHeader();
+            renderStrategyNotes();
+            renderMatchups();
+            renderReviews();
+            renderCanvasTokens();
+            redrawCanvas();
+        }
+
+        function renderChampionList() {
             const container = document.getElementById('champListContainer');
             if (!container) return;
-            container.innerHTML = '';
 
             const filtered = state.champions.filter(c => {
-                const matchLane = state.currentFilterLane === 'ALL' || (c.lanes && c.lanes.includes(state.currentFilterLane));
-                const matchSearch = c.name.toLowerCase().includes(state.searchQuery.toLowerCase()) || 
-                                    (c.title && c.title.toLowerCase().includes(state.searchQuery.toLowerCase()));
-                return matchLane && matchSearch;
+                const matchesLane = state.currentFilterLane === 'ALL' || (c.lanes && c.lanes.includes(state.currentFilterLane));
+                const matchesSearch = !state.searchQuery || c.name.toLowerCase().includes(state.searchQuery.toLowerCase());
+                return matchesLane && matchesSearch;
             });
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-8 text-xs text-slate-500">
-                        <i class="fa-solid fa-ghost text-2xl mb-2 block opacity-50"></i>
-                        조건에 맞는 챔피언이 없습니다.
-                    </div>
-                `;
+                    <div class="p-6 text-center text-slate-500 text-xs">
+                        <i class="fa-solid fa-ghost text-2xl mb-2 block"></i>
+                        조건에 일치하는 챔피언이 없습니다.
+                    </div>`;
                 return;
             }
 
-            filtered.forEach(c => {
-                const isSelected = c.id === state.selectedChampId;
-                const card = document.createElement('div');
-                card.className = `p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                    isSelected 
-                        ? 'bg-lol-gold/15 border-lol-gold text-white shadow-md' 
-                        : 'bg-lol-bgDark/60 hover:bg-lol-bgDark border-lol-border/80 text-slate-300 hover:border-slate-600'
-                }`;
-                card.onclick = () => selectChampion(c.id);
+            container.innerHTML = filtered.map(champ => {
+                const isSelected = champ.id === state.selectedChampId;
+                const laneBadges = (champ.lanes || []).map(l => 
+                    `<span class="text-[9px] px-1.5 py-0.2 rounded bg-black/60 text-lol-gold border border-lol-border">${l}</span>`
+                ).join(' ');
 
-                const lanePills = (c.lanes || []).map(l => 
-                    `<span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-black border border-lol-border text-slate-300">${l}</span>`
-                ).join('');
-
-                card.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <img src="${c.avatar}" alt="${c.name}" 
-                             onerror="this.src='https://placehold.co/100x100/0A1428/C8AA6E?text=${encodeURIComponent(c.name)}'"
-                             class="w-10 h-10 rounded-lg object-cover border ${isSelected ? 'border-lol-gold' : 'border-lol-border'}">
-                        <div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="font-bold text-xs">${c.name}</span>
-                                <span class="text-[10px] text-slate-400">${c.title || ''}</span>
+                return `
+                    <div onclick="selectChampion('${champ.id}')" 
+                         class="p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between group ${isSelected ? 'bg-gradient-to-r from-lol-gold/20 to-transparent border-lol-gold shadow-md' : 'bg-lol-bgDark/60 border-lol-border/60 hover:border-slate-600'}">
+                        <div class="flex items-center gap-3">
+                            <img src="${champ.avatar}" onerror="this.src='https://placehold.co/100x100/0A1428/C8AA6E?text=LoL'" 
+                                 class="w-10 h-10 rounded-lg object-cover border ${isSelected ? 'border-lol-gold' : 'border-slate-700'}">
+                            <div>
+                                <h4 class="text-xs font-bold ${isSelected ? 'text-lol-gold' : 'text-slate-200 group-hover:text-white'}">${champ.name}</h4>
+                                <p class="text-[10px] text-slate-400 line-clamp-1">${champ.title || '소환사의 협곡'}</p>
                             </div>
-                            <div class="flex gap-1 mt-1">${lanePills}</div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            ${laneBadges}
                         </div>
                     </div>
-                    <i class="fa-solid fa-chevron-right text-xs ${isSelected ? 'text-lol-gold' : 'text-slate-600'}"></i>
                 `;
+            }).join('');
 
-                container.appendChild(card);
+            populateOpponentSelects();
+        }
+
+        function populateOpponentSelects() {
+            const mSelect = document.getElementById('matchupOpponentSelect');
+            const rSelect = document.getElementById('revOpponent');
+            const options = state.champions.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+            if (mSelect) mSelect.innerHTML = options;
+            if (rSelect) rSelect.innerHTML = options;
+        }
+
+        function selectChampion(champId) {
+            state.selectedChampId = champId;
+            renderChampionList();
+            renderSelectedChampionHeader();
+            renderStrategyNotes();
+            renderMatchups();
+            renderReviews();
+            updateCanvasTokenPreview();
+            saveStateToCloud();
+        }
+
+        function renderSelectedChampionHeader() {
+            const champ = state.champions.find(c => c.id === state.selectedChampId) || state.champions[0];
+            if (!champ) return;
+
+            document.getElementById('bannerChampImg').src = champ.avatar;
+            document.getElementById('bannerChampName').innerText = champ.name;
+            document.getElementById('bannerChampTitle').innerText = champ.title ? `"${champ.title}"` : '';
+
+            const roleBadge = document.getElementById('bannerChampRoleBadge');
+            if (roleBadge) roleBadge.innerText = champ.lanes && champ.lanes.length > 0 ? champ.lanes[0] : 'MID';
+
+            const badgesContainer = document.getElementById('bannerLaneBadges');
+            if (badgesContainer) {
+                badgesContainer.innerHTML = ALL_LANES.map(lane => {
+                    const hasLane = champ.lanes && champ.lanes.includes(lane);
+                    return `
+                        <button onclick="toggleChampLane('${lane}')" 
+                                class="text-[10px] font-bold px-2 py-0.5 rounded transition-all ${hasLane ? 'bg-lol-gold text-black shadow font-extrabold' : 'bg-slate-900 text-slate-500 border border-slate-800 hover:text-slate-300'}">
+                            ${lane}
+                        </button>
+                    `;
+                }).join('');
+            }
+
+            // Stats calculation from reviews
+            const champReviews = (state.reviews[champ.id] || []);
+            const total = champReviews.length;
+            const wins = champReviews.filter(r => r.result === 'WIN').length;
+            const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+
+            document.getElementById('statReviewCount').innerText = `${total}판`;
+            document.getElementById('statWinRate').innerText = `${winRate}%`;
+
+            let kSum = 0, dSum = 0, aSum = 0;
+            champReviews.forEach(r => {
+                if (r.kda) {
+                    const parts = r.kda.split('/').map(n => parseFloat(n.trim()) || 0);
+                    if (parts.length === 3) {
+                        kSum += parts[0];
+                        dSum += parts[1];
+                        aSum += parts[2];
+                    }
+                }
             });
+            const avgKdaVal = total > 0 && dSum > 0 ? ((kSum + aSum) / dSum).toFixed(2) : (total > 0 ? '완벽' : '0.0');
+            document.getElementById('statAvgKda').innerText = avgKdaVal;
 
-            updateOpponentSelects();
             updateCanvasTokenPreview();
         }
 
-        function selectChampion(id) {
-            const champ = state.champions.find(c => c.id === id);
+        function toggleChampLane(lane) {
+            const champ = state.champions.find(c => c.id === state.selectedChampId);
             if (!champ) return;
+            if (!champ.lanes) champ.lanes = [];
+            const idx = champ.lanes.indexOf(lane);
+            if (idx > -1) {
+                champ.lanes.splice(idx, 1);
+            } else {
+                champ.lanes.push(lane);
+            }
+            renderSelectedChampionHeader();
+            renderChampionList();
+            saveStateToCloud();
+        }
 
-            state.selectedChampId = id;
-            renderChampions();
-
-            document.getElementById('bannerChampName').innerText = champ.name;
-            document.getElementById('bannerChampTitle').innerText = champ.title ? `— ${champ.title}` : '';
-            document.getElementById('bannerChampImg').src = champ.avatar;
-            document.getElementById('bannerChampRoleBadge').innerText = (champ.lanes && champ.lanes[0]) || 'MID';
-
-            const laneBadgesContainer = document.getElementById('bannerLaneBadges');
-            laneBadgesContainer.innerHTML = '';
-            
-            ALL_LANES.forEach(lane => {
-                const hasLane = champ.lanes && champ.lanes.includes(lane);
-                const tag = document.createElement('button');
-                tag.className = `text-[11px] px-2.5 py-1 rounded-md font-semibold transition-all flex items-center gap-1 ${
-                    hasLane 
-                        ? 'bg-lol-gold text-lol-bg border border-lol-gold shadow' 
-                        : 'bg-lol-bgDark/90 text-slate-400 hover:text-slate-200 border border-lol-border/80 hover:border-slate-500'
-                }`;
-                tag.innerHTML = hasLane ? `<i class="fa-solid fa-check text-[9px]"></i> ${lane}` : `<i class="fa-solid fa-plus text-[9px]"></i> ${lane}`;
-                tag.onclick = (e) => {
-                    e.stopPropagation();
-                    toggleChampLane(champ.id, lane);
-                };
-                laneBadgesContainer.appendChild(tag);
-            });
-
-            const notes = state.notes[id] || {};
+        function renderStrategyNotes() {
+            const notes = state.notes[state.selectedChampId] || {};
             document.getElementById('noteStartItems').value = notes.startItems || '';
             document.getElementById('noteCoreItems').value = notes.coreItems || '';
             document.getElementById('noteRunes').value = notes.runes || '';
             document.getElementById('noteSpells').value = notes.spells || '';
             document.getElementById('noteSkillOrder').value = notes.skillOrder || '';
             document.getElementById('noteTips').value = notes.tips || '';
-
-            renderMatchups();
-            renderReviews();
-            updateHeaderStats();
-            updateCanvasTokenPreview();
-        }
-
-        function initTacticalCanvas() {
-            canvas = document.getElementById('tacticalMapCanvas');
-            if (!canvas) return;
-            ctx = canvas.getContext('2d');
-
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-
-            // Canvas mouse events
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseleave', stopDrawing);
-
-            // Touch support
-            canvas.addEventListener('touchstart', (e) => {
-                const touch = e.touches[0];
-                startDrawing({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => e.preventDefault() });
-            });
-            canvas.addEventListener('touchmove', (e) => {
-                const touch = e.touches[0];
-                draw({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => e.preventDefault() });
-            });
-            canvas.addEventListener('touchend', stopDrawing);
-
-            redrawCanvas();
-        }
-
-        function resizeCanvas() {
-            const wrapper = document.getElementById('canvasMapWrapper');
-            if (!wrapper || !canvas) return;
-            
-            const rect = wrapper.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            redrawCanvas();
-        }
-
-        function drawSummonersRiftBackground() {
-            if (!ctx || !canvas) return;
-            const w = canvas.width;
-            const h = canvas.height;
-
-            // Deep dark map base
-            ctx.fillStyle = '#0a141d';
-            ctx.fillRect(0, 0, w, h);
-
-            // Lane paths (Top, Mid, Bottom)
-            ctx.strokeStyle = '#1a2b3c';
-            ctx.lineWidth = w * 0.08;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-
-            // Top Lane
-            ctx.beginPath();
-            ctx.moveTo(w * 0.1, h * 0.9);
-            ctx.lineTo(w * 0.1, h * 0.1);
-            ctx.lineTo(w * 0.9, h * 0.1);
-            ctx.stroke();
-
-            // Mid Lane
-            ctx.beginPath();
-            ctx.moveTo(w * 0.15, h * 0.85);
-            ctx.lineTo(w * 0.85, h * 0.15);
-            ctx.stroke();
-
-            // Bottom Lane
-            ctx.beginPath();
-            ctx.moveTo(w * 0.1, h * 0.9);
-            ctx.lineTo(w * 0.9, h * 0.9);
-            ctx.lineTo(w * 0.9, h * 0.1);
-            ctx.stroke();
-
-            // River Path
-            ctx.strokeStyle = '#034358';
-            ctx.lineWidth = w * 0.06;
-            ctx.beginPath();
-            ctx.moveTo(w * 0.1, h * 0.3);
-            ctx.lineTo(w * 0.9, h * 0.7);
-            ctx.stroke();
-
-            // Dragon Pit & Baron Pit Circles
-            ctx.fillStyle = '#162b3a';
-            ctx.beginPath();
-            ctx.arc(w * 0.65, h * 0.65, w * 0.05, 0, Math.PI * 2); // Dragon Pit
-            ctx.fill();
-            ctx.strokeStyle = '#785A28';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(w * 0.35, h * 0.35, w * 0.05, 0, Math.PI * 2); // Baron Pit
-            ctx.fill();
-            ctx.stroke();
-
-            // Blue Nexus Base (Bottom Left) & Red Nexus Base (Top Right)
-            ctx.fillStyle = 'rgba(10, 200, 185, 0.25)';
-            ctx.beginPath();
-            ctx.arc(w * 0.12, h * 0.88, w * 0.09, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = 'rgba(230, 57, 70, 0.25)';
-            ctx.beginPath();
-            ctx.arc(w * 0.88, h * 0.12, w * 0.09, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Label Text
-            ctx.fillStyle = 'rgba(200, 170, 110, 0.4)';
-            ctx.font = `bold ${Math.max(10, w * 0.025)}px Rajdhani`;
-            ctx.textAlign = 'center';
-            ctx.fillText('SUMMONER\'S RIFT TACTICAL MAP', w * 0.5, h * 0.05);
-            ctx.fillText('BARON', w * 0.35, h * 0.35 + 4);
-            ctx.fillText('DRAGON', w * 0.65, h * 0.65 + 4);
-        }
-
-        function getCanvasCoords(e) {
-            const rect = canvas.getBoundingClientRect();
-            return {
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top
-            };
-        }
-
-        function startDrawing(e) {
-            const coords = getCanvasCoords(e);
-            isDrawing = true;
-            startX = coords.x;
-            startY = coords.y;
-
-            if (canvasTool === 'ping') {
-                placePingOnCanvas(coords.x, coords.y);
-                isDrawing = false;
-            } else if (canvasTool === 'brush') {
-                canvasDrawings.push({
-                    type: 'brush',
-                    color: strokeColor,
-                    width: strokeWidth,
-                    points: [{ x: coords.x, y: coords.y }]
-                });
-            }
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            const coords = getCanvasCoords(e);
-
-            if (canvasTool === 'brush') {
-                const currentPath = canvasDrawings[canvasDrawings.length - 1];
-                if (currentPath && currentPath.type === 'brush') {
-                    currentPath.points.push({ x: coords.x, y: coords.y });
-                    redrawCanvas();
-                }
-            } else if (canvasTool === 'arrow') {
-                redrawCanvas();
-                drawArrow(ctx, startX, startY, coords.x, coords.y, strokeColor, strokeWidth);
-            }
-        }
-
-        function stopDrawing(e) {
-            if (!isDrawing) return;
-            isDrawing = false;
-
-            if (canvasTool === 'arrow' && e) {
-                const coords = getCanvasCoords(e);
-                canvasDrawings.push({
-                    type: 'arrow',
-                    fromX: startX,
-                    fromY: startY,
-                    toX: coords.x,
-                    toY: coords.y,
-                    color: strokeColor,
-                    width: strokeWidth
-                });
-                redrawCanvas();
-            }
-        }
-
-        function drawArrow(context, fromx, fromy, tox, toy, color, width) {
-            const headlen = width * 3.5;
-            const dx = tox - fromx;
-            const dy = toy - fromy;
-            const angle = Math.atan2(dy, dx);
-
-            context.beginPath();
-            context.strokeStyle = color;
-            context.fillStyle = color;
-            context.lineWidth = width;
-            context.moveTo(fromx, fromy);
-            context.lineTo(tox, toy);
-            context.stroke();
-
-            context.beginPath();
-            context.moveTo(tox, toy);
-            context.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
-            context.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
-            context.lineTo(tox, toy);
-            context.fill();
-        }
-
-        function placePingOnCanvas(x, y) {
-            canvasDrawings.push({
-                type: 'ping',
-                pingType: pingType,
-                x: x,
-                y: y
-            });
-            redrawCanvas();
-        }
-
-        function redrawCanvas() {
-            if (!ctx || !canvas) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawSummonersRiftBackground();
-
-            canvasDrawings.forEach(item => {
-                if (item.type === 'brush') {
-                    ctx.beginPath();
-                    ctx.strokeStyle = item.color;
-                    ctx.lineWidth = item.width;
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
-                    item.points.forEach((pt, idx) => {
-                        if (idx === 0) ctx.moveTo(pt.x, pt.y);
-                        else ctx.lineTo(pt.x, pt.y);
-                    });
-                    ctx.stroke();
-                } else if (item.type === 'arrow') {
-                    drawArrow(ctx, item.fromX, item.fromY, item.toX, item.toY, item.color, item.width);
-                } else if (item.type === 'ping') {
-                    drawPingMarker(ctx, item.x, item.y, item.pingType);
-                }
-            });
-        }
-
-        function drawPingMarker(context, x, y, type) {
-            context.save();
-            context.translate(x, y);
-
-            if (type === 'ward_stealth') {
-                context.fillStyle = '#FACC15';
-                context.beginPath();
-                context.arc(0, 0, 10, 0, Math.PI * 2);
-                context.fill();
-                context.strokeStyle = '#000';
-                context.lineWidth = 2;
-                context.stroke();
-                context.fillStyle = '#000';
-                context.font = 'bold 10px sans-serif';
-                context.textAlign = 'center';
-                context.fillText('W', 0, 3.5);
-            } else if (type === 'ward_control') {
-                context.fillStyle = '#E63946';
-                context.beginPath();
-                context.arc(0, 0, 10, 0, Math.PI * 2);
-                context.fill();
-                context.strokeStyle = '#FFF';
-                context.lineWidth = 2;
-                context.stroke();
-                context.fillStyle = '#FFF';
-                context.font = 'bold 10px sans-serif';
-                context.textAlign = 'center';
-                context.fillText('C', 0, 3.5);
-            } else if (type === 'ping_danger') {
-                context.fillStyle = '#EF4444';
-                context.beginPath();
-                context.moveTo(0, -12);
-                context.lineTo(10, 8);
-                context.lineTo(-10, 8);
-                context.closePath();
-                context.fill();
-                context.fillStyle = '#FFF';
-                context.font = 'bold 11px sans-serif';
-                context.textAlign = 'center';
-                context.fillText('!', 0, 5);
-            } else if (type === 'ping_assist') {
-                context.fillStyle = '#06B6D4';
-                context.beginPath();
-                context.arc(0, 0, 10, 0, Math.PI * 2);
-                context.fill();
-                context.fillStyle = '#FFF';
-                context.font = 'bold 10px sans-serif';
-                context.textAlign = 'center';
-                context.fillText('FLAG', 0, 3.5);
-            }
-            context.restore();
-        }
-
-        function setCanvasTool(tool) {
-            canvasTool = tool;
-            document.querySelectorAll('.tool-btn').forEach(btn => {
-                btn.className = 'tool-btn p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 text-slate-400 hover:text-white';
-            });
-
-            const activeBtn = document.getElementById(`tool-${tool}`);
-            if (activeBtn) {
-                activeBtn.className = 'tool-btn active p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 bg-lol-gold text-black shadow';
-            }
-
-            const pingContainer = document.getElementById('pingTypeContainer');
-            const statusText = document.getElementById('canvasModeStatusText');
-
-            if (tool === 'ping') {
-                pingContainer.classList.remove('hidden');
-                pingContainer.classList.add('grid');
-                statusText.innerText = '와드 / 핑 위치 클릭 (Place Ward/Ping)';
-            } else {
-                pingContainer.classList.add('hidden');
-                pingContainer.classList.remove('grid');
-                statusText.innerText = tool === 'brush' ? '자유 그리기 (Freehand Brush)' : '이동 화살표 그리기 (Arrow Tool)';
-            }
-        }
-
-        function setPingType(pType) {
-            pingType = pType;
-            document.querySelectorAll('.ping-sub-btn').forEach(btn => {
-                btn.className = 'ping-sub-btn p-1 text-center font-bold text-slate-400 rounded';
-            });
-            const active = document.getElementById(`ping-${pType}`);
-            if (active) {
-                active.className = 'ping-sub-btn active p-1 text-center font-bold text-yellow-300 bg-yellow-950/60 border border-yellow-600 rounded';
-            }
-        }
-
-        function setCanvasColor(color) {
-            strokeColor = color;
-            showToast(`그리기 색상이 변경되었습니다.`);
-        }
-
-        function setBrushSize(size) {
-            strokeWidth = parseInt(size, 10);
-            document.getElementById('brushSizeVal').innerText = `${size}px`;
-        }
-
-        function setPlacementTeam(team) {
-            placementTeam = team;
-            const blueBtn = document.getElementById('teamBlueBtn');
-            const redBtn = document.getElementById('teamRedBtn');
-
-            if (team === 'blue') {
-                blueBtn.className = 'py-1 rounded bg-teal-950 text-lol-blue border border-lol-blue text-center';
-                redBtn.className = 'py-1 rounded bg-rose-950 text-rose-400 border border-transparent opacity-60 text-center';
-            } else {
-                blueBtn.className = 'py-1 rounded bg-teal-950 text-lol-blue border border-transparent opacity-60 text-center';
-                redBtn.className = 'py-1 rounded bg-rose-950 text-rose-400 border border-rose-500 text-center';
-            }
-        }
-
-        function updateCanvasTokenPreview() {
-            const champ = state.champions.find(c => c.id === state.selectedChampId);
-            if (!champ) return;
-
-            document.getElementById('canvasTokenPreviewImg').src = champ.avatar;
-            document.getElementById('canvasTokenPreviewName').innerText = champ.name;
-        }
-
-        function spawnSelectedChampToken() {
-            const champ = state.champions.find(c => c.id === state.selectedChampId);
-            if (!champ) return;
-
-            const tokenLayer = document.getElementById('champTokensLayer');
-            if (!tokenLayer) return;
-
-            const tokenId = 'token_' + Date.now();
-            const isBlue = placementTeam === 'blue';
-
-            const tokenEl = document.createElement('div');
-            tokenEl.id = tokenId;
-            tokenEl.className = `absolute pointer-events-auto cursor-grab w-10 h-10 rounded-full border-2 ${
-                isBlue ? 'border-lol-blue team-blue-glow' : 'border-rose-500 team-red-glow'
-            } bg-black shadow-2xl flex items-center justify-center transition-transform hover:scale-110`;
-            tokenEl.style.left = '45%';
-            tokenEl.style.top = '45%';
-
-            tokenEl.innerHTML = `
-                <img src="${champ.avatar}" class="w-full h-full rounded-full object-cover">
-                <span class="absolute -bottom-4 text-[9px] font-bold px-1 rounded bg-black/90 text-white border border-slate-700 whitespace-nowrap">
-                    ${champ.name}
-                </span>
-            `;
-
-            // Make Draggable
-            let isDragging = false;
-            let offsetLeft = 0, offsetTop = 0;
-
-            tokenEl.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                tokenEl.style.cursor = 'grabbing';
-                const rect = tokenEl.getBoundingClientRect();
-                offsetLeft = e.clientX - rect.left;
-                offsetTop = e.clientY - rect.top;
-                e.stopPropagation();
-            });
-
-            window.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                const wrapperRect = document.getElementById('canvasMapWrapper').getBoundingClientRect();
-                let x = e.clientX - wrapperRect.left - offsetLeft;
-                let y = e.clientY - wrapperRect.top - offsetTop;
-
-                // Clamp inside wrapper bounds
-                x = Math.max(0, Math.min(wrapperRect.width - 40, x));
-                y = Math.max(0, Math.min(wrapperRect.height - 40, y));
-
-                tokenEl.style.left = `${x}px`;
-                tokenEl.style.top = `${y}px`;
-            });
-
-            window.addEventListener('mouseup', () => {
-                if (isDragging) {
-                    isDragging = false;
-                    tokenEl.style.cursor = 'grab';
-                }
-            });
-
-            // Double click to remove
-            tokenEl.addEventListener('dblclick', () => {
-                tokenEl.remove();
-                showToast(`${champ.name} 토큰이 맵에서 제거되었습니다.`);
-            });
-
-            tokenLayer.appendChild(tokenEl);
-            showToast(`${champ.name} 챔피언 토큰이 맵에 배치되었습니다! (드래그하여 위치 이동)`);
-        }
-
-        function clearMapCanvas() {
-            canvasDrawings = [];
-            const tokenLayer = document.getElementById('champTokensLayer');
-            if (tokenLayer) tokenLayer.innerHTML = '';
-            redrawCanvas();
-            showToast('전술 캔버스가 모두 초기화되었습니다.');
-        }
-
-        function undoCanvasLastPath() {
-            canvasDrawings.pop();
-            redrawCanvas();
-            showToast('마지막 전술 경로가 취소되었습니다.');
-        }
-
-        function exportCanvasImage() {
-            if (!canvas) return;
-            const dataUrl = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = `lol_tactical_plan_${Date.now()}.png`;
-            link.href = dataUrl;
-            link.click();
-            showToast('전술 지도 캔버스가 이미지로 저장되었습니다!');
-        }
-
-        function switchAppMode(mode) {
-            const hubMain = document.getElementById('appViewHub');
-            const canvasMain = document.getElementById('appViewCanvas');
-            const btnHub = document.getElementById('modeBtnHub');
-            const btnCanvas = document.getElementById('modeBtnCanvas');
-
-            if (mode === 'canvas') {
-                hubMain.classList.add('hidden');
-                canvasMain.classList.remove('hidden');
-                canvasMain.classList.add('flex');
-                
-                btnCanvas.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-lol-blue text-black shadow';
-                btnHub.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white';
-                
-                setTimeout(resizeCanvas, 100);
-            } else {
-                canvasMain.classList.add('hidden');
-                canvasMain.classList.remove('flex');
-                hubMain.classList.remove('hidden');
-
-                btnHub.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-lol-gold text-black shadow';
-                btnCanvas.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white';
-            }
-        }
-
-        function updateOpponentSelects() {
-            const matchSelect = document.getElementById('matchupOpponentSelect');
-            const revSelect = document.getElementById('revOpponent');
-            if (!matchSelect || !revSelect) return;
-
-            const optionsHtml = state.champions
-                .filter(c => c.id !== state.selectedChampId)
-                .map(c => `<option value="${c.id}">vs ${c.name} (${c.title || (c.lanes && c.lanes[0]) || 'MID'})</option>`)
-                .join('');
-
-            matchSelect.innerHTML = optionsHtml;
-            revSelect.innerHTML = optionsHtml;
-        }
-
-        function toggleChampLane(champId, lane) {
-            const champ = state.champions.find(c => c.id === champId);
-            if (!champ) return;
-
-            if (!champ.lanes) champ.lanes = [];
-
-            if (champ.lanes.includes(lane)) {
-                if (champ.lanes.length > 1) {
-                    champ.lanes = champ.lanes.filter(l => l !== lane);
-                }
-            } else {
-                champ.lanes.push(lane);
-            }
-
-            saveToFirestore();
-            selectChampion(champId);
         }
 
         function saveBuildNotes() {
             const champId = state.selectedChampId;
+            if (!state.notes) state.notes = {};
             state.notes[champId] = {
                 startItems: document.getElementById('noteStartItems').value,
                 coreItems: document.getElementById('noteCoreItems').value,
@@ -1682,202 +1135,157 @@
                 skillOrder: document.getElementById('noteSkillOrder').value,
                 tips: document.getElementById('noteTips').value
             };
-
-            saveToFirestore();
-            showToast('공략 노트가 클라우드에 안전하게 저장되었습니다.');
-        }
-
-        function handlePhotoFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                state.tempPhotoData = e.target.result;
-                document.getElementById('modalPhotoPreview').src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function saveChampionPhoto() {
-            const champ = state.champions.find(c => c.id === state.selectedChampId);
-            if (!champ) return;
-
-            const urlInput = document.getElementById('photoUrlInput').value.trim();
-            
-            if (state.tempPhotoData) {
-                champ.avatar = state.tempPhotoData;
-            } else if (urlInput) {
-                champ.avatar = urlInput;
-            }
-
-            saveToFirestore();
-            selectChampion(state.selectedChampId);
-            closeModal('changePhotoModal');
-            showToast(`${champ.name} 챔피언 사진이 변경되었습니다!`);
-        }
-
-        function resetToDefaultPhoto() {
-            const champ = state.champions.find(c => c.id === state.selectedChampId);
-            if (!champ) return;
-
-            const defaultObj = DEFAULT_CHAMPIONS.find(d => d.id === champ.id);
-            if (defaultObj) {
-                champ.avatar = defaultObj.avatar;
-            } else {
-                champ.avatar = `https://placehold.co/100x100/0A1428/C8AA6E?text=${encodeURIComponent(champ.name)}`;
-            }
-
-            saveToFirestore();
-            selectChampion(state.selectedChampId);
-            closeModal('changePhotoModal');
-            showToast('기본 프로필 사진으로 복원되었습니다.');
+            saveStateToCloud();
+            alert("공략 및 빌드 노트가 저장되었습니다.");
         }
 
         function renderMatchups() {
-            const container = document.getElementById('matchupListContainer');
-            if (!container) return;
             const list = state.matchups[state.selectedChampId] || [];
-            document.getElementById('matchupBadgeCount').innerText = list.length;
+            const container = document.getElementById('matchupListContainer');
+            const badgeCount = document.getElementById('matchupBadgeCount');
+            if (badgeCount) badgeCount.innerText = list.length;
+
+            if (!container) return;
 
             if (list.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-2 text-center py-10 text-xs text-slate-500 bg-lol-bgPanel/40 rounded-xl border border-lol-border/60">
-                        <i class="fa-solid fa-swords text-3xl mb-2 block opacity-40"></i>
-                        등록된 상대법 노하우가 없습니다. 상단 [상대법 추가하기] 버튼으로 카운터 노하우를 적어보세요.
-                    </div>
-                `;
+                    <div class="col-span-full p-8 text-center bg-lol-bgPanel border border-lol-border/60 rounded-xl text-slate-500 text-xs">
+                        <i class="fa-solid fa-swords text-3xl mb-2 text-slate-600 block"></i>
+                        아직 등록된 상대법 노하우가 없습니다. 상단 [상대법 추가하기] 버튼을 눌러 작성해 보세요.
+                    </div>`;
                 return;
             }
 
-            container.innerHTML = '';
-            list.forEach(m => {
-                const opp = state.champions.find(c => c.id === m.opponentId) || { name: m.opponentId, avatar: 'https://placehold.co/80x80/0A1428/C8AA6E?text=Vs' };
-                
-                let diffBadge = 'bg-slate-700 text-slate-200';
-                if (m.difficulty === '쉬움') diffBadge = 'bg-emerald-900/60 text-emerald-300 border-emerald-700';
-                if (m.difficulty === '보통') diffBadge = 'bg-amber-900/60 text-amber-300 border-amber-700';
-                if (m.difficulty === '어려움') diffBadge = 'bg-rose-900/60 text-rose-300 border-rose-700';
-                if (m.difficulty === '극상성') diffBadge = 'bg-purple-900/60 text-purple-300 border-purple-700';
+            container.innerHTML = list.map((m, idx) => {
+                let diffColor = "bg-amber-950/80 text-amber-400 border-amber-700";
+                if (m.difficulty === '쉬움') diffColor = "bg-emerald-950/80 text-emerald-400 border-emerald-700";
+                if (m.difficulty === '어려움' || m.difficulty === '극상성') diffColor = "bg-rose-950/80 text-rose-400 border-rose-700";
 
-                const card = document.createElement('div');
-                card.className = "bg-lol-bgPanel border border-lol-border/80 rounded-xl p-4 space-y-3 relative group";
-                card.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <img src="${opp.avatar}" class="w-9 h-9 rounded-lg border border-lol-gold/40 object-cover" onerror="this.src='https://placehold.co/80x80/0A1428/C8AA6E?text=LoL'">
-                            <div>
-                                <h4 class="font-bold text-xs text-slate-100">vs ${opp.name}</h4>
-                                <span class="text-[10px] px-2 py-0.5 rounded border font-semibold ${diffBadge}">${m.difficulty}</span>
+                return `
+                    <div class="bg-lol-bgPanel border border-lol-border/80 p-4 rounded-xl space-y-2 shadow relative group">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-sm text-lol-gold flex items-center gap-1.5">
+                                <i class="fa-solid fa-user-ninja"></i> 상대: ${m.opponent}
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${diffColor}">
+                                    난이도: ${m.difficulty}
+                                </span>
+                                <button onclick="deleteMatchup(${idx})" class="text-slate-500 hover:text-rose-400 text-xs p-1">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
                             </div>
                         </div>
-                        <button onclick="deleteMatchup('${m.id}')" class="text-slate-500 hover:text-rose-400 text-xs transition-colors">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
+                        <p class="text-xs text-slate-300 leading-relaxed bg-black/40 p-2.5 rounded-lg border border-lol-border/40 whitespace-pre-line">${m.note}</p>
                     </div>
-                    <p class="text-xs text-slate-900 bg-white p-3 rounded-lg border border-slate-300 leading-relaxed font-semibold">
-                        ${m.note}
-                    </p>
                 `;
-                container.appendChild(card);
-            });
+            }).join('');
         }
 
         function saveMatchup() {
-            const oppId = document.getElementById('matchupOpponentSelect').value;
-            const diff = document.getElementById('matchupDifficulty').value;
+            const opponent = document.getElementById('matchupOpponentSelect').value;
+            const difficulty = document.getElementById('matchupDifficulty').value;
             const note = document.getElementById('matchupNoteText').value;
 
             if (!note.trim()) {
-                showToast('대응 전략 내용을 입력해 주세요.');
+                alert("대응 전략 내용을 입력해 주세요.");
                 return;
             }
 
             const champId = state.selectedChampId;
             if (!state.matchups[champId]) state.matchups[champId] = [];
+            state.matchups[champId].unshift({ opponent, difficulty, note, createdAt: new Date().toISOString() });
 
-            state.matchups[champId].push({
-                id: 'm_' + Date.now(),
-                opponentId: oppId,
-                difficulty: diff,
-                note: note
-            });
-
-            saveToFirestore();
-            renderMatchups();
-            closeModal('addMatchupModal');
             document.getElementById('matchupNoteText').value = '';
-            showToast('상대법 정보가 등록되었습니다.');
+            closeModal('addMatchupModal');
+            renderMatchups();
+            saveStateToCloud();
         }
 
-        function deleteMatchup(id) {
-            const champId = state.selectedChampId;
-            if (!state.matchups[champId]) return;
-            state.matchups[champId] = state.matchups[champId].filter(m => m.id !== id);
-            saveToFirestore();
-            renderMatchups();
-            showToast('상대법이 삭제되었습니다.');
+        function deleteMatchup(idx) {
+            const list = state.matchups[state.selectedChampId];
+            if (list) {
+                list.splice(idx, 1);
+                renderMatchups();
+                saveStateToCloud();
+            }
         }
 
         function renderReviews() {
-            const container = document.getElementById('reviewListContainer');
-            if (!container) return;
             const list = state.reviews[state.selectedChampId] || [];
-            document.getElementById('reviewBadgeCount').innerText = list.length;
+            const container = document.getElementById('reviewListContainer');
+            const badgeCount = document.getElementById('reviewBadgeCount');
+            if (badgeCount) badgeCount.innerText = list.length;
+
+            if (!container) return;
+
+            // Update Review Stats
+            const total = list.length;
+            const wins = list.filter(r => r.result === 'WIN').length;
+            const losses = total - wins;
+            const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+            
+            let ratingSum = 0;
+            list.forEach(r => ratingSum += parseFloat(r.rating || 0));
+            const avgRating = total > 0 ? (ratingSum / total).toFixed(1) : '0.0';
+
+            document.getElementById('revStatTotal').innerText = `${total}판`;
+            document.getElementById('revStatWinLoss').innerText = `${wins}승 ${losses}패`;
+            document.getElementById('revStatRate').innerText = `${winRate}%`;
+            document.getElementById('revStatRating').innerText = `${avgRating} / 5.0`;
 
             if (list.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-10 text-xs text-slate-500 bg-lol-bgPanel/40 rounded-xl border border-lol-border/60">
-                        <i class="fa-solid fa-clipboard-list text-3xl mb-2 block opacity-40"></i>
-                        등록된 플레이 피드백 리뷰가 없습니다. 게임 완료 후 스스로를 평가해 보세요!
-                    </div>
-                `;
+                    <div class="p-8 text-center bg-lol-bgPanel border border-lol-border/60 rounded-xl text-slate-500 text-xs">
+                        <i class="fa-solid fa-clipboard-check text-3xl mb-2 text-slate-600 block"></i>
+                        기록된 경기 피드백이 없습니다. [경기 피드백 추가] 버튼을 클릭해 복기 기록을 작성하세요.
+                    </div>`;
                 return;
             }
 
-            container.innerHTML = '';
-            list.forEach(r => {
-                const opp = state.champions.find(c => c.id === r.opponentId) || { name: r.opponentId };
+            container.innerHTML = list.map((r, idx) => {
                 const isWin = r.result === 'WIN';
+                const resultBadge = isWin ? 
+                    '<span class="bg-teal-950/80 text-lol-blue border border-teal-700 px-2 py-0.5 rounded font-bold text-[10px]">VICTORY 승리</span>' : 
+                    '<span class="bg-rose-950/80 text-rose-400 border border-rose-700 px-2 py-0.5 rounded font-bold text-[10px]">DEFEAT 패배</span>';
 
-                const card = document.createElement('div');
-                card.className = `bg-lol-bgPanel border rounded-xl p-4 space-y-3 ${isWin ? 'border-lol-blue/40' : 'border-rose-900/40'}`;
-                card.innerHTML = `
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-lol-border/60 pb-2.5">
-                        <div class="flex items-center gap-2">
-                            <span class="px-2.5 py-1 rounded text-xs font-extrabold ${isWin ? 'bg-lol-blue/20 text-lol-blue border border-lol-blue/40' : 'bg-rose-950 text-rose-400 border border-rose-800'}">
-                                ${isWin ? 'WIN 승리' : 'LOSS 패배'}
-                            </span>
-                            <span class="text-xs font-bold text-slate-200">vs ${opp.name}</span>
-                            <span class="text-[10px] text-slate-400">| ${r.date || '최근'}</span>
+                const stars = '★'.repeat(parseInt(r.rating || 0)) + '☆'.repeat(5 - parseInt(r.rating || 0));
+
+                return `
+                    <div class="bg-lol-bgPanel border border-lol-border/80 p-4 rounded-xl space-y-3 shadow relative">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-lol-border/60 pb-2">
+                            <div class="flex items-center gap-2">
+                                ${resultBadge}
+                                <span class="text-xs font-bold text-slate-200">vs ${r.opponent || '상대'}</span>
+                                <span class="text-xs text-lol-gold font-mono font-bold">${r.kda || '0/0/0'}</span>
+                                <span class="text-xs text-slate-400">CS: ${r.cs || '-'}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-amber-400 font-bold">${stars}</span>
+                                <button onclick="deleteReview(${idx})" class="text-slate-500 hover:text-rose-400 text-xs p-1">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-3 text-xs">
-                            <span class="font-semibold text-slate-200">KDA: <strong class="text-lol-gold">${r.kda || '0/0/0'}</strong></span>
-                            <span class="text-slate-400">CS: ${r.cs || '-'}</span>
-                            <span class="text-amber-400">★ ${r.rating || 5}.0</span>
-                            <button onclick="deleteReview('${r.id}')" class="text-slate-500 hover:text-rose-400 ml-2">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                        <div class="bg-emerald-950/20 border border-emerald-800/30 p-2.5 rounded-lg">
-                            <span class="text-emerald-400 font-bold block mb-1">👍 잘한 점 / 칭찬</span>
-                            <p class="text-slate-200 font-medium leading-relaxed">${r.good || '없음'}</p>
-                        </div>
-                        <div class="bg-rose-950/20 border border-rose-800/30 p-2.5 rounded-lg">
-                            <span class="text-rose-400 font-bold block mb-1">👎 아쉬운 점 / 피드백</span>
-                            <p class="text-slate-200 font-medium leading-relaxed">${r.bad || '없음'}</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                            <div class="bg-emerald-950/20 border border-emerald-900/50 p-2.5 rounded-lg space-y-1">
+                                <span class="text-emerald-400 font-bold block"><i class="fa-solid fa-thumbs-up"></i> 잘한 점</span>
+                                <p class="text-slate-300 leading-relaxed whitespace-pre-line">${r.good || '없음'}</p>
+                            </div>
+                            <div class="bg-rose-950/20 border border-rose-900/50 p-2.5 rounded-lg space-y-1">
+                                <span class="text-rose-400 font-bold block"><i class="fa-solid fa-thumbs-down"></i> 아쉬운 점 / 실수</span>
+                                <p class="text-slate-300 leading-relaxed whitespace-pre-line">${r.bad || '없음'}</p>
+                            </div>
                         </div>
                     </div>
                 `;
-                container.appendChild(card);
-            });
+            }).join('');
         }
 
         function saveReview() {
-            const res = document.getElementById('revResult').value;
-            const oppId = document.getElementById('revOpponent').value;
+            const result = document.getElementById('revResult').value;
+            const opponent = document.getElementById('revOpponent').value;
             const kda = document.getElementById('revKda').value;
             const cs = document.getElementById('revCs').value;
             const rating = document.getElementById('revRating').value;
@@ -1887,287 +1295,527 @@
             const champId = state.selectedChampId;
             if (!state.reviews[champId]) state.reviews[champId] = [];
 
-            const now = new Date();
-            const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
-
             state.reviews[champId].unshift({
-                id: 'r_' + Date.now(),
-                result: res,
-                opponentId: oppId,
-                kda: kda,
-                cs: cs,
-                rating: rating,
-                good: good,
-                bad: bad,
-                date: dateStr
+                result, opponent, kda, cs, rating, good, bad, createdAt: new Date().toISOString()
             });
-
-            saveToFirestore();
-            renderReviews();
-            updateHeaderStats();
-            closeModal('addReviewModal');
 
             document.getElementById('revKda').value = '';
             document.getElementById('revCs').value = '';
             document.getElementById('revGood').value = '';
             document.getElementById('revBad').value = '';
-            showToast('경기 피드백 일지가 등록되었습니다.');
-        }
 
-        function deleteReview(id) {
-            const champId = state.selectedChampId;
-            if (!state.reviews[champId]) return;
-            state.reviews[champId] = state.reviews[champId].filter(r => r.id !== id);
-            saveToFirestore();
+            closeModal('addReviewModal');
             renderReviews();
-            updateHeaderStats();
-            showToast('리뷰가 삭제되었습니다.');
+            renderSelectedChampionHeader();
+            saveStateToCloud();
         }
 
-        function updateHeaderStats() {
-            const reviews = state.reviews[state.selectedChampId] || [];
-            const count = reviews.length;
+        function deleteReview(idx) {
+            const list = state.reviews[state.selectedChampId];
+            if (list) {
+                list.splice(idx, 1);
+                renderReviews();
+                renderSelectedChampionHeader();
+                saveStateToCloud();
+            }
+        }
 
-            document.getElementById('statReviewCount').innerText = `${count}판`;
-            document.getElementById('revStatTotal').innerText = `${count}판`;
+        function initCanvas() {
+            canvas = document.getElementById('tacticalMapCanvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
 
-            if (count === 0) {
-                document.getElementById('statWinRate').innerText = '0%';
-                document.getElementById('statAvgKda').innerText = '0.0';
-                document.getElementById('revStatWinLoss').innerText = '0승 0패';
-                document.getElementById('revStatRate').innerText = '0%';
-                document.getElementById('revStatRating').innerText = '0.0 / 5.0';
-                return;
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Canvas drawing events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+
+            // Touch support
+            canvas.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent("mousedown", { clientX: touch.clientX, clientY: touch.clientY });
+                canvas.dispatchEvent(mouseEvent);
+            }, { passive: true });
+
+            canvas.addEventListener('touchmove', (e) => {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent("mousemove", { clientX: touch.clientX, clientY: touch.clientY });
+                canvas.dispatchEvent(mouseEvent);
+            }, { passive: true });
+
+            canvas.addEventListener('touchend', () => {
+                const mouseEvent = new MouseEvent("mouseup", {});
+                canvas.dispatchEvent(mouseEvent);
+            });
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const wrapper = document.getElementById('canvasMapWrapper');
+            if (wrapper) {
+                canvas.width = wrapper.clientWidth;
+                canvas.height = wrapper.clientHeight;
+                redrawCanvas();
+            }
+        }
+
+        function getCanvasPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getCanvasPos(e);
+            startX = pos.x;
+            startY = pos.y;
+
+            if (canvasTool === 'brush') {
+                canvasDrawings.push({
+                    type: 'brush',
+                    color: strokeColor,
+                    width: strokeWidth,
+                    points: [{ x: startX, y: startY }]
+                });
+            } else if (canvasTool === 'ping') {
+                canvasDrawings.push({
+                    type: 'ping',
+                    pingType: pingType,
+                    x: startX,
+                    y: startY
+                });
+                isDrawing = false;
+                redrawCanvas();
+                saveStateToCloud();
+            }
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getCanvasPos(e);
+
+            if (canvasTool === 'brush') {
+                const currentPath = canvasDrawings[canvasDrawings.length - 1];
+                if (currentPath && currentPath.points) {
+                    currentPath.points.push({ x: pos.x, y: pos.y });
+                    redrawCanvas();
+                }
+            } else if (canvasTool === 'arrow') {
+                redrawCanvas();
+                // Draw temporary arrow preview
+                drawArrow(ctx, startX, startY, pos.x, pos.y, strokeColor, strokeWidth);
+            }
+        }
+
+        function stopDrawing(e) {
+            if (!isDrawing) return;
+            isDrawing = false;
+
+            if (canvasTool === 'arrow' && e) {
+                const pos = getCanvasPos(e);
+                canvasDrawings.push({
+                    type: 'arrow',
+                    color: strokeColor,
+                    width: strokeWidth,
+                    x1: startX, y1: startY,
+                    x2: pos.x, y2: pos.y
+                });
+            }
+            redrawCanvas();
+            saveStateToCloud();
+        }
+
+        function redrawCanvas() {
+            if (!ctx || !canvas) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid / map lines
+            ctx.strokeStyle = "rgba(200, 170, 110, 0.08)";
+            ctx.lineWidth = 1;
+            const step = 40;
+            for (let x = 0; x < canvas.width; x += step) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += step) {
+                ctx.beginPath();
+                ctx.moveTo(0, y); ctx.lineTo(canvas.width, y);
+                ctx.stroke();
             }
 
-            let wins = 0;
-            let totalRating = 0;
-            let totalKills = 0, totalDeaths = 0, totalAssists = 0;
-
-            reviews.forEach(r => {
-                if (r.result === 'WIN') wins++;
-                totalRating += parseFloat(r.rating || 5);
-
-                if (r.kda && r.kda.includes('/')) {
-                    const parts = r.kda.split('/').map(n => parseFloat(n.trim()) || 0);
-                    if (parts.length === 3) {
-                        totalKills += parts[0];
-                        totalDeaths += parts[1];
-                        totalAssists += parts[2];
+            // Draw saved elements
+            canvasDrawings.forEach(d => {
+                if (d.type === 'brush' && d.points.length > 0) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = d.color;
+                    ctx.lineWidth = d.width;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.moveTo(d.points[0].x, d.points[0].y);
+                    for (let i = 1; i < d.points.length; i++) {
+                        ctx.lineTo(d.points[i].x, d.points[i].y);
                     }
+                    ctx.stroke();
+                } else if (d.type === 'arrow') {
+                    drawArrow(ctx, d.x1, d.y1, d.x2, d.y2, d.color, d.width);
+                } else if (d.type === 'ping') {
+                    drawPingMark(ctx, d.x, d.y, d.pingType);
                 }
             });
+        }
 
-            const winRate = Math.round((wins / count) * 100);
-            const avgRating = (totalRating / count).toFixed(1);
-            
-            let kdaRatio = '0.0';
-            if (totalDeaths === 0) {
-                kdaRatio = (totalKills + totalAssists) > 0 ? 'Perfect' : '0.0';
-            } else {
-                kdaRatio = ((totalKills + totalAssists) / totalDeaths).toFixed(2);
+        function drawArrow(context, fromx, fromy, tox, toy, color, width) {
+            const headlen = 12 + width;
+            const dx = tox - fromx;
+            const dy = toy - fromy;
+            const angle = Math.atan2(dy, dx);
+            context.save();
+            context.strokeStyle = color;
+            context.fillStyle = color;
+            context.lineWidth = width;
+
+            context.beginPath();
+            context.moveTo(fromx, fromy);
+            context.lineTo(tox, toy);
+            context.stroke();
+
+            context.beginPath();
+            context.moveTo(tox, toy);
+            context.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+            context.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+            context.closePath();
+            context.fill();
+            context.restore();
+        }
+
+        function drawPingMark(context, x, y, type) {
+            context.save();
+            context.translate(x, y);
+
+            if (type === 'ward_stealth') {
+                context.fillStyle = '#FACC15';
+                context.beginPath(); context.arc(0, 0, 10, 0, Math.PI * 2); context.fill();
+                context.strokeStyle = '#000'; context.lineWidth = 2; context.stroke();
+                context.fillStyle = '#000'; context.font = 'bold 10px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle';
+                context.fillText('W', 0, 0);
+            } else if (type === 'ward_control') {
+                context.fillStyle = '#F43F5E';
+                context.beginPath(); context.arc(0, 0, 10, 0, Math.PI * 2); context.fill();
+                context.strokeStyle = '#FFF'; context.lineWidth = 2; context.stroke();
+                context.fillStyle = '#FFF'; context.font = 'bold 10px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle';
+                context.fillText('C', 0, 0);
+            } else if (type === 'ping_danger') {
+                context.fillStyle = '#EF4444';
+                context.beginPath(); context.arc(0, 0, 12, 0, Math.PI * 2); context.fill();
+                context.fillStyle = '#FFF'; context.font = 'bold 12px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle';
+                context.fillText('!', 0, 0);
+            } else if (type === 'ping_assist') {
+                context.fillStyle = '#06B6D4';
+                context.beginPath(); context.arc(0, 0, 12, 0, Math.PI * 2); context.fill();
+                context.fillStyle = '#FFF'; context.font = 'bold 12px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle';
+                context.fillText('?', 0, 0);
+            }
+            context.restore();
+        }
+
+        function updateCanvasTokenPreview() {
+            const champ = state.champions.find(c => c.id === state.selectedChampId) || state.champions[0];
+            if (!champ) return;
+            const imgEl = document.getElementById('canvasTokenPreviewImg');
+            const nameEl = document.getElementById('canvasTokenPreviewName');
+            if (imgEl) imgEl.src = champ.avatar;
+            if (nameEl) nameEl.innerText = champ.name;
+        }
+
+        function spawnSelectedChampToken() {
+            const champ = state.champions.find(c => c.id === state.selectedChampId) || state.champions[0];
+            if (!champ) return;
+
+            const token = {
+                id: 'tok_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                champId: champ.id,
+                name: champ.name,
+                avatar: champ.avatar,
+                team: placementTeam,
+                x: 40 + Math.random() * 20,
+                y: 40 + Math.random() * 20
+            };
+
+            canvasTokens.push(token);
+            renderCanvasTokens();
+            saveStateToCloud();
+        }
+
+        function renderCanvasTokens() {
+            const layer = document.getElementById('champTokensLayer');
+            if (!layer) return;
+
+            layer.innerHTML = canvasTokens.map(tok => {
+                const borderClass = tok.team === 'blue' ? 'border-2 border-lol-blue team-blue-glow' : 'border-2 border-rose-500 team-red-glow';
+                return `
+                    <div id="${tok.id}" 
+                         style="left: ${tok.x}%; top: ${tok.y}%; pointer-events: auto;" 
+                         ondblclick="removeToken('${tok.id}')"
+                         class="absolute -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing group">
+                        <img src="${tok.avatar}" class="w-10 h-10 rounded-full object-cover shadow-lg ${borderClass}">
+                        <span class="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] font-extrabold bg-black/80 px-1.5 py-0.2 rounded text-white border border-lol-border whitespace-nowrap shadow">
+                            ${tok.name}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+
+            // Attach drag listeners to tokens
+            canvasTokens.forEach(tok => {
+                const el = document.getElementById(tok.id);
+                if (el) setupTokenDrag(el, tok);
+            });
+        }
+
+        function setupTokenDrag(el, tokenObj) {
+            let isDragging = false;
+            let startMouseX, startMouseY;
+
+            const onStart = (e) => {
+                isDragging = true;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                startMouseX = clientX;
+                startMouseY = clientY;
+                e.stopPropagation();
+            };
+
+            const onMove = (e) => {
+                if (!isDragging) return;
+                const wrapper = document.getElementById('canvasMapWrapper');
+                if (!wrapper) return;
+                const rect = wrapper.getBoundingClientRect();
+
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                let newX = ((clientX - rect.left) / rect.width) * 100;
+                let newY = ((clientY - rect.top) / rect.height) * 100;
+
+                newX = Math.max(2, Math.min(98, newX));
+                newY = Math.max(2, Math.min(98, newY));
+
+                tokenObj.x = newX;
+                tokenObj.y = newY;
+
+                el.style.left = `${newX}%`;
+                el.style.top = `${newY}%`;
+            };
+
+            const onEnd = () => {
+                if (isDragging) {
+                    isDragging = false;
+                    saveStateToCloud();
+                }
+            };
+
+            el.addEventListener('mousedown', onStart);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onEnd);
+
+            el.addEventListener('touchstart', onStart, { passive: true });
+            window.addEventListener('touchmove', onMove, { passive: true });
+            window.addEventListener('touchend', onEnd);
+        }
+
+        function removeToken(id) {
+            canvasTokens = canvasTokens.filter(t => t.id !== id);
+            renderCanvasTokens();
+            saveStateToCloud();
+        }
+
+        function clearMapCanvas() {
+            canvasDrawings = [];
+            canvasTokens = [];
+            redrawCanvas();
+            renderCanvasTokens();
+            saveStateToCloud();
+        }
+
+        function undoCanvasLastPath() {
+            canvasDrawings.pop();
+            redrawCanvas();
+            saveStateToCloud();
+        }
+
+        function exportCanvasImage() {
+            if (!canvas) return;
+            const link = document.createElement('a');
+            link.download = `lol-tactics-${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        async function fetchDataDragonChampions(force = false) {
+            try {
+                const res = await fetch('https://ddragon.leagueoflegends.com/cdn/14.24.1/data/ko_KR/champion.json');
+                if (!res.ok) throw new Error("Data Dragon fetch error");
+                const data = await res.json();
+                const champObj = data.data;
+
+                const fetchedChamps = Object.keys(champObj).map(key => {
+                    const c = champObj[key];
+                    let lanes = ['MID'];
+                    const tags = c.tags || [];
+                    if (tags.includes('Fighter') || tags.includes('Tank')) lanes = ['TOP'];
+                    if (tags.includes('Assassin')) lanes = ['MID'];
+                    if (tags.includes('Mage')) lanes = ['MID'];
+                    if (tags.includes('Marksman')) lanes = ['ADC'];
+                    if (tags.includes('Support')) lanes = ['SUP'];
+
+                    return {
+                        id: c.id.toLowerCase(),
+                        name: c.name,
+                        title: c.title,
+                        avatar: `https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/${c.id}.png`,
+                        lanes: lanes
+                    };
+                });
+
+                // Preserve custom champions
+                const existingCustoms = state.champions.filter(c => c.isCustom);
+                state.champions = [...fetchedChamps, ...existingCustoms];
+
+                renderChampionList();
+                renderSelectedChampionHeader();
+                saveStateToCloud();
+                if (force) alert("롤 최신 DataDragon 챔피언 데이터 동기화가 완료되었습니다.");
+            } catch (err) {
+                console.warn("DataDragon fetch failed:", err);
+                if (force) alert("데이터 동기화 실패. 인터넷 연결을 확인해 주세요.");
+            }
+        }
+
+        function handlePhotoFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    state.tempPhotoData = evt.target.result;
+                    document.getElementById('modalPhotoPreview').src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveChampionPhoto() {
+            const champ = state.champions.find(c => c.id === state.selectedChampId);
+            if (!champ) return;
+
+            const urlInput = document.getElementById('photoUrlInput').value.trim();
+            if (state.tempPhotoData) {
+                champ.avatar = state.tempPhotoData;
+            } else if (urlInput) {
+                champ.avatar = urlInput;
             }
 
-            document.getElementById('statWinRate').innerText = `${winRate}%`;
-            document.getElementById('statAvgKda').innerText = kdaRatio;
-            document.getElementById('revStatWinLoss').innerText = `${wins}승 ${count - wins}패`;
-            document.getElementById('revStatRate').innerText = `${winRate}%`;
-            document.getElementById('revStatRating').innerText = `${avgRating} / 5.0`;
+            state.tempPhotoData = '';
+            document.getElementById('photoUrlInput').value = '';
+            closeModal('changePhotoModal');
+            renderSelectedChampionHeader();
+            renderChampionList();
+            saveStateToCloud();
+        }
+
+        function resetToDefaultPhoto() {
+            const champ = state.champions.find(c => c.id === state.selectedChampId);
+            if (champ) {
+                champ.avatar = `https://placehold.co/100x100/0A1428/C8AA6E?text=${encodeURIComponent(champ.name)}`;
+                renderSelectedChampionHeader();
+                renderChampionList();
+                closeModal('changePhotoModal');
+                saveStateToCloud();
+            }
         }
 
         function addNewChampion() {
             const name = document.getElementById('newChampName').value.trim();
             const title = document.getElementById('newChampTitle').value.trim();
-            const lane = document.getElementById('newChampPrimaryLane').value;
-            const customAvatar = document.getElementById('newChampAvatar').value.trim();
+            const primaryLane = document.getElementById('newChampPrimaryLane').value;
+            const avatar = document.getElementById('newChampAvatar').value.trim();
 
             if (!name) {
-                showToast('챔피언 이름을 입력해 주세요.');
+                alert("챔피언 이름을 입력해 주세요.");
                 return;
             }
 
-            const id = 'custom_' + Date.now();
             const newChamp = {
-                id: id,
+                id: 'cust_' + Date.now(),
                 name: name,
                 title: title || '신규 커스텀 챔피언',
-                avatar: customAvatar || `https://placehold.co/100x100/0A1428/C8AA6E?text=${encodeURIComponent(name)}`,
-                lanes: [lane]
+                avatar: avatar || `https://placehold.co/100x100/0A1428/C8AA6E?text=${encodeURIComponent(name)}`,
+                lanes: [primaryLane],
+                isCustom: true
             };
 
             state.champions.unshift(newChamp);
-            saveToFirestore();
-            renderChampions();
-            selectChampion(id);
-            closeModal('addChampModal');
+            state.selectedChampId = newChamp.id;
 
             document.getElementById('newChampName').value = '';
             document.getElementById('newChampTitle').value = '';
             document.getElementById('newChampAvatar').value = '';
-            showToast(`${name} 챔피언이 성공적으로 추가되었습니다!`);
-        }
 
-        function setLaneFilter(lane) {
-            state.currentFilterLane = lane;
-            document.querySelectorAll('.lane-tab').forEach(tab => {
-                tab.className = 'lane-tab py-1.5 rounded text-center text-slate-400 hover:text-slate-200';
-            });
-            const activeTab = document.getElementById(`filter-${lane}`);
-            if (activeTab) {
-                activeTab.className = 'lane-tab active py-1.5 rounded text-center font-bold text-lol-gold bg-lol-gold/10 border border-lol-gold/30';
-            }
-            renderChampions();
-        }
-
-        function filterChampions() {
-            state.searchQuery = document.getElementById('champSearch').value.trim();
-            renderChampions();
-        }
-
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.main-tab').forEach(el => {
-                el.className = 'main-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all shrink-0';
-            });
-
-            document.getElementById(`pane-${tabName}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
-            if (activeBtn) {
-                activeBtn.className = 'main-tab active px-4 py-2.5 border-b-2 border-lol-gold text-lol-gold flex items-center gap-2 transition-all shrink-0';
-            }
-        }
-
-        function openModal(id) {
-            const modal = document.getElementById(id);
-            if (!modal) return;
-
-            if (id === 'changePhotoModal') {
-                const champ = state.champions.find(c => c.id === state.selectedChampId);
-                if (champ) {
-                    document.getElementById('photoModalChampName').innerText = champ.name;
-                    document.getElementById('modalPhotoPreview').src = champ.avatar;
-                    document.getElementById('photoUrlInput').value = '';
-                    state.tempPhotoData = '';
-                }
-            } else if (id === 'syncCodeModal') {
-                updateSyncCodeDisplay();
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            const modal = document.getElementById(id);
-            if (modal) modal.classList.add('hidden');
-        }
-
-        function updateSyncCodeDisplay() {
-            const displayEl = document.getElementById('headerSyncCodeDisplay');
-            const inputEl = document.getElementById('syncCodeInput');
-            const shortCode = currentSyncCode ? (currentSyncCode.length > 12 ? currentSyncCode.substring(0, 10) + '...' : currentSyncCode) : '미설정';
-            if (displayEl) displayEl.innerText = shortCode;
-            if (inputEl) inputEl.value = currentSyncCode;
+            closeModal('addChampModal');
+            renderChampionList();
+            renderSelectedChampionHeader();
+            saveStateToCloud();
         }
 
         function applySyncCode() {
-            const inputVal = document.getElementById('syncCodeInput').value.trim();
-            if (!inputVal) {
-                showToast('연동할 숫자가 입력되지 않았습니다.');
+            const val = document.getElementById('syncCodeInput').value.trim();
+            if (!val) {
+                alert("연동 숫자를 입력하세요.");
                 return;
             }
-
-            currentSyncCode = inputVal;
+            currentSyncCode = val;
             localStorage.setItem('lol_hub_sync_code', currentSyncCode);
-            updateSyncCodeDisplay();
-
-            if (currentUser && db) {
-                setupFirestoreSync(currentUser.uid);
-                saveToFirestore();
-            } else {
-                saveToLocalStorage();
-            }
-
             closeModal('syncCodeModal');
-            showToast(`연동 번호 [${currentSyncCode}] (으)로 기기 동기화가 설정되었습니다!`);
+            setupFirestoreSync();
+            alert(`[${currentSyncCode}] 코드로 실시간 기기 연동이 적용되었습니다.`);
         }
 
         function useFirebaseUidAsSyncCode() {
-            if (currentUser && currentUser.uid) {
-                document.getElementById('syncCodeInput').value = currentUser.uid;
-                showToast('Firebase 고유 키(UID)가 입력되었습니다.');
-            } else {
-                showToast('Firebase 인증 정보를 불러오는 중입니다.');
+            if (currentUser) {
+                currentSyncCode = currentUser.uid;
+                localStorage.setItem('lol_hub_sync_code', currentSyncCode);
+                updateSyncCodeDisplay();
+                setupFirestoreSync();
+                alert("개인 고유 Key 코드로 변경되었습니다.");
             }
         }
 
         function generateRandomSyncCode() {
-            const newCode = String(Math.floor(100000 + Math.random() * 900000));
-            document.getElementById('syncCodeInput').value = newCode;
-            showToast(`랜덤 6자리 숫자(${newCode})가 입력되었습니다.`);
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            document.getElementById('syncCodeInput').value = code;
         }
 
         function copySyncCode() {
-            const code = document.getElementById('syncCodeInput').value;
-            if (!code) return;
-
-            const tempInput = document.createElement('input');
-            tempInput.value = code;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-
-            showToast(`동기화 코드가 복사되었습니다!`);
-        }
-
-        function updateSyncStatusUI(isSuccess, message = "클라우드 연동됨") {
-            const el = document.getElementById('cloudSyncStatus');
-            const textEl = document.getElementById('cloudSyncText');
-            if (!el || !textEl) return;
-
-            textEl.innerText = message;
-            if (isSuccess) {
-                el.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-700/60";
+            const val = currentSyncCode;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(val);
+                alert("연동 코드가 클립보드에 복사되었습니다: " + val);
             } else {
-                el.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-950/80 text-amber-400 border border-amber-700/60";
+                const temp = document.createElement('textarea');
+                temp.value = val;
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand('copy');
+                document.body.removeChild(temp);
+                alert("연동 코드가 복사되었습니다: " + val);
             }
-        }
-
-        function saveToLocalStorage() {
-            localStorage.setItem('lol_hub_state', JSON.stringify(state));
-        }
-
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('lol_hub_state');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    state = { ...state, ...parsed };
-                } catch (e) {
-                    console.error('LocalStorage load failed:', e);
-                }
-            }
-        }
-
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-5 right-5 bg-lol-bgDark border border-lol-gold text-lol-goldLight px-4 py-3 rounded-xl shadow-2xl text-xs font-bold z-50 flex items-center gap-2 transition-all animate-bounce';
-            toast.innerHTML = `<i class="fa-solid fa-bell text-lol-gold"></i> ${message}`;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", `lol_strategy_backup_${Date.now()}.json`);
-            document.body.appendChild(dlAnchorElem);
-            dlAnchorElem.click();
-            dlAnchorElem.remove();
-            showToast('데이터가 JSON 백업 파일로 내보내졌습니다.');
         }
 
         function confirmResetData() {
@@ -2175,51 +1823,189 @@
         }
 
         function executeResetData() {
-            localStorage.removeItem('lol_hub_state');
             state = {
-                champions: JSON.parse(JSON.stringify(DEFAULT_CHAMPIONS)),
+                champions: [...DEFAULT_CHAMPIONS],
                 selectedChampId: 'roak',
                 currentFilterLane: 'ALL',
                 searchQuery: '',
-                tempPhotoData: '',
-                notes: {},
-                matchups: {},
-                reviews: {}
+                notes: {}, matchups: {}, reviews: {}
             };
-            saveToFirestore();
-            renderChampions();
-            selectChampion('roak');
-            clearMapCanvas();
+            canvasDrawings = [];
+            canvasTokens = [];
             closeModal('resetConfirmModal');
-            showToast('모든 데이터가 성공적으로 초기화되었습니다.');
+            renderAllUI();
+            saveStateToCloud();
+            alert("모든 데이터가 초기화되었습니다.");
         }
 
-        // Window Object Global Mappings
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `lol_strategy_backup_${Date.now()}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        }
+
+        // Global UI Tab / Mode Switchers
+        function switchAppMode(mode) {
+            const hub = document.getElementById('appViewHub');
+            const canvasView = document.getElementById('appViewCanvas');
+            const btnHub = document.getElementById('modeBtnHub');
+            const btnCanvas = document.getElementById('modeBtnCanvas');
+
+            if (mode === 'hub') {
+                hub.classList.remove('hidden');
+                canvasView.classList.add('hidden');
+                btnHub.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-lol-gold text-black shadow";
+                btnCanvas.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white";
+            } else {
+                hub.classList.add('hidden');
+                canvasView.classList.remove('hidden');
+                btnCanvas.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-lol-blue text-black shadow";
+                btnHub.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white";
+                setTimeout(resizeCanvas, 100);
+            }
+        }
+
+        function switchTab(tabName) {
+            ['strategy', 'matchups', 'reviews'].forEach(t => {
+                const pane = document.getElementById(`pane-${t}`);
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (pane) pane.classList.toggle('hidden', t !== tabName);
+                if (btn) {
+                    if (t === tabName) {
+                        btn.className = "main-tab active px-4 py-2.5 border-b-2 border-lol-gold text-lol-gold flex items-center gap-2 transition-all shrink-0 font-bold";
+                    } else {
+                        btn.className = "main-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all shrink-0 font-semibold";
+                    }
+                }
+            });
+        }
+
+        function filterChampions() {
+            state.searchQuery = document.getElementById('champSearch').value;
+            renderChampionList();
+        }
+
+        function setLaneFilter(lane) {
+            state.currentFilterLane = lane;
+            ALL_LANES.concat(['ALL']).forEach(l => {
+                const btn = document.getElementById(`filter-${l}`);
+                if (btn) {
+                    if (l === lane) {
+                        btn.className = "lane-tab active py-1.5 rounded text-center font-bold text-lol-gold bg-lol-gold/10 border border-lol-gold/30";
+                    } else {
+                        btn.className = "lane-tab py-1.5 rounded text-center text-slate-400 hover:text-slate-200";
+                    }
+                }
+            });
+            renderChampionList();
+        }
+
+        function setCanvasTool(tool) {
+            canvasTool = tool;
+            ['brush', 'arrow', 'ping'].forEach(t => {
+                const btn = document.getElementById(`tool-${t}`);
+                if (btn) {
+                    if (t === tool) {
+                        btn.className = "tool-btn active p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 bg-lol-gold text-black shadow";
+                    } else {
+                        btn.className = "tool-btn p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 text-slate-400 hover:text-white";
+                    }
+                }
+            });
+
+            const pingBox = document.getElementById('pingTypeContainer');
+            if (pingBox) {
+                if (tool === 'ping') pingBox.classList.remove('hidden');
+                else pingBox.classList.add('hidden');
+            }
+
+            const statusText = document.getElementById('canvasModeStatusText');
+            if (statusText) {
+                if (tool === 'brush') statusText.innerText = "자유 그리기 (Free Draw)";
+                if (tool === 'arrow') statusText.innerText = "이동 화살표 (Arrow)";
+                if (tool === 'ping') statusText.innerText = "와드/핑 찍기 (Ping/Ward)";
+            }
+        }
+
+        function setPingType(type) {
+            pingType = type;
+            ['ward_stealth', 'ward_control', 'ping_danger', 'ping_assist'].forEach(pt => {
+                const btn = document.getElementById(`ping-${pt}`);
+                if (btn) {
+                    if (pt === type) {
+                        btn.classList.add('bg-yellow-950/60', 'border', 'border-yellow-600');
+                    } else {
+                        btn.classList.remove('bg-yellow-950/60', 'border', 'border-yellow-600');
+                    }
+                }
+            });
+        }
+
+        function setCanvasColor(color) {
+            strokeColor = color;
+        }
+
+        function setBrushSize(val) {
+            strokeWidth = parseInt(val);
+            const display = document.getElementById('brushSizeVal');
+            if (display) display.innerText = `${val}px`;
+        }
+
+        function setPlacementTeam(team) {
+            placementTeam = team;
+            const bBtn = document.getElementById('teamBlueBtn');
+            const rBtn = document.getElementById('teamRedBtn');
+            if (team === 'blue') {
+                bBtn.className = "py-1 rounded bg-teal-950 text-lol-blue border border-lol-blue text-center";
+                rBtn.className = "py-1 rounded bg-rose-950 text-rose-400 border border-transparent opacity-60 text-center";
+            } else {
+                rBtn.className = "py-1 rounded bg-rose-950 text-rose-400 border border-rose-500 text-center";
+                bBtn.className = "py-1 rounded bg-teal-950 text-lol-blue border border-transparent opacity-60 text-center";
+            }
+        }
+
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('hidden');
+                if (id === 'changePhotoModal') {
+                    const champ = state.champions.find(c => c.id === state.selectedChampId);
+                    document.getElementById('photoModalChampName').innerText = champ ? champ.name : '';
+                    document.getElementById('modalPhotoPreview').src = champ ? champ.avatar : '';
+                }
+            }
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
+
         window.switchAppMode = switchAppMode;
+        window.switchTab = switchTab;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
         window.fetchDataDragonChampions = fetchDataDragonChampions;
+        window.exportData = exportData;
+        window.confirmResetData = confirmResetData;
+        window.executeResetData = executeResetData;
+        window.filterChampions = filterChampions;
+        window.setLaneFilter = setLaneFilter;
+        window.selectChampion = selectChampion;
+        window.toggleChampLane = toggleChampLane;
+        window.handlePhotoFileSelect = handlePhotoFileSelect;
+        window.saveChampionPhoto = saveChampionPhoto;
+        window.resetToDefaultPhoto = resetToDefaultPhoto;
+        window.addNewChampion = addNewChampion;
         window.saveBuildNotes = saveBuildNotes;
         window.saveMatchup = saveMatchup;
         window.deleteMatchup = deleteMatchup;
         window.saveReview = saveReview;
         window.deleteReview = deleteReview;
-        window.addNewChampion = addNewChampion;
-        window.handlePhotoFileSelect = handlePhotoFileSelect;
-        window.saveChampionPhoto = saveChampionPhoto;
-        window.resetToDefaultPhoto = resetToDefaultPhoto;
-        window.setLaneFilter = setLaneFilter;
-        window.filterChampions = filterChampions;
-        window.switchTab = switchTab;
-        window.openModal = openModal;
-        window.closeModal = closeModal;
-        window.exportData = exportData;
-        window.confirmResetData = confirmResetData;
-        window.executeResetData = executeResetData;
-        window.applySyncCode = applySyncCode;
-        window.useFirebaseUidAsSyncCode = useFirebaseUidAsSyncCode;
-        window.generateRandomSyncCode = generateRandomSyncCode;
-        window.copySyncCode = copySyncCode;
-
-        // Canvas Functions
         window.setCanvasTool = setCanvasTool;
         window.setPingType = setPingType;
         window.setCanvasColor = setCanvasColor;
@@ -2229,13 +2015,20 @@
         window.clearMapCanvas = clearMapCanvas;
         window.undoCanvasLastPath = undoCanvasLastPath;
         window.exportCanvasImage = exportCanvasImage;
+        window.applySyncCode = applySyncCode;
+        window.useFirebaseUidAsSyncCode = useFirebaseUidAsSyncCode;
+        window.generateRandomSyncCode = generateRandomSyncCode;
+        window.copySyncCode = copySyncCode;
+        window.removeToken = removeToken;
 
-        // Launch app on load
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            initApp();
-        } else {
-            window.addEventListener('DOMContentLoaded', initApp);
-        }
+        // On Load Initialization
+        window.addEventListener('load', async () => {
+            loadLocalBackup();
+            initCanvas();
+            renderAllUI();
+            await initFirebase();
+            fetchDataDragonChampions(false);
+        });
     </script>
 </body>
 </html>
