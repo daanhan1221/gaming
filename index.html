@@ -114,7 +114,7 @@
         <div class="flex items-center gap-2 sm:gap-3">
             <div id="cloudSyncStatus" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-700/60" title="Firebase 클라우드 실시간 동기화 상태">
                 <i class="fa-solid fa-cloud-check text-xs"></i>
-                <span id="cloudSyncText">클라우드 연동됨</span>
+                <span id="cloudSyncText">동기화 준비됨</span>
             </div>
 
             <button onclick="openModal('syncCodeModal')" class="bg-lol-blue/20 hover:bg-lol-blue/30 text-lol-blue border border-lol-blue/50 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm" title="스마트폰 & PC 실시간 연동">
@@ -205,7 +205,7 @@
                                     <i class="fa-solid fa-tags text-lol-gold"></i> 포지션 지정 (클릭하여 챔프 라인 추가/제거):
                                 </span>
                                 <div id="bannerLaneBadges" class="flex flex-wrap gap-1">
-                                    <!-- Dynamic lane tags (Click to add Zyra to Jungle etc.) -->
+                                    <!-- Dynamic lane tags -->
                                 </div>
                             </div>
                         </div>
@@ -641,7 +641,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WITH FIREBASE INTEGRATION -->
+    <!-- JAVASCRIPT LOGIC WITH FIREBASE INTEGRATION & ROBUST LOAD HANDLING -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -650,7 +650,7 @@
         // =========================================================================
         // 🔑 [사용자 지정 FIREBASE 설정]
         // Firebase 콘솔(https://console.firebase.google.com/) -> 프로젝트 설정에서 복사한
-        // 발급 키(apiKey, projectId 등)를 아래 객체에 그대로 붙여넣으세요.
+        // 발급 키(apiKey, projectId 등)를 아래 객체에 붙여넣으면 클라우드 연동이 활성화됩니다.
         // =========================================================================
         const MY_FIREBASE_CONFIG = {
             apiKey: "YOUR_API_KEY",
@@ -661,7 +661,6 @@
             appId: "YOUR_APP_ID"
         };
 
-        // 직접 입력한 키가 유효한지 감지하여 우선 적용하고, 없을 경우 로컬/시스템 설정으로 유연하게 동작합니다.
         const isCustomConfigValid = MY_FIREBASE_CONFIG.apiKey && !MY_FIREBASE_CONFIG.apiKey.includes("YOUR_API_KEY");
         const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const firebaseConfig = isCustomConfigValid ? MY_FIREBASE_CONFIG : envConfig;
@@ -701,7 +700,7 @@
 
         async function initFirebase() {
             try {
-                if (Object.keys(firebaseConfig).length > 0) {
+                if (Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey) {
                     app = initializeApp(firebaseConfig);
                     auth = getAuth(app);
                     db = getFirestore(app);
@@ -715,7 +714,6 @@
 
                     currentUser = userCredential.user;
 
-                    // Use Firebase's unique key (currentUser.uid) as sync code if none saved yet
                     if (!currentSyncCode) {
                         currentSyncCode = currentUser.uid;
                         localStorage.setItem('lol_hub_sync_code', currentSyncCode);
@@ -730,15 +728,14 @@
                         }
                     });
                 } else {
-                    console.warn("Firebase config not available. Falling back to local storage.");
                     if (!currentSyncCode) currentSyncCode = 'LOCAL-' + Math.floor(100000 + Math.random() * 900000);
                     updateSyncStatusUI(false, "로컬 모드");
                     updateSyncCodeDisplay();
                 }
             } catch (err) {
-                console.error("Firebase init failed:", err);
+                console.warn("Firebase fallback to local mode:", err);
                 if (!currentSyncCode) currentSyncCode = 'LOCAL-' + Math.floor(100000 + Math.random() * 900000);
-                updateSyncStatusUI(false, "오프라인 저장");
+                updateSyncStatusUI(false, "로컬 오프라인 모드");
                 updateSyncCodeDisplay();
             }
         }
@@ -748,7 +745,6 @@
 
             updateSyncCodeDisplay();
 
-            // Strict Public Path: /artifacts/{appId}/public/data/dashboards/{currentSyncCode}
             const dashboardDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboards', currentSyncCode);
 
             if (activeSnapshotUnsubscribe) {
@@ -773,8 +769,8 @@
                     saveToFirestore();
                 }
             }, (error) => {
-                console.error("Firestore onSnapshot error:", error);
-                updateSyncStatusUI(false, "동기화 오류");
+                console.warn("Firestore snapshot notice:", error);
+                updateSyncStatusUI(false, "로컬 보관 모드");
             });
         }
 
@@ -797,8 +793,8 @@
 
                 updateSyncStatusUI(true, `[${currentSyncCode.substring(0, 8)}...] 저장 완료`);
             } catch (err) {
-                console.error("Firestore save failed:", err);
-                updateSyncStatusUI(false, "저장 실패 (로컬 보관)");
+                console.warn("Firestore save fallback:", err);
+                updateSyncStatusUI(false, "로컬 보관 완료");
             }
         }
 
@@ -917,8 +913,8 @@
             renderChampions();
             selectChampion(state.selectedChampId || 'roak');
 
-            await initFirebase();
-            await fetchDataDragonChampions(false);
+            initFirebase().catch(e => console.warn(e));
+            fetchDataDragonChampions(false).catch(e => console.warn(e));
         }
 
         function ensureSpecialChampionsExist() {
@@ -1066,7 +1062,7 @@
 
             const optionsHtml = state.champions
                 .filter(c => c.id !== state.selectedChampId)
-                .map(c => `<option value="${c.id}">vs ${c.name} (${c.title || c.lanes[0] || 'MID'})</option>`)
+                .map(c => `<option value="${c.id}">vs ${c.name} (${c.title || (c.lanes && c.lanes[0]) || 'MID'})</option>`)
                 .join('');
 
             matchSelect.innerHTML = optionsHtml;
@@ -1608,9 +1604,12 @@
         window.generateRandomSyncCode = generateRandomSyncCode;
         window.copySyncCode = copySyncCode;
 
-        window.onload = function() {
+        // Ensure robust launch regardless of script load timing
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
             initApp();
-        };
+        } else {
+            window.addEventListener('DOMContentLoaded', initApp);
+        }
     </script>
 </body>
 </html>
