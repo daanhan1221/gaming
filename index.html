@@ -1,2034 +1,1297 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>LoL Strategy & Canvas Tactics Hub</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        lol: {
-                            bg: '#000000',
-                            bgPanel: '#091428',
-                            bgDark: '#0A1428',
-                            gold: '#C8AA6E',
-                            goldLight: '#F0E6D2',
-                            goldDark: '#785A28',
-                            blue: '#0AC8B9',
-                            blueDark: '#03979E',
-                            border: '#1E2328',
-                            borderGold: '#463714',
-                            red: '#E63946',
-                            green: '#2A9D8F'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        lol: ['Rajdhani', 'sans-serif']
-                    }
-                }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LoL 노트 & 플레이 피드백 센터</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            lol: {
+              gold: '#C8AA6E',
+              goldLight: '#F0E6D2',
+              blue: '#0AC8B9',
+              darkBlue: '#0397AB',
+              darkBg: '#091428',
+              cardBg: '#0A141E',
+              panelBg: '#1E232A',
+              border: '#785A28'
             }
+          }
         }
-    </script>
-    <style>
-        /* Force absolute Pitch Black background across viewport */
-        html, body {
-            background-color: #000000 !important;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
+      }
+    }
+  </script>
 
-        /* Custom Hextech scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #000000;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1E2B3C;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #C8AA6E;
-        }
-        
-        .gold-gradient-text {
-            background: linear-gradient(135deg, #F0E6D2 0%, #C8AA6E 50%, #785A28 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter & Noto Sans KR -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 
-        .hextech-card {
-            background: linear-gradient(180deg, rgba(9, 20, 40, 0.95) 0%, rgba(0, 0, 0, 0.95) 100%);
-            border: 1px solid rgba(200, 170, 110, 0.35);
-        }
-
-        .lol-white-input {
-            background-color: #FFFFFF !important;
-            color: #0F172A !important;
-            font-weight: 600 !important;
-            border: 2px solid #CBD5E1 !important;
-        }
-        .lol-white-input:focus {
-            background-color: #FFFFFF !important;
-            color: #0F172A !important;
-            border-color: #C8AA6E !important;
-            outline: none !important;
-            box-shadow: 0 0 0 3px rgba(200, 170, 110, 0.3) !important;
-        }
-        .lol-white-input::placeholder {
-            color: #64748B !important;
-            font-weight: 400 !important;
-        }
-
-        .cursor-draw { cursor: crosshair; }
-        
-        .map-bg {
-            background-image: radial-gradient(#1e293b 1px, transparent 1px), radial-gradient(#0f172a 1px, #020617 1px);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
-        }
-    </style>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', 'Inter', sans-serif;
+      background-color: #091428;
+      color: #cdbe91;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #091428;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3c3c41;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #c8aa6e;
+    }
+    .hextech-border {
+      border: 1px solid #785a28;
+      box-shadow: 0 0 10px rgba(200, 170, 110, 0.15);
+    }
+    .hextech-card {
+      background: linear-gradient(135deg, #0a141e 0%, #1e232a 100%);
+    }
+    .gold-gradient-text {
+      background: linear-gradient(180deg, #f0e6d2 0%, #c8aa6e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
 </head>
-<body class="bg-black text-slate-200 font-sans min-h-screen flex flex-col antialiased selection:bg-lol-gold selection:text-lol-bg">
+<body class="min-h-screen flex flex-col selection:bg-lol-gold selection:text-black">
 
-    <!-- TOP HEADER -->
-    <header class="h-16 border-b border-lol-border/80 bg-lol-bgPanel/90 backdrop-blur-md px-4 lg:px-6 flex items-center justify-between sticky top-0 z-40">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-lol-goldLight via-lol-gold to-lol-goldDark flex items-center justify-center text-lol-bg shadow-md">
-                <i class="fa-solid fa-map-location-dot text-xl"></i>
+  <header class="sticky top-0 z-40 bg-opacity-95 bg-[#091428] border-b border-lol-border backdrop-blur shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchMainTab('guides')">
+        <div class="w-10 h-10 rounded-full border border-lol-gold flex items-center justify-center bg-black/40 text-lol-gold shadow-md">
+          <i class="fa-solid font-bold text-xl fa-shield-halved"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold gold-gradient-text tracking-wider uppercase">LoL Note & Feedback</h1>
+          <p class="text-xs text-slate-400">챔피언 공략 & 나만의 플레이 피드백 노트</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex items-center space-x-2 sm:space-x-4">
+        <button id="nav-btn-guides" onclick="switchMainTab('guides')" class="px-4 py-2 rounded-lg font-bold text-sm transition-all duration-200 border border-lol-gold bg-lol-gold text-black shadow-lg">
+          <i class="fa-solid fa-book-bookmark mr-1.5"></i> 챔피언 공략노트
+        </button>
+        <button id="nav-btn-feedback" onclick="switchMainTab('feedback')" class="px-4 py-2 rounded-lg font-bold text-sm transition-all duration-200 border border-slate-700 bg-slate-800 text-slate-300 hover:border-lol-gold">
+          <i class="fa-solid fa-gamepad mr-1.5"></i> 플레이 피드백
+        </button>
+      </div>
+
+      <!-- Firebase Status Indicator & Config Button -->
+      <div class="flex items-center space-x-2">
+        <button onclick="openFirebaseConfigModal()" title="Firebase 키 설정 및 상태 확인" class="flex items-center space-x-2 text-xs bg-slate-900/90 hover:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 hover:border-lol-gold transition text-slate-300">
+          <span id="firebase-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+          <span id="firebase-text" class="text-slate-300">동기화 중...</span>
+          <i class="fa-solid fa-gear text-slate-400 hover:text-lol-gold ml-1"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- SECTION 1: CHAMPION GUIDES -->
+    <section id="section-guides" class="space-y-6">
+      
+      <!-- Filter Bar & Custom Add Controls -->
+      <div class="bg-[#0A141E] p-4 rounded-xl border border-lol-border flex flex-col md:flex-row gap-4 items-center justify-between">
+        
+        <!-- Lane Filter Tabs -->
+        <div class="flex flex-wrap items-center gap-1.5 w-full md:w-auto" id="lane-tabs-container">
+          <!-- Dynamically Rendered Lane Tabs -->
+        </div>
+
+        <!-- Right Tools: Add Champion, Add Lane, Search -->
+        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full md:w-auto">
+          <div class="relative w-full sm:w-48">
+            <input type="text" id="search-champion-input" oninput="renderChampionGrid()" placeholder="챔피언 검색..." 
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-3 py-1.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-lol-gold">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+          </div>
+
+          <button onclick="openAddLaneModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold text-slate-200 transition whitespace-nowrap">
+            <i class="fa-solid fa-plus text-lol-gold mr-1"></i> 라인 추가
+          </button>
+
+          <button onclick="openAddChampionModal()" class="px-3 py-1.5 bg-lol-gold/10 hover:bg-lol-gold/20 border border-lol-gold text-lol-gold font-semibold rounded-lg text-xs transition whitespace-nowrap">
+            <i class="fa-solid fa-user-plus mr-1"></i> 챔피언 추가
+          </button>
+        </div>
+      </div>
+
+      <!-- Champion Grid Stats Summary -->
+      <div class="flex justify-between items-center px-1 text-xs text-slate-400">
+        <span>표시 중인 챔피언: <strong id="champ-count" class="text-lol-gold">0</strong>개</span>
+        <span class="italic"><i class="fa-solid fa-circle-info mr-1"></i>챔피언 카드를 클릭하여 룬, 아이템, 상대법을 작성하세요.</span>
+      </div>
+
+      <!-- Champion Grid Display -->
+      <div id="champion-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+        <!-- Dynamic Cards Inserted Here -->
+      </div>
+    </section>
+
+    <!-- SECTION 2: PLAY FEEDBACK LOGS -->
+    <section id="section-feedback" class="hidden space-y-6">
+      
+      <!-- Top Banner / New Log Button -->
+      <div class="bg-gradient-to-r from-[#0A141E] via-[#1E232A] to-[#0A141E] p-6 rounded-xl border border-lol-border flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold gold-gradient-text flex items-center">
+            <i class="fa-solid fa-chart-line mr-2.5 text-lol-gold"></i> 나만의 게임 피드백 노크
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            승패보다 중요한 것은 복기입니다. 잘했던 점, 실수한 점, 다음 판 목표를 기록하세요.
+          </p>
+        </div>
+        <button onclick="openAddFeedbackModal()" class="w-full sm:w-auto px-5 py-2.5 bg-lol-gold hover:bg-amber-400 text-black font-bold rounded-lg shadow-lg transition flex items-center justify-center">
+          <i class="fa-solid fa-pen-to-square mr-2"></i> 새 피드백 작성하기
+        </button>
+      </div>
+
+      <!-- Feedback Dashboard Summary -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-[#0A141E] p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400 font-semibold uppercase">총 피드백 판수</p>
+            <p id="stat-total-games" class="text-2xl font-black text-slate-100">0판</p>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-[#000000] fa-gamepad"></i>
+          </div>
+        </div>
+
+        <div class="bg-[#0A141E] p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400 font-semibold uppercase">기록 승률</p>
+            <p id="stat-winrate" class="text-2xl font-black text-emerald-400">0%</p>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+        </div>
+
+        <div class="bg-[#0A141E] p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400 font-semibold uppercase">평균 KDA</p>
+            <p id="stat-avg-kda" class="text-2xl font-black text-lol-gold">0.00:1</p>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-crosshairs"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback List Filter -->
+      <div class="flex flex-col sm:flex-row gap-3 items-center justify-between bg-[#0A141E] p-3 rounded-lg border border-slate-800">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <select id="filter-feedback-champ" onchange="renderFeedbackList()" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg p-2 focus:outline-none focus:border-lol-gold">
+            <option value="ALL">모든 챔피언 피드백</option>
+          </select>
+          <select id="filter-feedback-result" onchange="renderFeedbackList()" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg p-2 focus:outline-none focus:border-lol-gold">
+            <option value="ALL">모든 결과 (승/패)</option>
+            <option value="WIN">승리 (WIN)</option>
+            <option value="LOSS">패배 (LOSS)</option>
+          </select>
+        </div>
+        <span id="feedback-count-text" class="text-xs text-slate-400">0개의 피드백 노트</span>
+      </div>
+
+      <!-- Feedback Logs Grid -->
+      <div id="feedback-list-container" class="space-y-4">
+        <!-- Dynamic Feedback Cards -->
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- MODAL 1: CHAMPION DETAIL & GUIDE EDITOR MODAL -->
+  <div id="modal-champ-detail" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-[#0A141E] border border-lol-border rounded-xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="bg-[#1E232A] p-4 border-b border-lol-border flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <img id="detail-champ-img" src="" class="w-14 h-14 rounded-lg border-2 border-lol-gold object-cover shadow">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 id="detail-champ-name" class="text-xl font-black text-slate-100">챔피언 이름</h3>
+              <span id="detail-champ-id" class="text-xs text-slate-400 font-mono">ID</span>
+            </div>
+            <!-- Lane badges -->
+            <div id="detail-champ-lanes" class="flex flex-wrap gap-1 mt-1">
+              <!-- Lanes tags -->
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button onclick="saveChampionGuide()" class="px-4 py-2 bg-lol-gold hover:bg-amber-400 text-black font-bold rounded-lg text-xs shadow transition">
+            <i class="fa-solid fa-floppy-disk mr-1"></i> 공략 저장하기
+          </button>
+          <button onclick="closeModal('modal-champ-detail')" class="p-2 text-slate-400 hover:text-white rounded-lg">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body (Tabbed or Scrollable Sections) -->
+      <div class="p-5 overflow-y-auto space-y-6 flex-grow text-sm">
+        
+        <!-- Champion Image & Lane Edit Panel -->
+        <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800 flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <label class="text-xs font-semibold text-slate-400">이미지 URL:</label>
+            <input type="text" id="detail-input-imgurl" class="flex-grow sm:w-80 bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 focus:border-lol-gold" placeholder="https://...">
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <label class="text-xs font-semibold text-slate-400">포지션/라인 선택:</label>
+            <div id="detail-lane-checkboxes" class="flex flex-wrap gap-2 text-xs">
+              <!-- Dynamic Lane Checkboxes -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Guide Section Tabs / Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          
+          <!-- 1. Runes (룬 설정) -->
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3">
+            <h4 class="font-bold text-lol-gold flex items-center text-base">
+              <i class="fa-solid fa-bolt mr-2 text-amber-400"></i> 추천 룬 (Runes)
+            </h4>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">핵심 룬 빌드 (주 룬 & 보조 룬)</label>
+              <input type="text" id="guide-runes-main" placeholder="예: 정밀 (정복자 - 승전보 - 민첩함 - 최후의 저항) + 결의" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold">
             </div>
             <div>
-                <h1 class="font-lol font-bold text-lg lg:text-xl tracking-wider gold-gradient-text uppercase flex items-center gap-2">
-                    LoL Strategy &amp; Canvas Hub
-                </h1>
-                <p class="text-xs text-slate-400 -mt-1 hidden sm:block">전술 지도 캔버스 drawing &amp; 챔피언 데이터 피드백</p>
+              <label class="block text-xs text-slate-400 mb-1">파편 & 상세 설명 메모</label>
+              <textarea id="guide-runes-notes" rows="3" placeholder="능력치 파편 세팅이나 상대에 따른 룬 변화 설명..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold"></textarea>
             </div>
+          </div>
+
+          <!-- 2. Starting Items & Spells (시작아이템 & 스펠) -->
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3">
+            <h4 class="font-bold text-lol-gold flex items-center text-base">
+              <i class="fa-solid fa-flask mr-2 text-blue-400"></i> 시작 아이템 & 소환사 주문
+            </h4>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">시작 아이템</label>
+              <input type="text" id="guide-start-items" placeholder="예: 도란의 검 + 1체력포션 or 도란의 방패" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">추천 스펠 (Spells)</label>
+              <input type="text" id="guide-spells" placeholder="예: 점멸 + 점화 / 점멸 + 텔레포트" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold">
+            </div>
+          </div>
+
+          <!-- 3. Core Items & Build Path (아이템 트리) -->
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3 md:col-span-2">
+            <h4 class="font-bold text-lol-gold flex items-center text-base">
+              <i class="fa-solid fa-shield-cat mr-2 text-emerald-400"></i> 핵심 아이템 빌드 (Items)
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">1, 2, 3 코어템 빌드</label>
+                <input type="text" id="guide-core-items" placeholder="예: 몰락한 왕의 검 -> 몰락 -> 크라켄 -> 무한의 대검" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">신발 & 상황별 유동적 아이템</label>
+                <input type="text" id="guide-situational-items" placeholder="예: 판금 장화, 헤르메스 / AP 상대 주포 / CC 상대 수은" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold">
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Counter Matchups (상대법 & 카운터 팁) -->
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3 md:col-span-2">
+            <h4 class="font-bold text-lol-gold flex items-center text-base">
+              <i class="fa-solid fa-skull mr-2 text-red-400"></i> 라인전 상대법 & 카운터 팁
+            </h4>
+            <textarea id="guide-matchups" rows="4" placeholder="어려운 챔피언 상대법, 라인전 주도권 잡는 딜교 팁, 렙타이밍 노하우 등 상세 가이드..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold"></textarea>
+          </div>
+
+          <!-- 5. Quick Check-List (게임 중 한눈에 볼 핵심 체크리스트) -->
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3 md:col-span-2">
+            <h4 class="font-bold text-lol-gold flex items-center text-base">
+              <i class="fa-solid fa-list-check mr-2 text-purple-400"></i> 인게임 알트탭 핵심 요약 (Cheat Sheet)
+            </h4>
+            <textarea id="guide-quick-notes" rows="3" placeholder="게임 화면에서 알트탭으로 바로 볼 3줄 요약! (예: 1. 3렙 전 무리금지 / 2. 용타임 전 W 쿨 확인 / 3. 한타 시 상대 딜러 마크)" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold"></textarea>
+          </div>
+
         </div>
 
-        <!-- MODE SWITCH TABS IN HEADER -->
-        <div class="flex items-center bg-black/80 border border-lol-border p-1 rounded-xl">
-            <button onclick="switchAppMode('hub')" id="modeBtnHub" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-lol-gold text-black shadow">
-                <i class="fa-solid fa-book-bookmark"></i> <span class="hidden md:inline">공략 &amp; 일지 모드</span>
-            </button>
-            <button onclick="switchAppMode('canvas')" id="modeBtnCanvas" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white">
-                <i class="fa-solid fa-paintbrush"></i> <span class="hidden md:inline">전술 지도 캔버스</span>
-                <span class="bg-lol-blue/30 text-lol-blue text-[10px] px-1.5 py-0.2 rounded-full border border-lol-blue/40 font-mono">CANVAS</span>
-            </button>
-        </div>
-
-        <!-- Header Actions -->
-        <div class="flex items-center gap-2 sm:gap-3">
-            <div id="cloudSyncStatus" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-700/60" title="Firebase 클라우드 실시간 동기화 상태">
-                <i class="fa-solid fa-cloud-check text-xs"></i>
-                <span id="cloudSyncText">동기화 완료</span>
-            </div>
-
-            <button onclick="openModal('syncCodeModal')" class="bg-lol-blue/20 hover:bg-lol-blue/30 text-lol-blue border border-lol-blue/50 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm" title="스마트폰 & PC 실시간 연동">
-                <i class="fa-solid fa-mobile-screen-button"></i> <span class="hidden lg:inline">기기 연동 (<span id="headerSyncCodeDisplay" class="text-white font-mono">불러오는 중...</span>)</span>
-            </button>
-
-            <button onclick="fetchDataDragonChampions(true)" class="bg-lol-gold/10 hover:bg-lol-gold/20 text-lol-gold border border-lol-gold/40 hover:border-lol-gold px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all" title="최신 롤 챔피언 데이터 동기화">
-                <i class="fa-solid fa-arrows-rotate"></i> <span class="hidden xl:inline">전체 동기화</span>
-            </button>
-            <button onclick="openModal('addChampModal')" class="bg-lol-gold/10 hover:bg-lol-gold/20 text-lol-gold border border-lol-gold/40 hover:border-lol-gold px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
-                <i class="fa-solid fa-user-plus"></i> <span class="hidden xl:inline">신규 챔프</span>
-            </button>
-            <button onclick="exportData()" class="bg-lol-bgDark hover:bg-slate-800 text-slate-300 border border-lol-border px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all" title="데이터 백업">
-                <i class="fa-solid fa-download"></i>
-            </button>
-            <button onclick="confirmResetData()" class="text-xs text-slate-500 hover:text-red-400 p-1.5 transition-colors" title="데이터 초기화">
-                <i class="fa-solid fa-rotate-right"></i>
-            </button>
-        </div>
-    </header>
-
-    <!-- MAIN CONTENT CONTAINER -->
-    <div class="flex-1 flex flex-col md:flex-row overflow-hidden bg-black">
-        
-        <!-- SIDEBAR: CHAMPION DIRECTORY & LANE FILTERS -->
-        <aside class="w-full md:w-80 lg:w-96 border-r border-lol-border/80 bg-lol-bgPanel flex flex-col shrink-0">
-            
-            <!-- Search & Lane Filter Header -->
-            <div class="p-4 border-b border-lol-border/60 space-y-3 bg-lol-bgDark/50">
-                <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm z-10"></i>
-                    <input type="text" id="champSearch" oninput="filterChampions()" placeholder="챔피언 검색 (예: 자이라, 가렌, 로크)" 
-                           class="w-full lol-white-input rounded-lg pl-9 pr-3 py-2 text-sm">
-                </div>
-
-                <!-- Lane Selection Tabs -->
-                <div class="grid grid-cols-6 gap-1 bg-black p-1 rounded-lg border border-lol-border/60 text-xs">
-                    <button onclick="setLaneFilter('ALL')" id="filter-ALL" class="lane-tab active py-1.5 rounded text-center font-bold text-lol-gold bg-lol-gold/10 border border-lol-gold/30">ALL</button>
-                    <button onclick="setLaneFilter('TOP')" id="filter-TOP" class="lane-tab py-1.5 rounded text-center text-slate-400 hover:text-slate-200">탑</button>
-                    <button onclick="setLaneFilter('JUG')" id="filter-JUG" class="lane-tab py-1.5 rounded text-center text-slate-400 hover:text-slate-200">정글</button>
-                    <button onclick="setLaneFilter('MID')" id="filter-MID" class="lane-tab py-1.5 rounded text-center text-slate-400 hover:text-slate-200">미드</button>
-                    <button onclick="setLaneFilter('ADC')" id="filter-ADC" class="lane-tab py-1.5 rounded text-center text-slate-400 hover:text-slate-200">원딜</button>
-                    <button onclick="setLaneFilter('SUP')" id="filter-SUP" class="lane-tab py-1.5 rounded text-center text-slate-400 hover:text-slate-200">서폿</button>
-                </div>
-            </div>
-
-            <!-- Champion List Scrollable Container -->
-            <div id="champListContainer" class="flex-1 overflow-y-auto p-3 space-y-1.5 max-h-[35vh] md:max-h-[calc(100vh-10rem)] bg-lol-bgPanel">
-                <!-- Dynamically populated via JS -->
-            </div>
-        </aside>
-
-        <!-- VIEW 1: CHAMPION STRATEGY & FEEDBACK HUB -->
-        <main id="appViewHub" class="flex-1 overflow-y-auto bg-black flex flex-col p-4 md:p-6 space-y-6">
-            
-            <!-- CHAMPION BANNER HEADER -->
-            <div id="champHeaderBanner" class="hextech-card rounded-2xl p-5 md:p-6 border border-lol-gold/40 relative overflow-hidden">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
-                    
-                    <div class="flex items-center gap-4">
-                        <div class="relative group cursor-pointer" onclick="openModal('changePhotoModal')" title="클릭하여 챔피언 사진 변경">
-                            <img id="bannerChampImg" src="" alt="Champion" 
-                                 class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border-2 border-lol-gold shadow-lg bg-lol-bgDark transition-transform group-hover:scale-105"
-                                 onerror="this.src='https://placehold.co/100x100/0A1428/C8AA6E?text=LoL'">
-                            <div class="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center text-lol-gold opacity-0 group-hover:opacity-100 transition-opacity">
-                                <i class="fa-solid fa-camera text-lg"></i>
-                            </div>
-                            <div id="bannerChampRoleBadge" class="absolute -bottom-2 -right-2 bg-lol-bgDark border border-lol-gold text-lol-gold text-[10px] font-bold px-2 py-0.5 rounded-full uppercase shadow">
-                                MID
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h2 id="bannerChampName" class="text-2xl sm:text-3xl font-bold font-lol gold-gradient-text tracking-wide">챔피언 선택</h2>
-                                <span id="bannerChampTitle" class="text-xs text-slate-400 font-normal"></span>
-                                <button onclick="openModal('changePhotoModal')" class="ml-2 text-xs bg-lol-gold/10 hover:bg-lol-gold/20 text-lol-gold border border-lol-gold/30 px-2 py-0.5 rounded flex items-center gap-1 transition-colors" title="사진 변경">
-                                    <i class="fa-solid fa-image"></i> 사진 변경
-                                </button>
-                            </div>
-                            
-                            <div class="mt-2.5 flex flex-wrap items-center gap-1.5">
-                                <span class="text-xs text-slate-400 mr-1 font-semibold flex items-center gap-1">
-                                    <i class="fa-solid fa-tags text-lol-gold"></i> 포지션 지정:
-                                </span>
-                                <div id="bannerLaneBadges" class="flex flex-wrap gap-1">
-                                    <!-- Dynamic lane tags -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Header Stats Summary -->
-                    <div class="flex items-center gap-3 bg-lol-bgDark/80 border border-lol-border rounded-xl p-3 text-xs">
-                        <div class="text-center px-2 border-r border-lol-border/80">
-                            <p class="text-slate-400 text-[10px]">등록 리뷰</p>
-                            <p id="statReviewCount" class="text-base font-bold text-slate-100">0판</p>
-                        </div>
-                        <div class="text-center px-2 border-r border-lol-border/80">
-                            <p class="text-slate-400 text-[10px]">전적 승률</p>
-                            <p id="statWinRate" class="text-base font-bold text-lol-blue">0%</p>
-                        </div>
-                        <div class="text-center px-2">
-                            <p class="text-slate-400 text-[10px]">평균 KDA</p>
-                            <p id="statAvgKda" class="text-base font-bold text-lol-gold">0.0</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB NAVIGATION -->
-            <div class="flex border-b border-lol-border/80 text-sm font-semibold gap-2 overflow-x-auto">
-                <button onclick="switchTab('strategy')" id="tab-btn-strategy" class="main-tab active px-4 py-2.5 border-b-2 border-lol-gold text-lol-gold flex items-center gap-2 transition-all shrink-0">
-                    <i class="fa-solid fa-scroll"></i> 공략 &amp; 추천 빌드
-                </button>
-                <button onclick="switchTab('matchups')" id="tab-btn-matchups" class="main-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all shrink-0">
-                    <i class="fa-solid fa-swords"></i> 상대법 / 카운터 팁 <span id="matchupBadgeCount" class="bg-lol-gold/20 text-lol-gold text-xs px-1.5 py-0.5 rounded-full ml-1">0</span>
-                </button>
-                <button onclick="switchTab('reviews')" id="tab-btn-reviews" class="main-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all shrink-0">
-                    <i class="fa-solid fa-chart-line"></i> 플레이 피드백 &amp; 자평 일지 <span id="reviewBadgeCount" class="bg-lol-blue/20 text-lol-blue text-xs px-1.5 py-0.5 rounded-full ml-1">0</span>
-                </button>
-            </div>
-
-            <!-- CONTENT TAB 1: STRATEGY & BUILD NOTES -->
-            <div id="pane-strategy" class="tab-pane space-y-6">
-                <div class="flex justify-between items-center bg-lol-bgPanel/80 border border-lol-border p-3 rounded-xl">
-                    <p class="text-xs text-slate-300 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-info text-lol-gold"></i> 
-                        시작 아이템, 코어 빌드, 룬, 스킬 순서를 아래 <strong class="text-slate-900 bg-white px-1.5 py-0.5 rounded border border-amber-400 font-bold">흰색 입력창</strong>에 선명하게 기록하세요.
-                    </p>
-                    <button onclick="saveBuildNotes()" class="bg-gradient-to-r from-lol-goldDark to-lol-gold hover:from-lol-gold hover:to-lol-goldLight text-lol-bg font-bold px-4 py-2 rounded-lg text-xs shadow flex items-center gap-1.5 transition-all">
-                        <i class="fa-solid fa-floppy-disk"></i> 공략 저장하기
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <div class="bg-lol-bgPanel border border-lol-border/80 rounded-xl p-4 space-y-4 shadow-md">
-                        <h3 class="text-sm font-bold text-lol-gold flex items-center gap-2 border-b border-lol-border/60 pb-2">
-                            <i class="fa-solid fa-shield-cat text-lol-gold"></i> 시작 아이템 &amp; 추천 빌드
-                        </h3>
-                        <div>
-                            <label class="text-xs text-slate-300 font-semibold mb-1.5 block">시작 아이템 조합</label>
-                            <input type="text" id="noteStartItems" placeholder="예: 도란의 검 + 1포션 / 정글 도란의 칼날" 
-                                   class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-300 font-semibold mb-1.5 block">핵심 코어 아이템 순서</label>
-                            <textarea id="noteCoreItems" rows="4" placeholder="예: 1코어: 리안드리의 고통&#10;2코어: 라일라이의 수정홀&#10;3코어: 존야의 모래시계" 
-                                      class="w-full lol-white-input rounded-lg p-2.5 text-xs resize-none leading-relaxed"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="bg-lol-bgPanel border border-lol-border/80 rounded-xl p-4 space-y-4 shadow-md">
-                        <h3 class="text-sm font-bold text-lol-gold flex items-center gap-2 border-b border-lol-border/60 pb-2">
-                            <i class="fa-solid fa-wand-magic-sparkles text-lol-gold"></i> 룬 &amp; 소환사 주문
-                        </h3>
-                        <div>
-                            <label class="text-xs text-slate-300 font-semibold mb-1.5 block">추천 룬 빌드 (메인 / 보조)</label>
-                            <textarea id="noteRunes" rows="3" placeholder="예: 메인: 신비로운 유성 - 마나순환 팔찌 - 깨달음&#10;보조: 비스킷 배달 - 우주적 통찰력" 
-                                      class="w-full lol-white-input rounded-lg p-2.5 text-xs resize-none leading-relaxed"></textarea>
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-300 font-semibold mb-1.5 block">추천 스펠 (주문)</label>
-                            <input type="text" id="noteSpells" placeholder="예: 점멸 + 강타(정글) / 점멸 + 점화" 
-                                   class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                        </div>
-                    </div>
-
-                    <div class="bg-lol-bgPanel border border-lol-border/80 rounded-xl p-4 space-y-4 shadow-md md:col-span-2 lg:col-span-1">
-                        <h3 class="text-sm font-bold text-lol-gold flex items-center gap-2 border-b border-lol-border/60 pb-2">
-                            <i class="fa-solid fa-bolt text-lol-gold"></i> 스킬 순서 &amp; 라인/정글 동선 팁
-                        </h3>
-                        <div>
-                            <label class="text-xs text-slate-300 font-semibold mb-1.5 block">스킬 연마 순서</label>
-                            <input type="text" id="noteSkillOrder" placeholder="예: Q -> E -> W (1렙 Q, 2렙 E선택)" 
-                                   class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-300 font-semibold mb-1.5 block">라인전 / 정글 동선 / 한타 운영 핵심 팁</label>
-                            <textarea id="noteTips" rows="4" placeholder="예: 정글 자이라의 경우 1렙 식물배치로 노리시 정글링 가능. E 스킬 둔턱/속박 후 W 식물 폭딜 넣기." 
-                                      class="w-full lol-white-input rounded-lg p-2.5 text-xs resize-none leading-relaxed"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CONTENT TAB 2: MATCHUP & COUNTER TIPS -->
-            <div id="pane-matchups" class="tab-pane hidden space-y-4">
-                <div class="flex justify-between items-center bg-lol-bgPanel border border-lol-border/80 p-4 rounded-xl">
-                    <div>
-                        <h3 class="text-sm font-bold text-lol-gold flex items-center gap-2">
-                            <i class="fa-solid fa-crosshairs"></i> 챔피언별 맞춤 카운터 &amp; 상대법
-                        </h3>
-                        <p class="text-xs text-slate-400 mt-0.5">상대하기 힘든 카운터나 까다로운 챔피언을 대처하는 요령을 기록하세요.</p>
-                    </div>
-                    <button onclick="openModal('addMatchupModal')" class="bg-lol-gold/10 hover:bg-lol-gold/20 text-lol-gold border border-lol-gold/50 px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shrink-0">
-                        <i class="fa-solid fa-plus"></i> 상대법 추가하기
-                    </button>
-                </div>
-
-                <div id="matchupListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Dynamic Matchup Cards -->
-                </div>
-            </div>
-
-            <!-- CONTENT TAB 3: PLAY FEEDBACK & REVIEW JOURNAL -->
-            <div id="pane-reviews" class="tab-pane hidden space-y-6">
-                <div class="bg-lol-bgPanel border border-lol-border/80 p-4 md:p-5 rounded-xl space-y-3">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                        <div>
-                            <h3 class="text-sm font-bold text-lol-blue flex items-center gap-2">
-                                <i class="fa-solid fa-pen-to-square"></i> 플레이 평가 및 피드백 일지
-                            </h3>
-                            <p class="text-xs text-slate-400 mt-0.5">실제 진행한 경기 결과를 기록하여 잘한 점과 개선할 실수를 복기해보세요.</p>
-                        </div>
-                        <button onclick="openModal('addReviewModal')" class="bg-lol-blue/10 hover:bg-lol-blue/20 text-lol-blue border border-lol-blue/50 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all">
-                            <i class="fa-solid fa-square-plus"></i> 경기 피드백 추가
-                        </button>
-                    </div>
-
-                    <div id="reviewStatsBar" class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-lol-border/60 text-xs">
-                        <div class="bg-lol-bgDark/80 p-2.5 rounded-lg border border-lol-border">
-                            <span class="text-slate-400 block text-[10px]">총 경기 수</span>
-                            <span id="revStatTotal" class="text-base font-bold text-slate-100">0판</span>
-                        </div>
-                        <div class="bg-lol-bgDark/80 p-2.5 rounded-lg border border-lol-border">
-                            <span class="text-slate-400 block text-[10px]">승 / 패</span>
-                            <span id="revStatWinLoss" class="text-base font-bold text-slate-100">0승 0패</span>
-                        </div>
-                        <div class="bg-lol-bgDark/80 p-2.5 rounded-lg border border-lol-border">
-                            <span class="text-slate-400 block text-[10px]">평균 승률</span>
-                            <span id="revStatRate" class="text-base font-bold text-lol-blue">0%</span>
-                        </div>
-                        <div class="bg-lol-bgDark/80 p-2.5 rounded-lg border border-lol-border">
-                            <span class="text-slate-400 block text-[10px]">평균 평가 점수</span>
-                            <span id="revStatRating" class="text-base font-bold text-lol-gold">0.0 / 5.0</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="reviewListContainer" class="space-y-3">
-                    <!-- Dynamic Review Cards -->
-                </div>
-            </div>
-        </main>
-
-        <!-- VIEW 2: INTERACTIVE TACTICAL CANVAS MODE -->
-        <main id="appViewCanvas" class="flex-1 hidden bg-slate-950 flex flex-col xl:flex-row overflow-hidden relative">
-            
-            <div class="w-full xl:w-72 border-b xl:border-b-0 xl:border-r border-lol-border bg-lol-bgPanel p-3 flex flex-col space-y-3 shrink-0 overflow-y-auto">
-                <div class="flex items-center justify-between border-b border-lol-border/60 pb-2">
-                    <span class="font-bold text-xs text-lol-gold flex items-center gap-1.5">
-                        <i class="fa-solid fa-pen-ruler"></i> 전술 캔버스 도구함
-                    </span>
-                    <button onclick="clearMapCanvas()" class="text-[11px] text-rose-400 hover:text-rose-300 font-semibold bg-rose-950/50 border border-rose-800 px-2 py-0.5 rounded">
-                        <i class="fa-solid fa-trash-can"></i> 전체 지우기
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-3 gap-1.5 bg-black p-1 rounded-xl border border-lol-border/80">
-                    <button onclick="setCanvasTool('brush')" id="tool-brush" class="tool-btn active p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 bg-lol-gold text-black shadow">
-                        <i class="fa-solid fa-paintbrush text-sm"></i>
-                        <span>자유 그리기</span>
-                    </button>
-                    <button onclick="setCanvasTool('arrow')" id="tool-arrow" class="tool-btn p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 text-slate-400 hover:text-white">
-                        <i class="fa-solid fa-arrow-right-long text-sm"></i>
-                        <span>이동 화살표</span>
-                    </button>
-                    <button onclick="setCanvasTool('ping')" id="tool-ping" class="tool-btn p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 text-slate-400 hover:text-white">
-                        <i class="fa-solid fa-eye text-sm"></i>
-                        <span>와드 / 핑</span>
-                    </button>
-                </div>
-
-                <div id="pingTypeContainer" class="hidden grid grid-cols-4 gap-1 bg-lol-bgDark p-1 rounded-lg border border-lol-border text-[11px]">
-                    <button onclick="setPingType('ward_stealth')" id="ping-ward_stealth" class="ping-sub-btn active p-1 text-center font-bold text-yellow-300 bg-yellow-950/60 border border-yellow-600 rounded">노란와드</button>
-                    <button onclick="setPingType('ward_control')" id="ping-ward_control" class="ping-sub-btn p-1 text-center font-bold text-rose-300 text-slate-400 rounded">제어와드</button>
-                    <button onclick="setPingType('ping_danger')" id="ping-ping_danger" class="ping-sub-btn p-1 text-center font-bold text-red-400 text-slate-400 rounded">위험핑</button>
-                    <button onclick="setPingType('ping_assist')" id="ping-ping_assist" class="ping-sub-btn p-1 text-center font-bold text-cyan-300 text-slate-400 rounded">지원핑</button>
-                </div>
-
-                <div class="space-y-2 bg-black/40 p-2.5 rounded-xl border border-lol-border/60">
-                    <label class="text-[11px] text-slate-300 font-bold block">선 색상 선택</label>
-                    <div class="flex items-center gap-2">
-                        <button onclick="setCanvasColor('#C8AA6E')" class="w-6 h-6 rounded-full bg-[#C8AA6E] border-2 border-white focus:scale-110 shadow" title="골드"></button>
-                        <button onclick="setCanvasColor('#0AC8B9')" class="w-6 h-6 rounded-full bg-[#0AC8B9] border-2 border-transparent focus:scale-110 shadow" title="블루팀 청록"></button>
-                        <button onclick="setCanvasColor('#E63946')" class="w-6 h-6 rounded-full bg-[#E63946] border-2 border-transparent focus:scale-110 shadow" title="레드팀 빨강"></button>
-                        <button onclick="setCanvasColor('#FACC15')" class="w-6 h-6 rounded-full bg-[#FACC15] border-2 border-transparent focus:scale-110 shadow" title="노랑 와드"></button>
-                        <button onclick="setCanvasColor('#10B981')" class="w-6 h-6 rounded-full bg-[#10B981] border-2 border-transparent focus:scale-110 shadow" title="초록 시야"></button>
-                        <button onclick="setCanvasColor('#FFFFFF')" class="w-6 h-6 rounded-full bg-white border-2 border-transparent focus:scale-110 shadow" title="흰색"></button>
-                    </div>
-
-                    <div class="pt-2">
-                        <div class="flex justify-between text-[11px] text-slate-300 font-bold">
-                            <span>선 굵기:</span>
-                            <span id="brushSizeVal" class="text-lol-gold font-mono">4px</span>
-                        </div>
-                        <input type="range" id="brushSizeInput" min="2" max="16" value="4" oninput="setBrushSize(this.value)"
-                               class="w-full accent-lol-gold cursor-pointer">
-                    </div>
-                </div>
-
-                <div class="flex-1 flex flex-col space-y-2 min-h-[160px]">
-                    <div class="flex justify-between items-center">
-                        <span class="text-[11px] font-bold text-slate-300">
-                            <i class="fa-solid fa-chess-knight text-lol-gold"></i> 맵에 챔피언 토큰 배치
-                        </span>
-                        <span class="text-[10px] text-slate-500">클릭 또는 드래그</span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-1 text-[11px] font-bold">
-                        <button onclick="setPlacementTeam('blue')" id="teamBlueBtn" class="py-1 rounded bg-teal-950 text-lol-blue border border-lol-blue text-center">
-                            블루팀 (Blue)
-                        </button>
-                        <button onclick="setPlacementTeam('red')" id="teamRedBtn" class="py-1 rounded bg-rose-950 text-rose-400 border border-transparent opacity-60 text-center">
-                            레드팀 (Red)
-                        </button>
-                    </div>
-
-                    <div class="bg-black/80 border border-lol-gold/40 p-2.5 rounded-xl flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <img id="canvasTokenPreviewImg" src="" class="w-9 h-9 rounded-lg border border-lol-gold object-cover">
-                            <div>
-                                <p id="canvasTokenPreviewName" class="text-xs font-bold text-slate-100">선택 챔프</p>
-                                <p class="text-[10px] text-slate-400">클릭 시 맵 중앙에 배치</p>
-                            </div>
-                        </div>
-                        <button onclick="spawnSelectedChampToken()" class="px-3 py-1.5 bg-lol-gold text-black font-bold text-xs rounded-lg shadow hover:bg-amber-300 transition-colors">
-                            + 맵 배치
-                        </button>
-                    </div>
-
-                    <p class="text-[10px] text-slate-400 leading-tight">
-                        💡 팁: 맵에 올려진 챔피언 토큰 아이콘을 마우스로 드래그하면 자유롭게 위치를 옮길 수 있습니다. 더블 클릭 시 토큰 삭제.
-                    </p>
-                </div>
-
-                <div class="pt-2 border-t border-lol-border flex gap-2">
-                    <button onclick="undoCanvasLastPath()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
-                        <i class="fa-solid fa-rotate-left"></i> 실행 취소
-                    </button>
-                    <button onclick="exportCanvasImage()" class="flex-1 bg-lol-blue text-black font-bold py-1.5 rounded-lg text-xs shadow hover:bg-teal-300 flex items-center justify-center gap-1">
-                        <i class="fa-solid fa-camera"></i> 캡처 저장
-                    </button>
-                </div>
-            </div>
-
-            <div class="flex-1 p-3 md:p-5 flex flex-col items-center justify-center relative overflow-hidden bg-black">
-                <div class="w-full max-w-2xl mb-2 flex items-center justify-between text-xs text-slate-400 bg-lol-bgPanel/80 backdrop-blur px-3 py-1.5 rounded-lg border border-lol-border">
-                    <span class="flex items-center gap-1.5 font-semibold text-slate-200">
-                        <i class="fa-solid fa-map text-lol-gold"></i> 소환사의 협곡 전술 판
-                    </span>
-                    <span class="text-[11px] text-lol-gold">
-                        현재 모드: <strong id="canvasModeStatusText">자유 그리기 (Free Draw)</strong>
-                    </span>
-                </div>
-
-                <div id="canvasMapWrapper" class="relative w-full max-w-2xl aspect-square bg-slate-900 rounded-2xl border-2 border-lol-gold/50 shadow-2xl overflow-hidden cursor-draw map-bg">
-                    <canvas id="tacticalMapCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
-                    <div id="champTokensLayer" class="absolute inset-0 z-20 pointer-events-none"></div>
-                </div>
-            </div>
-        </main>
+      </div>
     </div>
+  </div>
 
-    <!-- MODAL: CHANGE CHAMPION PHOTO -->
-    <div id="changePhotoModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-lol-bgPanel border border-lol-gold/70 rounded-xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-lol-border pb-3">
-                <h3 class="text-base font-bold text-lol-gold flex items-center gap-2">
-                    <i class="fa-solid fa-camera font-bold"></i> <span id="photoModalChampName"></span> 챔피언 사진 변경
-                </h3>
-                <button onclick="closeModal('changePhotoModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            
-            <div class="space-y-4 text-xs">
-                <div class="flex items-center gap-3 bg-lol-bgDark p-3 rounded-lg border border-lol-border">
-                    <img id="modalPhotoPreview" src="" class="w-14 h-14 rounded-lg object-cover border border-lol-gold">
-                    <div>
-                        <p class="font-bold text-slate-200">현재 등록된 챔피언 이미지</p>
-                        <p class="text-[10px] text-slate-400">내 컴퓨터의 이미지 파일 등록 또는 이미지 URL 주소 입력</p>
-                    </div>
-                </div>
+  <!-- MODAL 2: ADD CHAMPION MODAL -->
+  <div id="modal-add-champion" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#0A141E] border border-lol-border rounded-xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-lg font-bold text-slate-100 flex items-center">
+          <i class="fa-solid fa-user-plus text-lol-gold mr-2"></i> 새 챔피언 추가하기
+        </h3>
+        <button onclick="closeModal('modal-add-champion')" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
 
-                <div>
-                    <label class="block text-slate-300 font-bold mb-1">1. 이미지 파일 직접 업로드 (내 컴퓨터)</label>
-                    <input type="file" id="photoFileInput" accept="image/*" onchange="handlePhotoFileSelect(event)" 
-                           class="w-full text-xs text-slate-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-lol-gold file:text-lol-bg hover:file:bg-lol-goldLight cursor-pointer">
-                </div>
-
-                <div class="text-center text-slate-500 font-bold">- 또는 -</div>
-
-                <div>
-                    <label class="block text-slate-300 font-bold mb-1">2. 웹 이미지 URL 주소 입력</label>
-                    <input type="text" id="photoUrlInput" placeholder="https://example.com/champion.png" 
-                           class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                </div>
-            </div>
-
-            <div class="flex justify-between items-center pt-2 border-t border-lol-border/60">
-                <button onclick="resetToDefaultPhoto()" class="text-slate-400 hover:text-amber-400 text-xs font-semibold">
-                    <i class="fa-solid fa-rotate-left"></i> 기본 사진으로 초기화
-                </button>
-                <div class="flex gap-2">
-                    <button onclick="closeModal('changePhotoModal')" class="px-3.5 py-1.5 rounded-lg border border-lol-border text-slate-400 text-xs">취소</button>
-                    <button onclick="saveChampionPhoto()" class="px-4 py-1.5 bg-lol-gold text-lol-bg font-bold rounded-lg text-xs shadow">사진 저장</button>
-                </div>
-            </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">챔피언 이름 (한국어)</label>
+          <input type="text" id="new-champ-name" placeholder="예: 암베사, 로크, 신규 챔피언..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
         </div>
-    </div>
 
-    <!-- MODAL 1: ADD CUSTOM CHAMPION -->
-    <div id="addChampModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-lol-bgPanel border border-lol-gold/60 rounded-xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-lol-border pb-3">
-                <h3 class="text-base font-bold text-lol-gold flex items-center gap-2">
-                    <i class="fa-solid fa-user-plus"></i> 신규/커스텀 챔피언 등록
-                </h3>
-                <button onclick="closeModal('addChampModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block text-slate-300 font-semibold mb-1">챔피언 이름 (한글)</label>
-                    <input type="text" id="newChampName" placeholder="예: 로크, 오로라, 멜" 
-                           class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                </div>
-                <div>
-                    <label class="block text-slate-300 font-semibold mb-1">칭호 / 스킨명 (선택)</label>
-                    <input type="text" id="newChampTitle" placeholder="예: 바위 거인 / 신규 챔피언" 
-                           class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                </div>
-                <div>
-                    <label class="block text-slate-300 font-semibold mb-1">기본 포지션</label>
-                    <select id="newChampPrimaryLane" class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                        <option value="TOP">탑 (TOP)</option>
-                        <option value="JUG">정글 (JUG)</option>
-                        <option value="MID" selected>미드 (MID)</option>
-                        <option value="ADC">원딜 (ADC)</option>
-                        <option value="SUP">서폿 (SUP)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-slate-300 font-semibold mb-1">챔피언 사진 URL (선택)</label>
-                    <input type="text" id="newChampAvatar" placeholder="https://example.com/photo.png (비워두면 자동 생성)" 
-                           class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-lol-border/60">
-                <button onclick="closeModal('addChampModal')" class="px-3.5 py-1.5 rounded-lg border border-lol-border text-slate-400 text-xs">취소</button>
-                <button onclick="addNewChampion()" class="px-4 py-1.5 bg-lol-gold text-lol-bg font-bold rounded-lg text-xs shadow">챔피언 추가</button>
-            </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">챔피언 영문 ID 또는 식별 키</label>
+          <input type="text" id="new-champ-id" placeholder="예: Ambessa, Roke, Custom1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
         </div>
-    </div>
 
-    <!-- MODAL 2: ADD COUNTER MATCHUP -->
-    <div id="addMatchupModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-lol-bgPanel border border-lol-gold/60 rounded-xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-lol-border pb-3">
-                <h3 class="text-base font-bold text-lol-gold flex items-center gap-2">
-                    <i class="fa-solid fa-crosshairs"></i> 카운터 상대법 노하우 추가
-                </h3>
-                <button onclick="closeModal('addMatchupModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block text-slate-300 font-semibold mb-1">상대 챔피언 선택</label>
-                    <select id="matchupOpponentSelect" class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                        <!-- Populated dynamically -->
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-slate-300 font-semibold mb-1">상대 난이도 구분</label>
-                    <select id="matchupDifficulty" class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                        <option value="쉬움">쉬움 (Easy)</option>
-                        <option value="보통" selected>보통 (Medium)</option>
-                        <option value="어려움">어려움 (Hard)</option>
-                        <option value="극상성">극상성 / 밴 추천 (Ban Heavy)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-slate-300 font-semibold mb-1">핵심 대응 전략 &amp; 주의사항</label>
-                    <textarea id="matchupNoteText" rows="4" placeholder="예: 3렙 전 딜교환 금지. 주요 핵심 스킬(Q/E) 빠졌을 때 진입." 
-                              class="w-full lol-white-input rounded-lg p-2.5 text-xs resize-none leading-relaxed"></textarea>
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-lol-border/60">
-                <button onclick="closeModal('addMatchupModal')" class="px-3.5 py-1.5 rounded-lg border border-lol-border text-slate-400 text-xs">취소</button>
-                <button onclick="saveMatchup()" class="px-4 py-1.5 bg-lol-gold text-lol-bg font-bold rounded-lg text-xs shadow">저장하기</button>
-            </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">이미지 URL (선택)</label>
+          <input type="text" id="new-champ-img" placeholder="https://... (비워둘 시 기본 아이콘 설정)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
         </div>
-    </div>
 
-    <!-- MODAL 3: ADD PLAY REVIEW FEEDBACK -->
-    <div id="addReviewModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-lol-bgPanel border border-lol-blue/60 rounded-xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-lol-border pb-3">
-                <h3 class="text-base font-bold text-lol-blue flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square"></i> 경기 결과 &amp; 피드백 기록
-                </h3>
-                <button onclick="closeModal('addReviewModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-slate-300 font-semibold mb-1">경기 승패 결과</label>
-                        <select id="revResult" class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                            <option value="WIN">승리 (WIN)</option>
-                            <option value="LOSS">패배 (LOSS)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-slate-300 font-semibold mb-1">맞라인 / 상대 주요 챔피언</label>
-                        <select id="revOpponent" class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                            <!-- Populated dynamically -->
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <label class="block text-slate-300 font-semibold mb-1">K / D / A</label>
-                        <input type="text" id="revKda" placeholder="예: 8/2/5" 
-                               class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                    </div>
-                    <div>
-                        <label class="block text-slate-300 font-semibold mb-1">CS (분당 CS)</label>
-                        <input type="text" id="revCs" placeholder="예: 210 (7.5)" 
-                               class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                    </div>
-                    <div>
-                        <label class="block text-slate-300 font-semibold mb-1">자기 평점</label>
-                        <select id="revRating" class="w-full lol-white-input rounded-lg p-2.5 text-xs">
-                            <option value="5">★★★★★ (5점)</option>
-                            <option value="4" selected>★★★★☆ (4점)</option>
-                            <option value="3">★★★☆☆ (3점)</option>
-                            <option value="2">★★☆☆☆ (2점)</option>
-                            <option value="1">★☆☆☆☆ (1점)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-emerald-400 font-bold mb-1">👍 잘한 점 (칭찬 &amp; 긍정적 플레이)</label>
-                    <textarea id="revGood" rows="2" placeholder="예: 첫 바위게 합류 빨랐음. 궁극기 적중률 훌륭함." 
-                              class="w-full lol-white-input rounded-lg p-2.5 text-xs resize-none"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-rose-400 font-bold mb-1">👎 아쉬운 점 / 실수 (반성 &amp; 피드백)</label>
-                    <textarea id="revBad" rows="2" placeholder="예: 15분경 와드 없이 무리하게 시야 잡다가 잘림." 
-                              class="w-full lol-white-input rounded-lg p-2.5 text-xs resize-none"></textarea>
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-lol-border/60">
-                <button onclick="closeModal('addReviewModal')" class="px-3.5 py-1.5 rounded-lg border border-lol-border text-slate-400 text-xs">취소</button>
-                <button onclick="saveReview()" class="px-4 py-1.5 bg-lol-blue text-lol-bg font-bold rounded-lg text-xs shadow">리뷰 저장</button>
-            </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">포지션/라인 선택</label>
+          <div id="new-champ-lanes" class="flex flex-wrap gap-2 pt-1">
+            <!-- Dynamic Lanes checkboxes -->
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- MODAL 4: CONFIRM RESET -->
-    <div id="resetConfirmModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-lol-bgPanel border border-red-500/60 rounded-xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
-            <div class="text-center space-y-2">
-                <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i>
-                <h3 class="text-base font-bold text-white">데이터 초기화 확인</h3>
-                <p class="text-xs text-slate-400">저장된 모든 공략, 상대법 팁, 플레이 리뷰 및 캔버스 데이터가 삭제됩니다. 계속하시겠습니까?</p>
-            </div>
-            <div class="flex justify-center gap-3 pt-2">
-                <button onclick="closeModal('resetConfirmModal')" class="px-4 py-1.5 rounded-lg border border-lol-border text-slate-300 text-xs">취소</button>
-                <button onclick="executeResetData()" class="px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs shadow">초기화 진행</button>
-            </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('modal-add-champion')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">취소</button>
+        <button onclick="submitNewChampion()" class="px-4 py-1.5 bg-lol-gold text-black font-bold rounded-lg text-xs hover:bg-amber-400">추가하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: ADD LANE MODAL -->
+  <div id="modal-add-lane" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#0A141E] border border-lol-border rounded-xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-lg font-bold text-slate-100 flex items-center">
+          <i class="fa-solid fa-plus text-lol-gold mr-2"></i> 새 라인/카테고리 추가
+        </h3>
+        <button onclick="closeModal('modal-add-lane')" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">라인 코드 (영문)</label>
+          <input type="text" id="new-lane-key" placeholder="예: ARAM, ROTATION, FLEX" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
         </div>
-    </div>
-
-    <!-- MODAL 5: DEVICE SYNC CODE MODAL -->
-    <div id="syncCodeModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-lol-bgPanel border border-lol-blue/70 rounded-xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-lol-border pb-3">
-                <h3 class="text-base font-bold text-lol-blue flex items-center gap-2">
-                    <i class="fa-solid fa-mobile-screen-button"></i> PC &amp; 스마트폰 실시간 기기 연동
-                </h3>
-                <button onclick="closeModal('syncCodeModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            
-            <div class="space-y-3 text-xs">
-                <div class="bg-lol-bgDark p-3 rounded-lg border border-lol-border text-slate-300 leading-relaxed">
-                    <p class="font-bold text-lol-gold mb-1"><i class="fa-solid fa-circle-info"></i> 직접 숫자를 정해서 연동하는 방법</p>
-                    <p class="text-[11px] text-slate-400">
-                        원하는 **숫자나 비밀번호(예: 1234, 7777, 2026 등)**를 직접 입력하고 <strong>[이 번호로 연동]</strong>을 누르세요.<br>
-                        다른 기기에서도 동일한 숫자를 입력하면 두 기기가 실시간으로 데이터를 공유합니다!
-                    </p>
-                </div>
-
-                <div>
-                    <label class="block text-slate-200 font-bold mb-1">사용할 커스텀 연동 숫자 / 번호 입력</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="syncCodeInput" placeholder="예: 123456 또는 원하는 숫자 입력" 
-                               class="w-full lol-white-input rounded-lg p-2.5 text-xs font-mono font-bold tracking-wider">
-                        <button onclick="applySyncCode()" class="px-4 py-2 bg-lol-blue text-lol-bg font-bold rounded-lg text-xs shrink-0 hover:bg-teal-300 transition-colors flex items-center gap-1">
-                            <i class="fa-solid fa-link"></i> 이 번호로 연동
-                        </button>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between pt-1">
-                    <button onclick="useFirebaseUidAsSyncCode()" class="text-emerald-400 hover:underline text-xs font-semibold flex items-center gap-1">
-                        <i class="fa-solid fa-key"></i> 내 고유 Key 사용
-                    </button>
-                    <button onclick="generateRandomSyncCode()" class="text-lol-gold hover:underline text-xs font-semibold flex items-center gap-1">
-                        <i class="fa-solid fa-dice"></i> 6자리 번호 생성
-                    </button>
-                    <button onclick="copySyncCode()" class="text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1">
-                        <i class="fa-solid fa-copy"></i> 번호 복사
-                    </button>
-                </div>
-            </div>
-
-            <div class="flex justify-end pt-2 border-t border-lol-border/60">
-                <button onclick="closeModal('syncCodeModal')" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">닫기</button>
-            </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">라인 표시 이름 (한국어)</label>
+          <input type="text" id="new-lane-label" placeholder="예: 칼바람, 로테이션, 원챔" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
         </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">아이콘 FontAwesome 클래스 (선택)</label>
+          <input type="text" id="new-lane-icon" placeholder="fa-crosshairs" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('modal-add-lane')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">취소</button>
+        <button onclick="submitNewLane()" class="px-4 py-1.5 bg-lol-gold text-black font-bold rounded-lg text-xs hover:bg-amber-400">라인 생성</button>
+      </div>
     </div>
+  </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  <!-- MODAL 4: ADD PLAY FEEDBACK MODAL -->
+  <div id="modal-add-feedback" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-[#0A141E] border border-lol-border rounded-xl w-full max-w-2xl p-5 space-y-4 shadow-2xl my-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-lg font-bold text-slate-100 flex items-center">
+          <i class="fa-solid fa-gamepad text-lol-gold mr-2"></i> 게임 피드백 복기 작성
+        </h3>
+        <button onclick="closeModal('modal-add-feedback')" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
 
-        // =========================================================================
-        // 🔑 FIREBASE CONFIGURATION & HYBRID DATA ENGINE
-        // =========================================================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyA2ECbZumISupaSbfmOwz4h21oLSbNv_zo",
-            authDomain: "gaming-c38f9.firebaseapp.com",
-            databaseURL: "https://gaming-c38f9-default-rtdb.firebaseio.com",
-            projectId: "gaming-c38f9",
-            storageBucket: "gaming-c38f9.firebasestorage.app",
-            messagingSenderId: "666444670157",
-            appId: "1:666444670157:web:6760ba5dd4a9aa56287584",
-            measurementId: "G-LSPG0X90R7"
-        };
+  <!-- MODAL 5: FIREBASE CONFIG SETTINGS MODAL -->
+  <div id="modal-firebase-config" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#0A141E] border border-lol-border rounded-xl w-full max-w-lg p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-lg font-bold text-slate-100 flex items-center">
+          <i class="fa-solid fa-fire text-amber-500 mr-2"></i> Firebase 개인 고유 키 연동 설정
+        </h3>
+        <button onclick="closeModal('modal-firebase-config')" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
 
-        const envAppId = typeof __app_id !== 'undefined' ? __app_id : 'lol-strategy-hub';
-        const appId = firebaseConfig.projectId || envAppId;
+      <p class="text-xs text-slate-400">
+        Firebase 콘솔(<span class="text-lol-gold">Project Settings &gt; General &gt; Your apps</span>)에서 발급받은 SDK 설정 키를 붙여넣으세요.
+      </p>
 
-        let app, auth, db;
-        let currentUser = null;
-        let activeSnapshotUnsubscribe = null;
-        let currentSyncCode = localStorage.getItem('lol_hub_sync_code') || '';
+      <!-- JSON Input Area -->
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold flex items-center justify-between">
+            <span>Firebase Config JSON 직접 입력</span>
+            <button onclick="fillSampleFirebaseConfig()" class="text-[10px] text-lol-gold underline hover:text-amber-300">기본 샘플 채우기</button>
+          </label>
+          <textarea id="fb-config-json-input" rows="6" placeholder='{
+  "apiKey": "AIzaSy...",
+  "authDomain": "your-app.firebaseapp.com",
+  "projectId": "your-app-id",
+  "storageBucket": "your-app.appspot.com",
+  "messagingSenderId": "1234567890",
+  "appId": "1:1234567890:web:abcdef..."
+}' class="w-full bg-slate-950 font-mono border border-slate-700 rounded-lg p-2.5 text-xs text-emerald-400 focus:border-lol-gold focus:outline-none"></textarea>
+        </div>
 
-        // Default Champion Preset Data
-        const DEFAULT_CHAMPIONS = [
-            { id: 'roak', name: '로크', title: '데마시아의 신규 챔피언', avatar: 'https://placehold.co/100x100/0A1428/C8AA6E?text=Roak', lanes: ['TOP', 'MID'] },
-            { id: 'mel', name: '멜', title: '녹서스의 정치가', avatar: 'https://placehold.co/100x100/0A1428/C8AA6E?text=Mel', lanes: ['MID', 'SUP'] },
-            { id: 'ambessa', name: '암베사', title: '녹서스의 군주', avatar: 'https://placehold.co/100x100/0A1428/C8AA6E?text=Ambessa', lanes: ['TOP', 'JUG'] },
-            { id: 'aurora', name: '오로라', title: '마녀 토끼', avatar: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Aurora.png', lanes: ['MID', 'TOP'] },
-            { id: 'zyra', name: '자이라', title: '가시덩굴의 복수', avatar: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Zyra.png', lanes: ['SUP', 'JUG'] },
-            { id: 'garen', name: '가렌', title: '데마시아의 힘', avatar: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Garen.png', lanes: ['TOP'] },
-            { id: 'ahri', name: '아리', title: '구미호', avatar: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Ahri.png', lanes: ['MID'] },
-            { id: 'leesin', name: '리 신', title: '눈먼 수도승', avatar: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/LeeSin.png', lanes: ['JUG'] },
-            { id: 'kaisa', name: '카이사', title: '공허의 딸', avatar: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Kaisa.png', lanes: ['ADC'] },
-            { id: 'lux', name: '럭스', title: '광휘의 요소', avatar: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Lux.png', lanes: ['MID', 'SUP'] }
+        <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-[11px] text-slate-400 space-y-1">
+          <p class="font-bold text-slate-300"><i class="fa-solid fa-circle-info mr-1 text-lol-gold"></i> 키 입력 안내</p>
+          <p>• 키를 저장하면 브라우저에 안전하게 보관되어 실시간 데이터 동기화가 활성화됩니다.</p>
+          <p>• 언제든지 [초기화] 버튼으로 기본 오프라인 모드로 전환할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <button onclick="resetFirebaseConfig()" class="px-3 py-1.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-lg text-xs font-semibold">
+          <i class="fa-solid fa-trash-can mr-1"></i> 키 초기화
+        </button>
+        <div class="flex gap-2">
+          <button onclick="closeModal('modal-firebase-config')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">취소</button>
+          <button onclick="saveCustomFirebaseConfig()" class="px-4 py-1.5 bg-lol-gold text-black font-bold rounded-lg text-xs hover:bg-amber-400">
+            <i class="fa-solid fa-plug mr-1"></i> 설정 저장 &amp; 재연동
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Global App Configuration & State
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'lol-note-app-default';
+    
+    // Default Firebase Config Fallback
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2ECbZumISupaSbfmOwz4h21oLSbNv_zo",
+      authDomain: "gaming-c38f9.firebaseapp.com",
+      databaseURL: "https://gaming-c38f9-default-rtdb.firebaseio.com",
+      projectId: "gaming-c38f9",
+      storageBucket: "gaming-c38f9.firebasestorage.app",
+      messagingSenderId: "666444670157",
+      appId: "1:666444670157:web:6760ba5dd4a9aa56287584",
+      measurementId: "G-LSPG0X90R7"
+    };
+
+    function getStoredFirebaseConfig() {
+      const stored = localStorage.getItem('user_firebase_config');
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (e) {
+          console.error("Local stored config error:", e);
+        }
+      }
+      return typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : defaultConfig;
+    }
+
+    let firebaseConfig = getStoredFirebaseConfig();
+
+    // Initialize Firebase Services
+    let app, auth, db;
+    let currentUser = null;
+    let isFirebaseConnected = false;
+
+    async function initFirebaseServices(cfg) {
+      try {
+        app = initializeApp(cfg);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            currentUser = user;
+            updateFirebaseStatus('connected', '클라우드 연동 완료');
+            setupRealtimeSync();
+          } else {
+            updateFirebaseStatus('offline', '오프라인 / 로컬 모드');
+          }
+        });
+      } catch (err) {
+        console.warn("Firebase Init fallback:", err);
+        updateFirebaseStatus('offline', '연동 실패 / 로컬 모드');
+      }
+    }
+
+    // Default Lanes Definition
+    window.lanes = [
+      { key: 'ALL', label: '전체 챔피언', icon: 'fa-globe' },
+      { key: 'TOP', label: '탑 (Top)', icon: 'fa-shield' },
+      { key: 'JUG', label: '정글 (Jungle)', icon: 'fa-tree' },
+      { key: 'MID', label: '미드 (Mid)', icon: 'fa-hat-wizard' },
+      { key: 'ADC', label: '원딜 (ADC)', icon: 'fa-bow-arrow' },
+      { key: 'SUP', label: '서폿 (Sup)', icon: 'fa-hand-holding-heart' }
+    ];
+
+    // Local state stores
+    window.championsMap = {}; // { 'Garen': { id, name, iconUrl, lanes: [], guide: {} } }
+    window.guidesMap = {};    // { 'Garen': { runes, items, matchups, quickNotes } }
+    window.feedbacksList = [];
+    window.activeLaneFilter = 'ALL';
+    window.activeMainTab = 'guides';
+    window.currentEditingChampId = null;
+
+    // Riot DataDragon Version & Base Image URL
+    const DDRAGON_VER = '14.24.1';
+    const CHAMP_IMG_BASE = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VER}/img/champion/`;
+
+    window.addEventListener('load', async () => {
+      updateFirebaseStatus('connecting', '서버 연결 중...');
+      
+      // Step 1: Initialize Auth
+      await initFirebaseServices(firebaseConfig);
+
+      // Step 2: Fetch Riot Champions Base Data
+      await loadInitialRiotChampions();
+
+      // Step 3: Render initial UI
+      renderLaneTabs();
+      renderChampionGrid();
+      renderFeedbackList();
+    });
+
+    // Helper: Update Firebase Status UI
+    function updateFirebaseStatus(status, message) {
+      const dot = document.getElementById('firebase-dot');
+      const text = document.getElementById('firebase-text');
+      if (!dot || !text) return;
+
+      if (status === 'connected') {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+        text.textContent = message;
+        isFirebaseConnected = true;
+      } else if (status === 'connecting') {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
+        text.textContent = message;
+      } else {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-500';
+        text.textContent = message;
+        isFirebaseConnected = false;
+      }
+    }
+
+    window.openFirebaseConfigModal = function() {
+      const input = document.getElementById('fb-config-json-input');
+      const currentCfg = getStoredFirebaseConfig();
+      if (input) {
+        input.value = JSON.stringify(currentCfg, null, 2);
+      }
+      openModal('modal-firebase-config');
+    };
+
+    window.fillSampleFirebaseConfig = function() {
+      const input = document.getElementById('fb-config-json-input');
+      if (input) {
+        input.value = JSON.stringify({
+          apiKey: "AIzaSyYOUR_ACTUAL_API_KEY_HERE",
+          authDomain: "your-project-id.firebaseapp.com",
+          projectId: "your-project-id",
+          storageBucket: "your-project-id.appspot.com",
+          messagingSenderId: "1234567890",
+          appId: "1:1234567890:web:1234567890abcdef"
+        }, null, 2);
+      }
+    };
+
+    window.saveCustomFirebaseConfig = function() {
+      const raw = document.getElementById('fb-config-json-input').value.trim();
+      if (!raw) {
+        showToast('Firebase Config JSON을 입력해 주세요.', true);
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(raw);
+        if (!parsed.apiKey || !parsed.projectId) {
+          showToast('유효하지 않은 Firebase Config입니다. (apiKey, projectId 필수)', true);
+          return;
+        }
+
+        localStorage.setItem('user_firebase_config', JSON.stringify(parsed));
+        firebaseConfig = parsed;
+
+        closeModal('modal-firebase-config');
+        showToast('Firebase 고유 키가 저장되었습니다. 재연동을 시작합니다.');
+
+        updateFirebaseStatus('connecting', '재연동 중...');
+        initFirebaseServices(parsed);
+      } catch (e) {
+        showToast('JSON 형식 오류! 올바른 JSON 문자열인지 확인해 주세요.', true);
+      }
+    };
+
+    window.resetFirebaseConfig = function() {
+      localStorage.removeItem('user_firebase_config');
+      firebaseConfig = defaultConfig;
+      document.getElementById('fb-config-json-input').value = JSON.stringify(defaultConfig, null, 2);
+      closeModal('modal-firebase-config');
+      showToast('Firebase 설정이 기본 상태로 초기화되었습니다.');
+      initFirebaseServices(defaultConfig);
+    };
+
+    // Load Champion Database from Riot DataDragon
+    async function loadInitialRiotChampions() {
+      try {
+        const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VER}/data/ko_KR/champion.json`);
+        const json = await res.json();
+        const data = json.data;
+
+        // Basic default lane assignment rules based on Riot tags
+        Object.keys(data).forEach(key => {
+          const champ = data[key];
+          const tags = champ.tags || [];
+          let inferredLanes = [];
+
+          if (tags.includes('Top') || tags.includes('Fighter') || tags.includes('Tank')) inferredLanes.push('TOP');
+          if (tags.includes('Jungle') || tags.includes('Assassin')) inferredLanes.push('JUG');
+          if (tags.includes('Mage') || tags.includes('Assassin')) inferredLanes.push('MID');
+          if (tags.includes('Marksman')) inferredLanes.push('ADC');
+          if (tags.includes('Support') || tags.includes('Tank')) inferredLanes.push('SUP');
+
+          // Fallback if empty
+          if (inferredLanes.length === 0) inferredLanes = ['MID'];
+
+          window.championsMap[key] = {
+            id: key,
+            name: champ.name, // Korean Name
+            title: champ.title,
+            imgUrl: `${CHAMP_IMG_BASE}${champ.image.full}`,
+            lanes: inferredLanes,
+            isCustom: false
+          };
+        });
+
+        // Ensure newly released / user requested special champions like Smolder, Ambessa, Naafiri, Briar, Hwei etc exist
+        const recentChamps = [
+          { id: 'Ambessa', name: '암베사', lanes: ['TOP', 'JUG'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Ambessa.png' },
+          { id: 'Smolder', name: '스몰더', lanes: ['ADC', 'MID'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Smolder.png' },
+          { id: 'Hwei', name: '웨이', lanes: ['MID', 'SUP'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Hwei.png' },
+          { id: 'Briar', name: '브라이어', lanes: ['JUG', 'TOP'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Briar.png' },
+          { id: 'Naafiri', name: '나피리', lanes: ['MID', 'TOP'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Naafiri.png' },
+          { id: 'Milio', name: '밀리오', lanes: ['SUP'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Milio.png' },
+          { id: 'KSante', name: '크산테', lanes: ['TOP', 'MID'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/KSante.png' },
+          { id: 'RokeCustom', name: '로크', lanes: ['TOP', 'MID'], imgUrl: 'https://placehold.co/120x120/1e232a/c8aa6e?text=ROKE' }
         ];
 
-        const ALL_LANES = ['TOP', 'JUG', 'MID', 'ADC', 'SUP'];
-
-        let state = {
-            champions: [],
-            selectedChampId: 'roak',
-            currentFilterLane: 'ALL',
-            searchQuery: '',
-            tempPhotoData: '',
-            notes: {},
-            matchups: {},
-            reviews: {}
-        };
-
-        // Canvas state variables
-        let canvas, ctx;
-        let isDrawing = false;
-        let startX = 0, startY = 0;
-        let canvasTool = 'brush'; // 'brush', 'arrow', 'ping'
-        let pingType = 'ward_stealth'; 
-        let strokeColor = '#C8AA6E';
-        let strokeWidth = 4;
-        let placementTeam = 'blue';
-        let canvasDrawings = []; 
-        let canvasTokens = [];
-
-        async function initFirebase() {
-            try {
-                if (firebaseConfig && firebaseConfig.apiKey) {
-                    app = initializeApp(firebaseConfig);
-                    auth = getAuth(app);
-                    db = getFirestore(app);
-
-                    let userCredential;
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        userCredential = await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        userCredential = await signInAnonymously(auth);
-                    }
-
-                    currentUser = userCredential.user;
-
-                    if (!currentSyncCode) {
-                        currentSyncCode = currentUser.uid;
-                        localStorage.setItem('lol_hub_sync_code', currentSyncCode);
-                    }
-
-                    setupFirestoreSync();
-
-                    onAuthStateChanged(auth, (user) => {
-                        if (user) {
-                            currentUser = user;
-                            setupFirestoreSync();
-                        }
-                    });
-                } else {
-                    fallbackLocalMode("파이어베이스 설정 오류");
-                }
-            } catch (err) {
-                console.warn("Firebase fallback to local mode:", err);
-                fallbackLocalMode("로컬 오프라인 모드");
-            }
-        }
-
-        function fallbackLocalMode(msg) {
-            if (!currentSyncCode) currentSyncCode = 'LOCAL-' + Math.floor(100000 + Math.random() * 900000);
-            updateSyncStatusUI(false, msg);
-            updateSyncCodeDisplay();
-        }
-
-        function setupFirestoreSync() {
-            if (!db || !currentSyncCode) return;
-
-            updateSyncCodeDisplay();
-
-            const dashboardDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboards', currentSyncCode);
-
-            if (activeSnapshotUnsubscribe) {
-                activeSnapshotUnsubscribe();
-            }
-
-            activeSnapshotUnsubscribe = onSnapshot(dashboardDocRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data && data.state) {
-                        mergeSyncedState(data.state);
-                        updateSyncStatusUI(true, "실시간 동기화됨");
-                    }
-                } else {
-                    saveStateToCloud();
-                }
-            }, (err) => {
-                console.warn("Firestore listener error:", err);
-                updateSyncStatusUI(false, "로컬 보관 모드");
-            });
-        }
-
-        function updateSyncStatusUI(isSynced, text) {
-            const statusEl = document.getElementById('cloudSyncStatus');
-            const textEl = document.getElementById('cloudSyncText');
-            if (statusEl && textEl) {
-                statusEl.classList.remove('hidden');
-                textEl.innerText = text;
-                if (isSynced) {
-                    statusEl.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-700/60";
-                } else {
-                    statusEl.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-950/80 text-amber-400 border border-amber-700/60";
-                }
-            }
-        }
-
-        function updateSyncCodeDisplay() {
-            const el = document.getElementById('headerSyncCodeDisplay');
-            if (el) {
-                el.innerText = currentSyncCode || '불러오는 중...';
-            }
-            const inputEl = document.getElementById('syncCodeInput');
-            if (inputEl) {
-                inputEl.value = currentSyncCode;
-            }
-        }
-
-        async function saveStateToCloud() {
-            saveLocalBackup();
-            if (!db || !currentSyncCode || !currentUser) return;
-            try {
-                const dashboardDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboards', currentSyncCode);
-                await setDoc(dashboardDocRef, {
-                    updatedAt: new Date().toISOString(),
-                    syncCode: currentSyncCode,
-                    state: state,
-                    canvasDrawings: canvasDrawings,
-                    canvasTokens: canvasTokens
-                }, { merge: true });
-            } catch (err) {
-                console.warn("Failed saving to cloud:", err);
-            }
-        }
-
-        function saveLocalBackup() {
-            try {
-                localStorage.setItem('lol_hub_local_state', JSON.stringify(state));
-                localStorage.setItem('lol_hub_canvas_drawings', JSON.stringify(canvasDrawings));
-                localStorage.setItem('lol_hub_canvas_tokens', JSON.stringify(canvasTokens));
-            } catch (e) {
-                console.warn("LocalStorage error:", e);
-            }
-        }
-
-        function loadLocalBackup() {
-            try {
-                const savedState = localStorage.getItem('lol_hub_local_state');
-                if (savedState) {
-                    state = JSON.parse(savedState);
-                } else {
-                    state.champions = [...DEFAULT_CHAMPIONS];
-                }
-                const savedDrawings = localStorage.getItem('lol_hub_canvas_drawings');
-                if (savedDrawings) canvasDrawings = JSON.parse(savedDrawings);
-                
-                const savedTokens = localStorage.getItem('lol_hub_canvas_tokens');
-                if (savedTokens) canvasTokens = JSON.parse(savedTokens);
-            } catch (e) {
-                state.champions = [...DEFAULT_CHAMPIONS];
-            }
-        }
-
-        function mergeSyncedState(remoteState) {
-            if (!remoteState) return;
-            state = { ...state, ...remoteState };
-            renderAllUI();
-        }
-
-        function renderAllUI() {
-            renderChampionList();
-            renderSelectedChampionHeader();
-            renderStrategyNotes();
-            renderMatchups();
-            renderReviews();
-            renderCanvasTokens();
-            redrawCanvas();
-        }
-
-        function renderChampionList() {
-            const container = document.getElementById('champListContainer');
-            if (!container) return;
-
-            const filtered = state.champions.filter(c => {
-                const matchesLane = state.currentFilterLane === 'ALL' || (c.lanes && c.lanes.includes(state.currentFilterLane));
-                const matchesSearch = !state.searchQuery || c.name.toLowerCase().includes(state.searchQuery.toLowerCase());
-                return matchesLane && matchesSearch;
-            });
-
-            if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div class="p-6 text-center text-slate-500 text-xs">
-                        <i class="fa-solid fa-ghost text-2xl mb-2 block"></i>
-                        조건에 일치하는 챔피언이 없습니다.
-                    </div>`;
-                return;
-            }
-
-            container.innerHTML = filtered.map(champ => {
-                const isSelected = champ.id === state.selectedChampId;
-                const laneBadges = (champ.lanes || []).map(l => 
-                    `<span class="text-[9px] px-1.5 py-0.2 rounded bg-black/60 text-lol-gold border border-lol-border">${l}</span>`
-                ).join(' ');
-
-                return `
-                    <div onclick="selectChampion('${champ.id}')" 
-                         class="p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between group ${isSelected ? 'bg-gradient-to-r from-lol-gold/20 to-transparent border-lol-gold shadow-md' : 'bg-lol-bgDark/60 border-lol-border/60 hover:border-slate-600'}">
-                        <div class="flex items-center gap-3">
-                            <img src="${champ.avatar}" onerror="this.src='https://placehold.co/100x100/0A1428/C8AA6E?text=LoL'" 
-                                 class="w-10 h-10 rounded-lg object-cover border ${isSelected ? 'border-lol-gold' : 'border-slate-700'}">
-                            <div>
-                                <h4 class="text-xs font-bold ${isSelected ? 'text-lol-gold' : 'text-slate-200 group-hover:text-white'}">${champ.name}</h4>
-                                <p class="text-[10px] text-slate-400 line-clamp-1">${champ.title || '소환사의 협곡'}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            ${laneBadges}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            populateOpponentSelects();
-        }
-
-        function populateOpponentSelects() {
-            const mSelect = document.getElementById('matchupOpponentSelect');
-            const rSelect = document.getElementById('revOpponent');
-            const options = state.champions.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-
-            if (mSelect) mSelect.innerHTML = options;
-            if (rSelect) rSelect.innerHTML = options;
-        }
-
-        function selectChampion(champId) {
-            state.selectedChampId = champId;
-            renderChampionList();
-            renderSelectedChampionHeader();
-            renderStrategyNotes();
-            renderMatchups();
-            renderReviews();
-            updateCanvasTokenPreview();
-            saveStateToCloud();
-        }
-
-        function renderSelectedChampionHeader() {
-            const champ = state.champions.find(c => c.id === state.selectedChampId) || state.champions[0];
-            if (!champ) return;
-
-            document.getElementById('bannerChampImg').src = champ.avatar;
-            document.getElementById('bannerChampName').innerText = champ.name;
-            document.getElementById('bannerChampTitle').innerText = champ.title ? `"${champ.title}"` : '';
-
-            const roleBadge = document.getElementById('bannerChampRoleBadge');
-            if (roleBadge) roleBadge.innerText = champ.lanes && champ.lanes.length > 0 ? champ.lanes[0] : 'MID';
-
-            const badgesContainer = document.getElementById('bannerLaneBadges');
-            if (badgesContainer) {
-                badgesContainer.innerHTML = ALL_LANES.map(lane => {
-                    const hasLane = champ.lanes && champ.lanes.includes(lane);
-                    return `
-                        <button onclick="toggleChampLane('${lane}')" 
-                                class="text-[10px] font-bold px-2 py-0.5 rounded transition-all ${hasLane ? 'bg-lol-gold text-black shadow font-extrabold' : 'bg-slate-900 text-slate-500 border border-slate-800 hover:text-slate-300'}">
-                            ${lane}
-                        </button>
-                    `;
-                }).join('');
-            }
-
-            // Stats calculation from reviews
-            const champReviews = (state.reviews[champ.id] || []);
-            const total = champReviews.length;
-            const wins = champReviews.filter(r => r.result === 'WIN').length;
-            const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
-
-            document.getElementById('statReviewCount').innerText = `${total}판`;
-            document.getElementById('statWinRate').innerText = `${winRate}%`;
-
-            let kSum = 0, dSum = 0, aSum = 0;
-            champReviews.forEach(r => {
-                if (r.kda) {
-                    const parts = r.kda.split('/').map(n => parseFloat(n.trim()) || 0);
-                    if (parts.length === 3) {
-                        kSum += parts[0];
-                        dSum += parts[1];
-                        aSum += parts[2];
-                    }
-                }
-            });
-            const avgKdaVal = total > 0 && dSum > 0 ? ((kSum + aSum) / dSum).toFixed(2) : (total > 0 ? '완벽' : '0.0');
-            document.getElementById('statAvgKda').innerText = avgKdaVal;
-
-            updateCanvasTokenPreview();
-        }
-
-        function toggleChampLane(lane) {
-            const champ = state.champions.find(c => c.id === state.selectedChampId);
-            if (!champ) return;
-            if (!champ.lanes) champ.lanes = [];
-            const idx = champ.lanes.indexOf(lane);
-            if (idx > -1) {
-                champ.lanes.splice(idx, 1);
-            } else {
-                champ.lanes.push(lane);
-            }
-            renderSelectedChampionHeader();
-            renderChampionList();
-            saveStateToCloud();
-        }
-
-        function renderStrategyNotes() {
-            const notes = state.notes[state.selectedChampId] || {};
-            document.getElementById('noteStartItems').value = notes.startItems || '';
-            document.getElementById('noteCoreItems').value = notes.coreItems || '';
-            document.getElementById('noteRunes').value = notes.runes || '';
-            document.getElementById('noteSpells').value = notes.spells || '';
-            document.getElementById('noteSkillOrder').value = notes.skillOrder || '';
-            document.getElementById('noteTips').value = notes.tips || '';
-        }
-
-        function saveBuildNotes() {
-            const champId = state.selectedChampId;
-            if (!state.notes) state.notes = {};
-            state.notes[champId] = {
-                startItems: document.getElementById('noteStartItems').value,
-                coreItems: document.getElementById('noteCoreItems').value,
-                runes: document.getElementById('noteRunes').value,
-                spells: document.getElementById('noteSpells').value,
-                skillOrder: document.getElementById('noteSkillOrder').value,
-                tips: document.getElementById('noteTips').value
+        recentChamps.forEach(rc => {
+          if (!window.championsMap[rc.id]) {
+            window.championsMap[rc.id] = {
+              id: rc.id,
+              name: rc.name,
+              title: '신규 / 커스텀 챔피언',
+              imgUrl: rc.imgUrl,
+              lanes: rc.lanes,
+              isCustom: true
             };
-            saveStateToCloud();
-            alert("공략 및 빌드 노트가 저장되었습니다.");
-        }
-
-        function renderMatchups() {
-            const list = state.matchups[state.selectedChampId] || [];
-            const container = document.getElementById('matchupListContainer');
-            const badgeCount = document.getElementById('matchupBadgeCount');
-            if (badgeCount) badgeCount.innerText = list.length;
-
-            if (!container) return;
-
-            if (list.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full p-8 text-center bg-lol-bgPanel border border-lol-border/60 rounded-xl text-slate-500 text-xs">
-                        <i class="fa-solid fa-swords text-3xl mb-2 text-slate-600 block"></i>
-                        아직 등록된 상대법 노하우가 없습니다. 상단 [상대법 추가하기] 버튼을 눌러 작성해 보세요.
-                    </div>`;
-                return;
-            }
-
-            container.innerHTML = list.map((m, idx) => {
-                let diffColor = "bg-amber-950/80 text-amber-400 border-amber-700";
-                if (m.difficulty === '쉬움') diffColor = "bg-emerald-950/80 text-emerald-400 border-emerald-700";
-                if (m.difficulty === '어려움' || m.difficulty === '극상성') diffColor = "bg-rose-950/80 text-rose-400 border-rose-700";
-
-                return `
-                    <div class="bg-lol-bgPanel border border-lol-border/80 p-4 rounded-xl space-y-2 shadow relative group">
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-sm text-lol-gold flex items-center gap-1.5">
-                                <i class="fa-solid fa-user-ninja"></i> 상대: ${m.opponent}
-                            </span>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${diffColor}">
-                                    난이도: ${m.difficulty}
-                                </span>
-                                <button onclick="deleteMatchup(${idx})" class="text-slate-500 hover:text-rose-400 text-xs p-1">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-300 leading-relaxed bg-black/40 p-2.5 rounded-lg border border-lol-border/40 whitespace-pre-line">${m.note}</p>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function saveMatchup() {
-            const opponent = document.getElementById('matchupOpponentSelect').value;
-            const difficulty = document.getElementById('matchupDifficulty').value;
-            const note = document.getElementById('matchupNoteText').value;
-
-            if (!note.trim()) {
-                alert("대응 전략 내용을 입력해 주세요.");
-                return;
-            }
-
-            const champId = state.selectedChampId;
-            if (!state.matchups[champId]) state.matchups[champId] = [];
-            state.matchups[champId].unshift({ opponent, difficulty, note, createdAt: new Date().toISOString() });
-
-            document.getElementById('matchupNoteText').value = '';
-            closeModal('addMatchupModal');
-            renderMatchups();
-            saveStateToCloud();
-        }
-
-        function deleteMatchup(idx) {
-            const list = state.matchups[state.selectedChampId];
-            if (list) {
-                list.splice(idx, 1);
-                renderMatchups();
-                saveStateToCloud();
-            }
-        }
-
-        function renderReviews() {
-            const list = state.reviews[state.selectedChampId] || [];
-            const container = document.getElementById('reviewListContainer');
-            const badgeCount = document.getElementById('reviewBadgeCount');
-            if (badgeCount) badgeCount.innerText = list.length;
-
-            if (!container) return;
-
-            // Update Review Stats
-            const total = list.length;
-            const wins = list.filter(r => r.result === 'WIN').length;
-            const losses = total - wins;
-            const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
-            
-            let ratingSum = 0;
-            list.forEach(r => ratingSum += parseFloat(r.rating || 0));
-            const avgRating = total > 0 ? (ratingSum / total).toFixed(1) : '0.0';
-
-            document.getElementById('revStatTotal').innerText = `${total}판`;
-            document.getElementById('revStatWinLoss').innerText = `${wins}승 ${losses}패`;
-            document.getElementById('revStatRate').innerText = `${winRate}%`;
-            document.getElementById('revStatRating').innerText = `${avgRating} / 5.0`;
-
-            if (list.length === 0) {
-                container.innerHTML = `
-                    <div class="p-8 text-center bg-lol-bgPanel border border-lol-border/60 rounded-xl text-slate-500 text-xs">
-                        <i class="fa-solid fa-clipboard-check text-3xl mb-2 text-slate-600 block"></i>
-                        기록된 경기 피드백이 없습니다. [경기 피드백 추가] 버튼을 클릭해 복기 기록을 작성하세요.
-                    </div>`;
-                return;
-            }
-
-            container.innerHTML = list.map((r, idx) => {
-                const isWin = r.result === 'WIN';
-                const resultBadge = isWin ? 
-                    '<span class="bg-teal-950/80 text-lol-blue border border-teal-700 px-2 py-0.5 rounded font-bold text-[10px]">VICTORY 승리</span>' : 
-                    '<span class="bg-rose-950/80 text-rose-400 border border-rose-700 px-2 py-0.5 rounded font-bold text-[10px]">DEFEAT 패배</span>';
-
-                const stars = '★'.repeat(parseInt(r.rating || 0)) + '☆'.repeat(5 - parseInt(r.rating || 0));
-
-                return `
-                    <div class="bg-lol-bgPanel border border-lol-border/80 p-4 rounded-xl space-y-3 shadow relative">
-                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-lol-border/60 pb-2">
-                            <div class="flex items-center gap-2">
-                                ${resultBadge}
-                                <span class="text-xs font-bold text-slate-200">vs ${r.opponent || '상대'}</span>
-                                <span class="text-xs text-lol-gold font-mono font-bold">${r.kda || '0/0/0'}</span>
-                                <span class="text-xs text-slate-400">CS: ${r.cs || '-'}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-amber-400 font-bold">${stars}</span>
-                                <button onclick="deleteReview(${idx})" class="text-slate-500 hover:text-rose-400 text-xs p-1">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                            <div class="bg-emerald-950/20 border border-emerald-900/50 p-2.5 rounded-lg space-y-1">
-                                <span class="text-emerald-400 font-bold block"><i class="fa-solid fa-thumbs-up"></i> 잘한 점</span>
-                                <p class="text-slate-300 leading-relaxed whitespace-pre-line">${r.good || '없음'}</p>
-                            </div>
-                            <div class="bg-rose-950/20 border border-rose-900/50 p-2.5 rounded-lg space-y-1">
-                                <span class="text-rose-400 font-bold block"><i class="fa-solid fa-thumbs-down"></i> 아쉬운 점 / 실수</span>
-                                <p class="text-slate-300 leading-relaxed whitespace-pre-line">${r.bad || '없음'}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function saveReview() {
-            const result = document.getElementById('revResult').value;
-            const opponent = document.getElementById('revOpponent').value;
-            const kda = document.getElementById('revKda').value;
-            const cs = document.getElementById('revCs').value;
-            const rating = document.getElementById('revRating').value;
-            const good = document.getElementById('revGood').value;
-            const bad = document.getElementById('revBad').value;
-
-            const champId = state.selectedChampId;
-            if (!state.reviews[champId]) state.reviews[champId] = [];
-
-            state.reviews[champId].unshift({
-                result, opponent, kda, cs, rating, good, bad, createdAt: new Date().toISOString()
-            });
-
-            document.getElementById('revKda').value = '';
-            document.getElementById('revCs').value = '';
-            document.getElementById('revGood').value = '';
-            document.getElementById('revBad').value = '';
-
-            closeModal('addReviewModal');
-            renderReviews();
-            renderSelectedChampionHeader();
-            saveStateToCloud();
-        }
-
-        function deleteReview(idx) {
-            const list = state.reviews[state.selectedChampId];
-            if (list) {
-                list.splice(idx, 1);
-                renderReviews();
-                renderSelectedChampionHeader();
-                saveStateToCloud();
-            }
-        }
-
-        function initCanvas() {
-            canvas = document.getElementById('tacticalMapCanvas');
-            if (!canvas) return;
-            ctx = canvas.getContext('2d');
-
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-
-            // Canvas drawing events
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseleave', stopDrawing);
-
-            // Touch support
-            canvas.addEventListener('touchstart', (e) => {
-                const touch = e.touches[0];
-                const mouseEvent = new MouseEvent("mousedown", { clientX: touch.clientX, clientY: touch.clientY });
-                canvas.dispatchEvent(mouseEvent);
-            }, { passive: true });
-
-            canvas.addEventListener('touchmove', (e) => {
-                const touch = e.touches[0];
-                const mouseEvent = new MouseEvent("mousemove", { clientX: touch.clientX, clientY: touch.clientY });
-                canvas.dispatchEvent(mouseEvent);
-            }, { passive: true });
-
-            canvas.addEventListener('touchend', () => {
-                const mouseEvent = new MouseEvent("mouseup", {});
-                canvas.dispatchEvent(mouseEvent);
-            });
-        }
-
-        function resizeCanvas() {
-            if (!canvas) return;
-            const wrapper = document.getElementById('canvasMapWrapper');
-            if (wrapper) {
-                canvas.width = wrapper.clientWidth;
-                canvas.height = wrapper.clientHeight;
-                redrawCanvas();
-            }
-        }
-
-        function getCanvasPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            return {
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top
-            };
-        }
-
-        function startDrawing(e) {
-            isDrawing = true;
-            const pos = getCanvasPos(e);
-            startX = pos.x;
-            startY = pos.y;
-
-            if (canvasTool === 'brush') {
-                canvasDrawings.push({
-                    type: 'brush',
-                    color: strokeColor,
-                    width: strokeWidth,
-                    points: [{ x: startX, y: startY }]
-                });
-            } else if (canvasTool === 'ping') {
-                canvasDrawings.push({
-                    type: 'ping',
-                    pingType: pingType,
-                    x: startX,
-                    y: startY
-                });
-                isDrawing = false;
-                redrawCanvas();
-                saveStateToCloud();
-            }
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            const pos = getCanvasPos(e);
-
-            if (canvasTool === 'brush') {
-                const currentPath = canvasDrawings[canvasDrawings.length - 1];
-                if (currentPath && currentPath.points) {
-                    currentPath.points.push({ x: pos.x, y: pos.y });
-                    redrawCanvas();
-                }
-            } else if (canvasTool === 'arrow') {
-                redrawCanvas();
-                // Draw temporary arrow preview
-                drawArrow(ctx, startX, startY, pos.x, pos.y, strokeColor, strokeWidth);
-            }
-        }
-
-        function stopDrawing(e) {
-            if (!isDrawing) return;
-            isDrawing = false;
-
-            if (canvasTool === 'arrow' && e) {
-                const pos = getCanvasPos(e);
-                canvasDrawings.push({
-                    type: 'arrow',
-                    color: strokeColor,
-                    width: strokeWidth,
-                    x1: startX, y1: startY,
-                    x2: pos.x, y2: pos.y
-                });
-            }
-            redrawCanvas();
-            saveStateToCloud();
-        }
-
-        function redrawCanvas() {
-            if (!ctx || !canvas) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw grid / map lines
-            ctx.strokeStyle = "rgba(200, 170, 110, 0.08)";
-            ctx.lineWidth = 1;
-            const step = 40;
-            for (let x = 0; x < canvas.width; x += step) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height);
-                ctx.stroke();
-            }
-            for (let y = 0; y < canvas.height; y += step) {
-                ctx.beginPath();
-                ctx.moveTo(0, y); ctx.lineTo(canvas.width, y);
-                ctx.stroke();
-            }
-
-            // Draw saved elements
-            canvasDrawings.forEach(d => {
-                if (d.type === 'brush' && d.points.length > 0) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = d.color;
-                    ctx.lineWidth = d.width;
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
-                    ctx.moveTo(d.points[0].x, d.points[0].y);
-                    for (let i = 1; i < d.points.length; i++) {
-                        ctx.lineTo(d.points[i].x, d.points[i].y);
-                    }
-                    ctx.stroke();
-                } else if (d.type === 'arrow') {
-                    drawArrow(ctx, d.x1, d.y1, d.x2, d.y2, d.color, d.width);
-                } else if (d.type === 'ping') {
-                    drawPingMark(ctx, d.x, d.y, d.pingType);
-                }
-            });
-        }
-
-        function drawArrow(context, fromx, fromy, tox, toy, color, width) {
-            const headlen = 12 + width;
-            const dx = tox - fromx;
-            const dy = toy - fromy;
-            const angle = Math.atan2(dy, dx);
-            context.save();
-            context.strokeStyle = color;
-            context.fillStyle = color;
-            context.lineWidth = width;
-
-            context.beginPath();
-            context.moveTo(fromx, fromy);
-            context.lineTo(tox, toy);
-            context.stroke();
-
-            context.beginPath();
-            context.moveTo(tox, toy);
-            context.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
-            context.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
-            context.closePath();
-            context.fill();
-            context.restore();
-        }
-
-        function drawPingMark(context, x, y, type) {
-            context.save();
-            context.translate(x, y);
-
-            if (type === 'ward_stealth') {
-                context.fillStyle = '#FACC15';
-                context.beginPath(); context.arc(0, 0, 10, 0, Math.PI * 2); context.fill();
-                context.strokeStyle = '#000'; context.lineWidth = 2; context.stroke();
-                context.fillStyle = '#000'; context.font = 'bold 10px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle';
-                context.fillText('W', 0, 0);
-            } else if (type === 'ward_control') {
-                context.fillStyle = '#F43F5E';
-                context.beginPath(); context.arc(0, 0, 10, 0, Math.PI * 2); context.fill();
-                context.strokeStyle = '#FFF'; context.lineWidth = 2; context.stroke();
-                context.fillStyle = '#FFF'; context.font = 'bold 10px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle';
-                context.fillText('C', 0, 0);
-            } else if (type === 'ping_danger') {
-                context.fillStyle = '#EF4444';
-                context.beginPath(); context.arc(0, 0, 12, 0, Math.PI * 2); context.fill();
-                context.fillStyle = '#FFF'; context.font = 'bold 12px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle';
-                context.fillText('!', 0, 0);
-            } else if (type === 'ping_assist') {
-                context.fillStyle = '#06B6D4';
-                context.beginPath(); context.arc(0, 0, 12, 0, Math.PI * 2); context.fill();
-                context.fillStyle = '#FFF'; context.font = 'bold 12px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle';
-                context.fillText('?', 0, 0);
-            }
-            context.restore();
-        }
-
-        function updateCanvasTokenPreview() {
-            const champ = state.champions.find(c => c.id === state.selectedChampId) || state.champions[0];
-            if (!champ) return;
-            const imgEl = document.getElementById('canvasTokenPreviewImg');
-            const nameEl = document.getElementById('canvasTokenPreviewName');
-            if (imgEl) imgEl.src = champ.avatar;
-            if (nameEl) nameEl.innerText = champ.name;
-        }
-
-        function spawnSelectedChampToken() {
-            const champ = state.champions.find(c => c.id === state.selectedChampId) || state.champions[0];
-            if (!champ) return;
-
-            const token = {
-                id: 'tok_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                champId: champ.id,
-                name: champ.name,
-                avatar: champ.avatar,
-                team: placementTeam,
-                x: 40 + Math.random() * 20,
-                y: 40 + Math.random() * 20
-            };
-
-            canvasTokens.push(token);
-            renderCanvasTokens();
-            saveStateToCloud();
-        }
-
-        function renderCanvasTokens() {
-            const layer = document.getElementById('champTokensLayer');
-            if (!layer) return;
-
-            layer.innerHTML = canvasTokens.map(tok => {
-                const borderClass = tok.team === 'blue' ? 'border-2 border-lol-blue team-blue-glow' : 'border-2 border-rose-500 team-red-glow';
-                return `
-                    <div id="${tok.id}" 
-                         style="left: ${tok.x}%; top: ${tok.y}%; pointer-events: auto;" 
-                         ondblclick="removeToken('${tok.id}')"
-                         class="absolute -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing group">
-                        <img src="${tok.avatar}" class="w-10 h-10 rounded-full object-cover shadow-lg ${borderClass}">
-                        <span class="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] font-extrabold bg-black/80 px-1.5 py-0.2 rounded text-white border border-lol-border whitespace-nowrap shadow">
-                            ${tok.name}
-                        </span>
-                    </div>
-                `;
-            }).join('');
-
-            // Attach drag listeners to tokens
-            canvasTokens.forEach(tok => {
-                const el = document.getElementById(tok.id);
-                if (el) setupTokenDrag(el, tok);
-            });
-        }
-
-        function setupTokenDrag(el, tokenObj) {
-            let isDragging = false;
-            let startMouseX, startMouseY;
-
-            const onStart = (e) => {
-                isDragging = true;
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                startMouseX = clientX;
-                startMouseY = clientY;
-                e.stopPropagation();
-            };
-
-            const onMove = (e) => {
-                if (!isDragging) return;
-                const wrapper = document.getElementById('canvasMapWrapper');
-                if (!wrapper) return;
-                const rect = wrapper.getBoundingClientRect();
-
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-                let newX = ((clientX - rect.left) / rect.width) * 100;
-                let newY = ((clientY - rect.top) / rect.height) * 100;
-
-                newX = Math.max(2, Math.min(98, newX));
-                newY = Math.max(2, Math.min(98, newY));
-
-                tokenObj.x = newX;
-                tokenObj.y = newY;
-
-                el.style.left = `${newX}%`;
-                el.style.top = `${newY}%`;
-            };
-
-            const onEnd = () => {
-                if (isDragging) {
-                    isDragging = false;
-                    saveStateToCloud();
-                }
-            };
-
-            el.addEventListener('mousedown', onStart);
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('mouseup', onEnd);
-
-            el.addEventListener('touchstart', onStart, { passive: true });
-            window.addEventListener('touchmove', onMove, { passive: true });
-            window.addEventListener('touchend', onEnd);
-        }
-
-        function removeToken(id) {
-            canvasTokens = canvasTokens.filter(t => t.id !== id);
-            renderCanvasTokens();
-            saveStateToCloud();
-        }
-
-        function clearMapCanvas() {
-            canvasDrawings = [];
-            canvasTokens = [];
-            redrawCanvas();
-            renderCanvasTokens();
-            saveStateToCloud();
-        }
-
-        function undoCanvasLastPath() {
-            canvasDrawings.pop();
-            redrawCanvas();
-            saveStateToCloud();
-        }
-
-        function exportCanvasImage() {
-            if (!canvas) return;
-            const link = document.createElement('a');
-            link.download = `lol-tactics-${Date.now()}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-        }
-
-        async function fetchDataDragonChampions(force = false) {
-            try {
-                const res = await fetch('https://ddragon.leagueoflegends.com/cdn/14.24.1/data/ko_KR/champion.json');
-                if (!res.ok) throw new Error("Data Dragon fetch error");
-                const data = await res.json();
-                const champObj = data.data;
-
-                const fetchedChamps = Object.keys(champObj).map(key => {
-                    const c = champObj[key];
-                    let lanes = ['MID'];
-                    const tags = c.tags || [];
-                    if (tags.includes('Fighter') || tags.includes('Tank')) lanes = ['TOP'];
-                    if (tags.includes('Assassin')) lanes = ['MID'];
-                    if (tags.includes('Mage')) lanes = ['MID'];
-                    if (tags.includes('Marksman')) lanes = ['ADC'];
-                    if (tags.includes('Support')) lanes = ['SUP'];
-
-                    return {
-                        id: c.id.toLowerCase(),
-                        name: c.name,
-                        title: c.title,
-                        avatar: `https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/${c.id}.png`,
-                        lanes: lanes
-                    };
-                });
-
-                // Preserve custom champions
-                const existingCustoms = state.champions.filter(c => c.isCustom);
-                state.champions = [...fetchedChamps, ...existingCustoms];
-
-                renderChampionList();
-                renderSelectedChampionHeader();
-                saveStateToCloud();
-                if (force) alert("롤 최신 DataDragon 챔피언 데이터 동기화가 완료되었습니다.");
-            } catch (err) {
-                console.warn("DataDragon fetch failed:", err);
-                if (force) alert("데이터 동기화 실패. 인터넷 연결을 확인해 주세요.");
-            }
-        }
-
-        function handlePhotoFileSelect(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    state.tempPhotoData = evt.target.result;
-                    document.getElementById('modalPhotoPreview').src = evt.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function saveChampionPhoto() {
-            const champ = state.champions.find(c => c.id === state.selectedChampId);
-            if (!champ) return;
-
-            const urlInput = document.getElementById('photoUrlInput').value.trim();
-            if (state.tempPhotoData) {
-                champ.avatar = state.tempPhotoData;
-            } else if (urlInput) {
-                champ.avatar = urlInput;
-            }
-
-            state.tempPhotoData = '';
-            document.getElementById('photoUrlInput').value = '';
-            closeModal('changePhotoModal');
-            renderSelectedChampionHeader();
-            renderChampionList();
-            saveStateToCloud();
-        }
-
-        function resetToDefaultPhoto() {
-            const champ = state.champions.find(c => c.id === state.selectedChampId);
-            if (champ) {
-                champ.avatar = `https://placehold.co/100x100/0A1428/C8AA6E?text=${encodeURIComponent(champ.name)}`;
-                renderSelectedChampionHeader();
-                renderChampionList();
-                closeModal('changePhotoModal');
-                saveStateToCloud();
-            }
-        }
-
-        function addNewChampion() {
-            const name = document.getElementById('newChampName').value.trim();
-            const title = document.getElementById('newChampTitle').value.trim();
-            const primaryLane = document.getElementById('newChampPrimaryLane').value;
-            const avatar = document.getElementById('newChampAvatar').value.trim();
-
-            if (!name) {
-                alert("챔피언 이름을 입력해 주세요.");
-                return;
-            }
-
-            const newChamp = {
-                id: 'cust_' + Date.now(),
-                name: name,
-                title: title || '신규 커스텀 챔피언',
-                avatar: avatar || `https://placehold.co/100x100/0A1428/C8AA6E?text=${encodeURIComponent(name)}`,
-                lanes: [primaryLane],
-                isCustom: true
-            };
-
-            state.champions.unshift(newChamp);
-            state.selectedChampId = newChamp.id;
-
-            document.getElementById('newChampName').value = '';
-            document.getElementById('newChampTitle').value = '';
-            document.getElementById('newChampAvatar').value = '';
-
-            closeModal('addChampModal');
-            renderChampionList();
-            renderSelectedChampionHeader();
-            saveStateToCloud();
-        }
-
-        function applySyncCode() {
-            const val = document.getElementById('syncCodeInput').value.trim();
-            if (!val) {
-                alert("연동 숫자를 입력하세요.");
-                return;
-            }
-            currentSyncCode = val;
-            localStorage.setItem('lol_hub_sync_code', currentSyncCode);
-            closeModal('syncCodeModal');
-            setupFirestoreSync();
-            alert(`[${currentSyncCode}] 코드로 실시간 기기 연동이 적용되었습니다.`);
-        }
-
-        function useFirebaseUidAsSyncCode() {
-            if (currentUser) {
-                currentSyncCode = currentUser.uid;
-                localStorage.setItem('lol_hub_sync_code', currentSyncCode);
-                updateSyncCodeDisplay();
-                setupFirestoreSync();
-                alert("개인 고유 Key 코드로 변경되었습니다.");
-            }
-        }
-
-        function generateRandomSyncCode() {
-            const code = Math.floor(100000 + Math.random() * 900000).toString();
-            document.getElementById('syncCodeInput').value = code;
-        }
-
-        function copySyncCode() {
-            const val = currentSyncCode;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(val);
-                alert("연동 코드가 클립보드에 복사되었습니다: " + val);
-            } else {
-                const temp = document.createElement('textarea');
-                temp.value = val;
-                document.body.appendChild(temp);
-                temp.select();
-                document.execCommand('copy');
-                document.body.removeChild(temp);
-                alert("연동 코드가 복사되었습니다: " + val);
-            }
-        }
-
-        function confirmResetData() {
-            openModal('resetConfirmModal');
-        }
-
-        function executeResetData() {
-            state = {
-                champions: [...DEFAULT_CHAMPIONS],
-                selectedChampId: 'roak',
-                currentFilterLane: 'ALL',
-                searchQuery: '',
-                notes: {}, matchups: {}, reviews: {}
-            };
-            canvasDrawings = [];
-            canvasTokens = [];
-            closeModal('resetConfirmModal');
-            renderAllUI();
-            saveStateToCloud();
-            alert("모든 데이터가 초기화되었습니다.");
-        }
-
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `lol_strategy_backup_${Date.now()}.json`);
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
-        }
-
-        // Global UI Tab / Mode Switchers
-        function switchAppMode(mode) {
-            const hub = document.getElementById('appViewHub');
-            const canvasView = document.getElementById('appViewCanvas');
-            const btnHub = document.getElementById('modeBtnHub');
-            const btnCanvas = document.getElementById('modeBtnCanvas');
-
-            if (mode === 'hub') {
-                hub.classList.remove('hidden');
-                canvasView.classList.add('hidden');
-                btnHub.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-lol-gold text-black shadow";
-                btnCanvas.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white";
-            } else {
-                hub.classList.add('hidden');
-                canvasView.classList.remove('hidden');
-                btnCanvas.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-lol-blue text-black shadow";
-                btnHub.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white";
-                setTimeout(resizeCanvas, 100);
-            }
-        }
-
-        function switchTab(tabName) {
-            ['strategy', 'matchups', 'reviews'].forEach(t => {
-                const pane = document.getElementById(`pane-${t}`);
-                const btn = document.getElementById(`tab-btn-${t}`);
-                if (pane) pane.classList.toggle('hidden', t !== tabName);
-                if (btn) {
-                    if (t === tabName) {
-                        btn.className = "main-tab active px-4 py-2.5 border-b-2 border-lol-gold text-lol-gold flex items-center gap-2 transition-all shrink-0 font-bold";
-                    } else {
-                        btn.className = "main-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all shrink-0 font-semibold";
-                    }
-                }
-            });
-        }
-
-        function filterChampions() {
-            state.searchQuery = document.getElementById('champSearch').value;
-            renderChampionList();
-        }
-
-        function setLaneFilter(lane) {
-            state.currentFilterLane = lane;
-            ALL_LANES.concat(['ALL']).forEach(l => {
-                const btn = document.getElementById(`filter-${l}`);
-                if (btn) {
-                    if (l === lane) {
-                        btn.className = "lane-tab active py-1.5 rounded text-center font-bold text-lol-gold bg-lol-gold/10 border border-lol-gold/30";
-                    } else {
-                        btn.className = "lane-tab py-1.5 rounded text-center text-slate-400 hover:text-slate-200";
-                    }
-                }
-            });
-            renderChampionList();
-        }
-
-        function setCanvasTool(tool) {
-            canvasTool = tool;
-            ['brush', 'arrow', 'ping'].forEach(t => {
-                const btn = document.getElementById(`tool-${t}`);
-                if (btn) {
-                    if (t === tool) {
-                        btn.className = "tool-btn active p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 bg-lol-gold text-black shadow";
-                    } else {
-                        btn.className = "tool-btn p-2 rounded-lg text-xs font-bold text-center flex flex-col items-center gap-1 text-slate-400 hover:text-white";
-                    }
-                }
-            });
-
-            const pingBox = document.getElementById('pingTypeContainer');
-            if (pingBox) {
-                if (tool === 'ping') pingBox.classList.remove('hidden');
-                else pingBox.classList.add('hidden');
-            }
-
-            const statusText = document.getElementById('canvasModeStatusText');
-            if (statusText) {
-                if (tool === 'brush') statusText.innerText = "자유 그리기 (Free Draw)";
-                if (tool === 'arrow') statusText.innerText = "이동 화살표 (Arrow)";
-                if (tool === 'ping') statusText.innerText = "와드/핑 찍기 (Ping/Ward)";
-            }
-        }
-
-        function setPingType(type) {
-            pingType = type;
-            ['ward_stealth', 'ward_control', 'ping_danger', 'ping_assist'].forEach(pt => {
-                const btn = document.getElementById(`ping-${pt}`);
-                if (btn) {
-                    if (pt === type) {
-                        btn.classList.add('bg-yellow-950/60', 'border', 'border-yellow-600');
-                    } else {
-                        btn.classList.remove('bg-yellow-950/60', 'border', 'border-yellow-600');
-                    }
-                }
-            });
-        }
-
-        function setCanvasColor(color) {
-            strokeColor = color;
-        }
-
-        function setBrushSize(val) {
-            strokeWidth = parseInt(val);
-            const display = document.getElementById('brushSizeVal');
-            if (display) display.innerText = `${val}px`;
-        }
-
-        function setPlacementTeam(team) {
-            placementTeam = team;
-            const bBtn = document.getElementById('teamBlueBtn');
-            const rBtn = document.getElementById('teamRedBtn');
-            if (team === 'blue') {
-                bBtn.className = "py-1 rounded bg-teal-950 text-lol-blue border border-lol-blue text-center";
-                rBtn.className = "py-1 rounded bg-rose-950 text-rose-400 border border-transparent opacity-60 text-center";
-            } else {
-                rBtn.className = "py-1 rounded bg-rose-950 text-rose-400 border border-rose-500 text-center";
-                bBtn.className = "py-1 rounded bg-teal-950 text-lol-blue border border-transparent opacity-60 text-center";
-            }
-        }
-
-        function openModal(id) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.classList.remove('hidden');
-                if (id === 'changePhotoModal') {
-                    const champ = state.champions.find(c => c.id === state.selectedChampId);
-                    document.getElementById('photoModalChampName').innerText = champ ? champ.name : '';
-                    document.getElementById('modalPhotoPreview').src = champ ? champ.avatar : '';
-                }
-            }
-        }
-
-        function closeModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.add('hidden');
-        }
-
-        window.switchAppMode = switchAppMode;
-        window.switchTab = switchTab;
-        window.openModal = openModal;
-        window.closeModal = closeModal;
-        window.fetchDataDragonChampions = fetchDataDragonChampions;
-        window.exportData = exportData;
-        window.confirmResetData = confirmResetData;
-        window.executeResetData = executeResetData;
-        window.filterChampions = filterChampions;
-        window.setLaneFilter = setLaneFilter;
-        window.selectChampion = selectChampion;
-        window.toggleChampLane = toggleChampLane;
-        window.handlePhotoFileSelect = handlePhotoFileSelect;
-        window.saveChampionPhoto = saveChampionPhoto;
-        window.resetToDefaultPhoto = resetToDefaultPhoto;
-        window.addNewChampion = addNewChampion;
-        window.saveBuildNotes = saveBuildNotes;
-        window.saveMatchup = saveMatchup;
-        window.deleteMatchup = deleteMatchup;
-        window.saveReview = saveReview;
-        window.deleteReview = deleteReview;
-        window.setCanvasTool = setCanvasTool;
-        window.setPingType = setPingType;
-        window.setCanvasColor = setCanvasColor;
-        window.setBrushSize = setBrushSize;
-        window.setPlacementTeam = setPlacementTeam;
-        window.spawnSelectedChampToken = spawnSelectedChampToken;
-        window.clearMapCanvas = clearMapCanvas;
-        window.undoCanvasLastPath = undoCanvasLastPath;
-        window.exportCanvasImage = exportCanvasImage;
-        window.applySyncCode = applySyncCode;
-        window.useFirebaseUidAsSyncCode = useFirebaseUidAsSyncCode;
-        window.generateRandomSyncCode = generateRandomSyncCode;
-        window.copySyncCode = copySyncCode;
-        window.removeToken = removeToken;
-
-        // On Load Initialization
-        window.addEventListener('load', async () => {
-            loadLocalBackup();
-            initCanvas();
-            renderAllUI();
-            await initFirebase();
-            fetchDataDragonChampions(false);
+          }
         });
-    </script>
+
+      } catch (e) {
+        console.warn("DDragon fetch fallback:", e);
+      }
+    }
+
+    function setupRealtimeSync() {
+      if (!db || !currentUser) return;
+
+      // 1. Guides Sync: /artifacts/{appId}/public/data/guides
+      const guidesCol = collection(db, 'artifacts', appId, 'public', 'data', 'guides');
+      onSnapshot(guidesCol, (snapshot) => {
+        snapshot.forEach((docSnap) => {
+          window.guidesMap[docSnap.id] = docSnap.data();
+        });
+        renderChampionGrid();
+      }, (err) => console.error("Firestore Guides Error:", err));
+
+      // 2. Custom Champions Sync: /artifacts/{appId}/public/data/custom_champions
+      const customChampsCol = collection(db, 'artifacts', appId, 'public', 'data', 'custom_champions');
+      onSnapshot(customChampsCol, (snapshot) => {
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          window.championsMap[docSnap.id] = data;
+        });
+        renderChampionGrid();
+        populateFeedbackChampDropdown();
+      }, (err) => console.error("Firestore Custom Champions Error:", err));
+
+      // 3. Custom Lanes Sync: /artifacts/{appId}/public/data/custom_lanes
+      const customLanesCol = collection(db, 'artifacts', appId, 'public', 'data', 'custom_lanes');
+      onSnapshot(customLanesCol, (snapshot) => {
+        snapshot.forEach((docSnap) => {
+          const laneObj = docSnap.data();
+          if (!window.lanes.some(l => l.key === laneObj.key)) {
+            window.lanes.push(laneObj);
+          }
+        });
+        renderLaneTabs();
+      }, (err) => console.error("Firestore Custom Lanes Error:", err));
+
+      // 4. Play Feedbacks Sync: /artifacts/{appId}/public/data/play_feedbacks
+      const feedbackCol = collection(db, 'artifacts', appId, 'public', 'data', 'play_feedbacks');
+      onSnapshot(feedbackCol, (snapshot) => {
+        const list = [];
+        snapshot.forEach((docSnap) => {
+          list.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        // Sort in memory by timestamp descending
+        window.feedbacksList = list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        renderFeedbackList();
+      }, (err) => console.error("Firestore Feedbacks Error:", err));
+    }
+
+    
+    // Render Lane Tabs
+    window.renderLaneTabs = function() {
+      const container = document.getElementById('lane-tabs-container');
+      if (!container) return;
+
+      container.innerHTML = window.lanes.map(lane => {
+        const isActive = window.activeLaneFilter === lane.key;
+        const activeClass = isActive 
+          ? 'bg-lol-gold text-black border-lol-gold font-bold shadow' 
+          : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-lol-gold';
+        
+        return `
+          <button onclick="setLaneFilter('${lane.key}')" class="px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1.5 transition ${activeClass}">
+            <i class="fa-solid ${lane.icon || 'fa-tag'}"></i>
+            <span>${lane.label}</span>
+          </button>
+        `;
+      }).join('');
+    };
+
+    window.setLaneFilter = function(laneKey) {
+      window.activeLaneFilter = laneKey;
+      renderLaneTabs();
+      renderChampionGrid();
+    };
+
+    // Render Champion Grid
+    window.renderChampionGrid = function() {
+      const grid = document.getElementById('champion-grid');
+      const searchInput = document.getElementById('search-champion-input');
+      if (!grid) return;
+
+      const searchQuery = (searchInput ? searchInput.value : '').trim().toLowerCase();
+      
+      const allKeys = Object.keys(window.championsMap);
+      let filtered = allKeys.filter(key => {
+        const champ = window.championsMap[key];
+        
+        // Filter by Lane
+        const matchesLane = window.activeLaneFilter === 'ALL' || (champ.lanes && champ.lanes.includes(window.activeLaneFilter));
+        
+        // Filter by Search Query
+        const matchesSearch = !searchQuery || 
+          champ.name.toLowerCase().includes(searchQuery) || 
+          champ.id.toLowerCase().includes(searchQuery);
+
+        return matchesLane && matchesSearch;
+      });
+
+      // Sort alphabetically by Korean Name
+      filtered.sort((a, b) => window.championsMap[a].name.localeCompare(window.championsMap[b].name, 'ko'));
+
+      document.getElementById('champ-count').textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-500 bg-[#0A141E] rounded-xl border border-slate-800">
+            <i class="fa-solid fa-ghost text-3xl mb-2 text-slate-600"></i>
+            <p class="text-sm">검색 결과에 맞는 챔피언이 없습니다.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(key => {
+        const champ = window.championsMap[key];
+        const hasGuide = !!window.guidesMap[key];
+
+        return `
+          <div onclick="openChampionDetail('${champ.id}')" 
+            class="group relative bg-[#0A141E] border border-slate-800 hover:border-lol-gold rounded-xl p-2 cursor-pointer transition transform hover:-translate-y-1 flex flex-col items-center">
+            
+            ${hasGuide ? `
+              <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-lol-gold shadow-md" title="공략 작성됨"></span>
+            ` : ''}
+
+            <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-slate-700 group-hover:border-lol-gold">
+              <img src="${champ.imgUrl}" alt="${champ.name}" 
+                onerror="this.src='https://placehold.co/120x120/1e232a/c8aa6e?text=${champ.id}'"
+                class="w-full h-full object-cover">
+            </div>
+
+            <span class="mt-2 text-xs font-semibold text-slate-200 truncate w-full text-center group-hover:text-lol-gold">
+              ${champ.name}
+            </span>
+            
+            <!-- Lane tags mini -->
+            <div class="flex gap-0.5 mt-1">
+              ${(champ.lanes || []).map(l => `<span class="text-[9px] px-1 bg-slate-900 text-slate-400 rounded">${l}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
+    // Open Champion Detail Modal & Populate Data
+    window.openChampionDetail = function(champId) {
+      window.currentEditingChampId = champId;
+      const champ = window.championsMap[champId];
+      if (!champ) return;
+
+      document.getElementById('detail-champ-img').src = champ.imgUrl;
+      document.getElementById('detail-champ-name').textContent = champ.name;
+      document.getElementById('detail-champ-id').textContent = `[ ${champ.id} ]`;
+      document.getElementById('detail-input-imgurl').value = champ.imgUrl || '';
+
+      // Checkboxes for lanes
+      const laneCheckboxes = document.getElementById('detail-lane-checkboxes');
+      laneCheckboxes.innerHTML = window.lanes.filter(l => l.key !== 'ALL').map(l => {
+        const isChecked = (champ.lanes || []).includes(l.key);
+        return `
+          <label class="inline-flex items-center space-x-1 cursor-pointer">
+            <input type="checkbox" value="${l.key}" ${isChecked ? 'checked' : ''} class="champ-detail-lane-cb rounded bg-slate-900 border-slate-700 text-lol-gold focus:ring-0">
+            <span class="text-slate-300">${l.label.split(' ')[0]}</span>
+          </label>
+        `;
+      }).join('');
+
+      // Populate Guide Inputs
+      const guide = window.guidesMap[champId] || {};
+      document.getElementById('guide-runes-main').value = guide.runesMain || '';
+      document.getElementById('guide-runes-notes').value = guide.runesNotes || '';
+      document.getElementById('guide-start-items').value = guide.startItems || '';
+      document.getElementById('guide-spells').value = guide.spells || '';
+      document.getElementById('guide-core-items').value = guide.coreItems || '';
+      document.getElementById('guide-situational-items').value = guide.situationalItems || '';
+      document.getElementById('guide-matchups').value = guide.matchups || '';
+      document.getElementById('guide-quick-notes').value = guide.quickNotes || '';
+
+      openModal('modal-champ-detail');
+    };
+
+    // Save Champion Guide
+    window.saveChampionGuide = async function() {
+      const champId = window.currentEditingChampId;
+      if (!champId) return;
+
+      const newImgUrl = document.getElementById('detail-input-imgurl').value.trim();
+      const selectedLanes = Array.from(document.querySelectorAll('.champ-detail-lane-cb:checked')).map(cb => cb.value);
+
+      // Update local Champion info
+      if (window.championsMap[champId]) {
+        if (newImgUrl) window.championsMap[champId].imgUrl = newImgUrl;
+        window.championsMap[champId].lanes = selectedLanes;
+      }
+
+      // Collect Guide Object
+      const guideObj = {
+        runesMain: document.getElementById('guide-runes-main').value.trim(),
+        runesNotes: document.getElementById('guide-runes-notes').value.trim(),
+        startItems: document.getElementById('guide-start-items').value.trim(),
+        spells: document.getElementById('guide-spells').value.trim(),
+        coreItems: document.getElementById('guide-core-items').value.trim(),
+        situationalItems: document.getElementById('guide-situational-items').value.trim(),
+        matchups: document.getElementById('guide-matchups').value.trim(),
+        quickNotes: document.getElementById('guide-quick-notes').value.trim(),
+        updatedAt: Date.now()
+      };
+
+      window.guidesMap[champId] = guideObj;
+
+      // Save to Firebase Firestore if connected
+      if (db && currentUser) {
+        try {
+          // Save Guide
+          await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'guides', champId), guideObj);
+
+          // Save/Update Champion info
+          await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom_champions', champId), window.championsMap[champId]);
+        } catch (e) {
+          console.error("Firestore save guide failed:", e);
+        }
+      }
+
+      renderChampionGrid();
+      closeModal('modal-champ-detail');
+      showToast('공략 노트 및 설정이 성공적으로 저장되었습니다!');
+    };
+
+    
+    // Open Add Champion Modal
+    window.openAddChampionModal = function() {
+      const laneContainer = document.getElementById('new-champ-lanes');
+      laneContainer.innerHTML = window.lanes.filter(l => l.key !== 'ALL').map(l => `
+        <label class="inline-flex items-center space-x-1 cursor-pointer">
+          <input type="checkbox" value="${l.key}" class="new-champ-lane-cb rounded bg-slate-900 border-slate-700 text-lol-gold">
+          <span class="text-slate-300 text-xs">${l.label.split(' ')[0]}</span>
+        </label>
+      `).join('');
+
+      openModal('modal-add-champion');
+    };
+
+    // Submit Custom Champion
+    window.submitNewChampion = async function() {
+      const name = document.getElementById('new-champ-name').value.trim();
+      let key = document.getElementById('new-champ-id').value.trim();
+      const imgUrl = document.getElementById('new-champ-img').value.trim();
+      const lanes = Array.from(document.querySelectorAll('.new-champ-lane-cb:checked')).map(cb => cb.value);
+
+      if (!name) {
+        showToast('챔피언 이름을 입력해 주세요.', true);
+        return;
+      }
+
+      if (!key) {
+        key = 'Custom_' + Date.now();
+      }
+
+      const champObj = {
+        id: key,
+        name: name,
+        title: '사용자 추가 챔피언',
+        imgUrl: imgUrl || `https://placehold.co/120x120/1e232a/c8aa6e?text=${encodeURIComponent(name)}`,
+        lanes: lanes.length > 0 ? lanes : ['MID'],
+        isCustom: true
+      };
+
+      window.championsMap[key] = champObj;
+
+      if (db && currentUser) {
+        try {
+          await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom_champions', key), champObj);
+        } catch (e) {
+          console.error("Firestore add custom champ error:", e);
+        }
+      }
+
+      renderChampionGrid();
+      populateFeedbackChampDropdown();
+      closeModal('modal-add-champion');
+      showToast(`${name} 챔피언이 새로 추가되었습니다!`);
+    };
+
+    // Open Add Lane Modal
+    window.openAddLaneModal = function() {
+      openModal('modal-add-lane');
+    };
+
+    // Submit Custom Lane
+    window.submitNewLane = async function() {
+      const key = document.getElementById('new-lane-key').value.trim().toUpperCase();
+      const label = document.getElementById('new-lane-label').value.trim();
+      const icon = document.getElementById('new-lane-icon').value.trim();
+
+      if (!key || !label) {
+        showToast('라인 코드와 표시 이름을 모두 입력해 주세요.', true);
+        return;
+      }
+
+      const laneObj = {
+        key: key,
+        label: label,
+        icon: icon || 'fa-tag'
+      };
+
+      if (!window.lanes.some(l => l.key === key)) {
+        window.lanes.push(laneObj);
+      }
+
+      if (db && currentUser) {
+        try {
+          await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom_lanes', key), laneObj);
+        } catch (e) {
+          console.error("Firestore add lane error:", e);
+        }
+      }
+
+      renderLaneTabs();
+      closeModal('modal-add-lane');
+      showToast(`${label} 라인이 추가되었습니다!`);
+    };
+
+
+    // Populate Champion Dropdown in Feedback Form
+    function populateFeedbackChampDropdown() {
+      const select = document.getElementById('fb-my-champ');
+      const filterSelect = document.getElementById('filter-feedback-champ');
+      if (!select) return;
+
+      const sorted = Object.keys(window.championsMap).sort((a, b) => 
+        window.championsMap[a].name.localeCompare(window.championsMap[b].name, 'ko')
+      );
+
+      const optionsHtml = sorted.map(key => {
+        const c = window.championsMap[key];
+        return `<option value="${c.id}">${c.name} (${c.id})</option>`;
+      }).join('');
+
+      select.innerHTML = optionsHtml;
+      
+      if (filterSelect) {
+        filterSelect.innerHTML = `<option value="ALL">모든 챔피언 피드백</option>` + optionsHtml;
+      }
+    }
+
+    // Open Feedback Modal
+    window.openAddFeedbackModal = function() {
+      populateFeedbackChampDropdown();
+      openModal('modal-add-feedback');
+    };
+
+    // Submit Feedback Log
+    window.submitNewFeedback = async function() {
+      const myChampId = document.getElementById('fb-my-champ').value;
+      const vsChamp = document.getElementById('fb-vs-champ').value.trim();
+      const result = document.getElementById('fb-result').value;
+      const lane = document.getElementById('fb-lane').value;
+      
+      const kills = parseInt(document.getElementById('fb-kills').value) || 0;
+      const deaths = parseInt(document.getElementById('fb-deaths').value) || 0;
+      const assists = parseInt(document.getElementById('fb-assists').value) || 0;
+      const cs = document.getElementById('fb-cs').value.trim();
+
+      const good = document.getElementById('fb-good').value.trim();
+      const bad = document.getElementById('fb-bad').value.trim();
+      const next = document.getElementById('fb-next').value.trim();
+
+      const feedbackId = 'fb_' + Date.now();
+
+      const newLog = {
+        id: feedbackId,
+        champId: myChampId,
+        vsChamp: vsChamp,
+        result: result,
+        lane: lane,
+        kills: kills,
+        deaths: deaths,
+        assists: assists,
+        cs: cs,
+        good: good,
+        bad: bad,
+        next: next,
+        createdAt: Date.now()
+      };
+
+      window.feedbacksList.unshift(newLog);
+
+      if (db && currentUser) {
+        try {
+          await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'play_feedbacks', feedbackId), newLog);
+        } catch (e) {
+          console.error("Firestore feedback error:", e);
+        }
+      }
+
+      renderFeedbackList();
+      closeModal('modal-add-feedback');
+      showToast('피드백 일기가 저장되었습니다!');
+    };
+
+    // Render Play Feedback Logs Grid & Update Dashboard Metrics
+    window.renderFeedbackList = function() {
+      const container = document.getElementById('feedback-list-container');
+      if (!container) return;
+
+      const champFilter = document.getElementById('filter-feedback-champ')?.value || 'ALL';
+      const resultFilter = document.getElementById('filter-feedback-result')?.value || 'ALL';
+
+      let filtered = window.feedbacksList.filter(item => {
+        const matchesChamp = champFilter === 'ALL' || item.champId === champFilter;
+        const matchesResult = resultFilter === 'ALL' || item.result === resultFilter;
+        return matchesChamp && matchesResult;
+      });
+
+      // Update Dashboard Stats
+      const totalGames = filtered.length;
+      const wins = filtered.filter(f => f.result === 'WIN').length;
+      const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
+
+      let totalK = 0, totalD = 0, totalA = 0;
+      filtered.forEach(f => {
+        totalK += f.kills || 0;
+        totalD += f.deaths || 0;
+        totalA += f.assists || 0;
+      });
+
+      const avgKdaRatio = totalD > 0 ? ((totalK + totalA) / totalD).toFixed(2) : (totalK + totalA).toFixed(2);
+
+      document.getElementById('stat-total-games').textContent = `${totalGames}판`;
+      document.getElementById('stat-winrate').textContent = `${winRate}%`;
+      document.getElementById('stat-avg-kda').textContent = `${avgKdaRatio}:1`;
+      document.getElementById('feedback-count-text').textContent = `${totalGames}개의 피드백 노트`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center bg-[#0A141E] rounded-xl border border-slate-800 text-slate-500">
+            <i class="fa-solid fa-clipboard-list text-3xl mb-2 text-slate-600"></i>
+            <p class="text-sm">기록된 피드백이 없습니다. 새 게임 피드백을 추가해보세요!</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(log => {
+        const champ = window.championsMap[log.champId] || { name: log.champId, imgUrl: '' };
+        const isWin = log.result === 'WIN';
+        const dateStr = new Date(log.createdAt).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        return `
+          <div class="bg-[#0A141E] border ${isWin ? 'border-emerald-500/30' : 'border-rose-500/30'} rounded-xl p-4 space-y-3 shadow">
+            
+            <!-- Top Header Row -->
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+              <div class="flex items-center space-x-3">
+                <img src="${champ.imgUrl}" class="w-12 h-12 rounded-lg border-2 ${isWin ? 'border-emerald-500' : 'border-rose-500'} object-cover">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-extrabold text-slate-100 text-base">${champ.name}</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase ${isWin ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'}">
+                      ${isWin ? '승리 WIN' : '패배 LOSS'}
+                    </span>
+                    <span class="text-xs px-2 py-0.5 bg-slate-800 text-slate-300 rounded">${log.lane || 'LINE'}</span>
+                  </div>
+                  <p class="text-xs text-slate-400 mt-0.5">
+                    VS <strong class="text-slate-200">${log.vsChamp || '미지정'}</strong> | ${dateStr}
+                  </p>
+                </div>
+              </div>
+
+              <!-- KDA Stats -->
+              <div class="text-right">
+                <div class="text-base font-black text-slate-100">
+                  <span class="text-emerald-400">${log.kills}</span> / 
+                  <span class="text-rose-400">${log.deaths}</span> / 
+                  <span class="text-amber-400">${log.assists}</span>
+                </div>
+                <div class="text-xs text-slate-400">
+                  CS: ${log.cs || 'N/A'}
+                </div>
+              </div>
+            </div>
+
+            <!-- Notes Content -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
+              ${log.good ? `
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                  <p class="font-bold text-emerald-400 mb-1"><i class="fa-solid fa-circle-check mr-1"></i> 잘한 점</p>
+                  <p class="text-slate-300 leading-relaxed">${log.good}</p>
+                </div>
+              ` : ''}
+
+              ${log.bad ? `
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                  <p class="font-bold text-rose-400 mb-1"><i class="fa-solid fa-circle-xmark mr-1"></i> 실수 / 아쉬운 점</p>
+                  <p class="text-slate-300 leading-relaxed">${log.bad}</p>
+                </div>
+              ` : ''}
+
+              ${log.next ? `
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                  <p class="font-bold text-lol-gold mb-1"><i class="fa-solid fa-bullseye mr-1"></i> 다음 개선점</p>
+                  <p class="text-slate-300 leading-relaxed">${log.next}</p>
+                </div>
+              ` : ''}
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    };
+
+    // Main Tab Switcher
+    window.switchMainTab = function(tabName) {
+      window.activeMainTab = tabName;
+      const btnGuides = document.getElementById('nav-btn-guides');
+      const btnFeedback = document.getElementById('nav-btn-feedback');
+      const secGuides = document.getElementById('section-guides');
+      const secFeedback = document.getElementById('section-feedback');
+
+      if (tabName === 'guides') {
+        secGuides.classList.remove('hidden');
+        secFeedback.classList.add('hidden');
+
+        btnGuides.className = 'px-4 py-2 rounded-lg font-bold text-sm transition-all border border-lol-gold bg-lol-gold text-black shadow-lg';
+        btnFeedback.className = 'px-4 py-2 rounded-lg font-bold text-sm transition-all border border-slate-700 bg-slate-800 text-slate-300 hover:border-lol-gold';
+      } else {
+        secGuides.classList.add('hidden');
+        secFeedback.classList.remove('hidden');
+
+        btnFeedback.className = 'px-4 py-2 rounded-lg font-bold text-sm transition-all border border-lol-gold bg-lol-gold text-black shadow-lg';
+        btnGuides.className = 'px-4 py-2 rounded-lg font-bold text-sm transition-all border border-slate-700 bg-slate-800 text-slate-300 hover:border-lol-gold';
+        
+        populateFeedbackChampDropdown();
+        renderFeedbackList();
+      }
+    };
+
+    // Modal Controls
+    window.openModal = function(id) {
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closeModal = function(id) {
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.add('hidden');
+    };
+
+    // Simple Toast Notification
+    function showToast(msg, isError = false) {
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl shadow-2xl text-xs font-bold transition transform duration-300 flex items-center space-x-2 border ${isError ? 'bg-rose-900/90 text-rose-100 border-rose-500' : 'bg-slate-900/95 text-lol-gold border-lol-gold'}`;
+      toast.innerHTML = `<i class="fa-solid ${isError ? 'fa-triangle-exclamation text-rose-400' : 'fa-circle-check text-lol-gold'}"></i><span>${msg}</span>`;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+  </script>
 </body>
 </html>
