@@ -1,1527 +1,1146 @@
 <!DOCTYPE html>
-<html lang="ko" class="dark">
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LoL 노트 & 플레이 피드백 센터</title>
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            lol: {
-              gold: '#C8AA6E',
-              goldLight: '#F0E6D2',
-              blue: '#0AC8B9',
-              darkBlue: '#0397AB',
-              darkBg: '#091428',
-              cardBg: '#0A141E',
-              panelBg: '#1E232A',
-              border: '#785A28'
-            }
-          }
-        }
-      }
-    }
-  </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>소환사의 노트</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --ink:#0d1117; --panel:#151b23; --panel-2:#1b222c; --line:#262e3a;
+  --text:#e6e9ee; --muted:#8b95a5; --gold:#c8a34a; --gold-dim:#8a7132;
+  --teal:#46b39d; --rose:#d1495b; --violet:#7c6bd6;
+  --r:10px;
+  --shadow:0 12px 32px rgba(0,0,0,.45);
+  font-synthesis-weight:none;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--ink);color:var(--text);
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",sans-serif;
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--gold)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts: Inter & Noto Sans KR -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+/* ---------- 상단 ---------- */
+header.top{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:12px 18px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#131922,#0f141b);
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:30;
+}
+.brand{display:flex;align-items:baseline;gap:9px;margin-right:6px}
+.brand b{font-weight:800;letter-spacing:-.02em;font-size:18px}
+.brand span{color:var(--muted);font-size:12px}
+nav.tabs{display:flex;gap:4px;background:var(--panel);padding:4px;border-radius:999px;border:1px solid var(--line)}
+nav.tabs button{
+  background:none;border:0;padding:6px 16px;border-radius:999px;color:var(--muted);font-weight:600;font-size:14px;
+}
+nav.tabs button[aria-selected="true"]{background:var(--gold);color:#17120a}
+.top .spacer{flex:1}
+.sync{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:#4a5566;flex:none}
+.dot.on{background:var(--teal);box-shadow:0 0 0 3px rgba(70,179,157,.18)}
+.dot.busy{background:var(--gold)}
+.dot.err{background:var(--rose)}
 
-  <style>
-    body {
-      font-family: 'Noto Sans KR', 'Inter', sans-serif;
-      background-color: #091428;
-      color: #cdbe91;
-    }
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #091428;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #3c3c41;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #c8aa6e;
-    }
-    .hextech-border {
-      border: 1px solid #785a28;
-      box-shadow: 0 0 10px rgba(200, 170, 110, 0.15);
-    }
-    .hextech-card {
-      background: linear-gradient(135deg, #0a141e 0%, #1e232a 100%);
-    }
-    .gold-gradient-text {
-      background: linear-gradient(180deg, #f0e6d2 0%, #c8aa6e 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-  </style>
+/* ---------- 레이아웃 ---------- */
+main{display:none}
+main.show{display:block}
+.wrap{display:grid;grid-template-columns:212px 1fr;gap:0;min-height:calc(100vh - 62px)}
+aside{border-right:1px solid var(--line);padding:16px 12px;background:#111720}
+.sec-label{font-size:12px;color:var(--muted);font-weight:600;margin:0 0 8px 6px}
+.lane-list{display:flex;flex-direction:column;gap:2px}
+.lane-btn{
+  display:flex;align-items:center;gap:9px;width:100%;text-align:left;
+  background:none;border:0;padding:8px 10px;border-radius:var(--r);color:var(--muted);font-weight:600;
+}
+.lane-btn:hover{background:var(--panel)}
+.lane-btn[aria-current="true"]{background:var(--panel-2);color:var(--text);box-shadow:inset 3px 0 0 var(--gold)}
+.lane-btn .ic{font-size:15px;width:20px;text-align:center}
+.lane-btn .cnt{margin-left:auto;font-size:11.5px;color:var(--muted);font-weight:500}
+.ghost{
+  margin-top:10px;width:100%;background:none;border:1px dashed var(--line);color:var(--muted);
+  padding:8px;border-radius:var(--r);font-size:13px;font-weight:600;
+}
+.ghost:hover{border-color:var(--gold-dim);color:var(--gold)}
+
+.content{padding:18px 22px 60px;min-width:0}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.bar h2{margin:0;font-size:20px;font-weight:800;letter-spacing:-.02em}
+.bar h2 em{font-style:normal;color:var(--muted);font-size:13px;font-weight:600;margin-left:8px}
+.search{
+  flex:1;min-width:150px;max-width:300px;background:var(--panel);border:1px solid var(--line);
+  border-radius:999px;padding:8px 14px;
+}
+.search::placeholder{color:#5d6878}
+.btn{
+  background:var(--panel);border:1px solid var(--line);padding:8px 14px;border-radius:var(--r);
+  font-weight:600;font-size:13.5px;color:var(--text);
+}
+.btn:hover{border-color:var(--gold-dim)}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#17120a}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--rose);border-color:#3a2028}
+.btn.sm{padding:5px 10px;font-size:12.5px}
+
+/* ---------- 챔피언 그리드 ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:12px}
+.champ{
+  background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;
+}
+.champ .por{
+  width:100%;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  background:var(--panel-2);display:grid;place-items:center;transition:border-color .12s,transform .12s;
+}
+.champ:hover .por{border-color:var(--gold);transform:translateY(-2px)}
+.champ .por img{width:100%;height:100%;object-fit:cover;display:block}
+.champ .ini{font-size:26px;font-weight:800;color:#3f4a5b}
+.champ .nm{font-size:12.5px;font-weight:600;text-align:center;line-height:1.25;word-break:keep-all}
+.champ .flag{
+  position:absolute;top:5px;right:5px;width:9px;height:9px;border-radius:50%;
+  background:var(--teal);box-shadow:0 0 0 2px #0d1117;
+}
+.empty{border:1px dashed var(--line);border-radius:var(--r);padding:44px 20px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--text);margin-bottom:6px;font-size:15px}
+
+/* ---------- 모달/시트 ---------- */
+.scrim{position:fixed;inset:0;background:rgba(5,8,12,.68);z-index:60;display:none}
+.scrim.show{display:block}
+.sheet{
+  position:fixed;top:0;right:0;bottom:0;width:min(640px,100%);background:var(--ink);
+  border-left:1px solid var(--line);z-index:61;display:none;flex-direction:column;box-shadow:var(--shadow);
+}
+.sheet.show{display:flex}
+.sheet header{
+  display:flex;align-items:center;gap:12px;padding:14px 18px;border-top:3px solid var(--gold);
+  border-bottom:1px solid var(--line);background:var(--panel);
+  padding-top:calc(14px + env(safe-area-inset-top,0px));
+}
+.sheet header img,.sheet header .ini{width:46px;height:46px;border-radius:10px;object-fit:cover;flex:none;background:var(--panel-2);display:grid;place-items:center;font-weight:800;color:#3f4a5b}
+.sheet header h3{margin:0;font-size:18px;font-weight:800}
+.sheet header .sub{color:var(--muted);font-size:12.5px}
+.sheet .body{overflow-y:auto;padding:18px;flex:1}
+.x{margin-left:auto;background:none;border:0;color:var(--muted);font-size:22px;line-height:1;padding:6px 8px}
+.x:hover{color:var(--text)}
+
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--gold);margin-bottom:6px}
+.field .hint{color:var(--muted);font-weight:500;font-size:11.5px;margin-left:6px}
+.field textarea,.field input,.field select{
+  width:100%;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  padding:10px 12px;resize:vertical;
+}
+.field textarea:focus,.field input:focus,.field select:focus{border-color:var(--gold-dim);outline:none}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1;min-width:120px}
+
+/* 매치업 */
+.mu{display:grid;grid-template-columns:1.1fr .7fr 2fr auto;gap:8px;margin-bottom:8px;align-items:center}
+.mu input,.mu select{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+.mu .del{background:none;border:0;color:var(--muted);padding:4px 8px;font-size:17px}
+.mu .del:hover{color:var(--rose)}
+.mu select[data-d="hard"]{color:var(--rose)}
+.mu select[data-d="even"]{color:var(--gold)}
+.mu select[data-d="easy"]{color:var(--teal)}
+
+/* ---------- 피드백 ---------- */
+.fb-layout{display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h3{margin:0 0 14px;font-size:16px;font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stat b{display:block;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.stat span{font-size:12px;color:var(--muted)}
+.log{
+  border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;background:var(--panel);
+  border-left:3px solid var(--line);
+}
+.log.win{border-left-color:var(--teal)}
+.log.lose{border-left-color:var(--rose)}
+.log .head{display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.log .head b{font-size:15px}
+.tag{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--panel-2);color:var(--muted);border:1px solid var(--line)}
+.tag.win{color:var(--teal);border-color:#204039}
+.tag.lose{color:var(--rose);border-color:#3a2028}
+.log dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px}
+.log dt{color:var(--muted);font-weight:600;white-space:nowrap}
+.log dd{margin:0;white-space:pre-wrap}
+.log .foot{margin-top:10px;display:flex;gap:8px}
+
+/* ---------- 설정 ---------- */
+.settings{max-width:760px;display:grid;gap:18px}
+.settings code{background:var(--panel-2);padding:1px 6px;border-radius:5px;font-size:12.5px}
+.settings p{color:var(--muted);font-size:13.5px;margin:0 0 12px}
+.ol{color:var(--muted);font-size:13.5px;padding-left:18px;margin:0 0 14px}
+.ol li{margin-bottom:5px}
+.lane-edit{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.lane-edit input{flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.lane-edit .ic-in{flex:none;width:52px;text-align:center}
+
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:90;
+  background:var(--panel);border:1px solid var(--gold-dim);color:var(--text);
+  padding:10px 18px;border-radius:999px;box-shadow:var(--shadow);font-size:13.5px;font-weight:600;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+.modal{
+  position:fixed;z-index:70;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92vw);
+  background:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);display:none;
+}
+.modal.show{display:block}
+.modal .mh{padding:16px 18px;border-bottom:1px solid var(--line);font-weight:800}
+.modal .mb{padding:18px;max-height:64vh;overflow:auto}
+.modal .mf{padding:14px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.pick{display:flex;gap:8px;flex-wrap:wrap}
+.pick label{
+  display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);
+  padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;
+}
+.pick input{accent-color:var(--gold)}
+.prev{width:74px;height:74px;border-radius:12px;object-fit:cover;border:1px solid var(--line);background:var(--panel-2)}
+
+@media (max-width:860px){
+  .wrap{grid-template-columns:1fr}
+  aside{border-right:0;border-bottom:1px solid var(--line);padding:12px}
+  .lane-list{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}
+  .lane-btn{width:auto;white-space:nowrap}
+  .lane-btn .cnt{margin-left:4px}
+  .ghost{margin-top:8px}
+  .fb-layout{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .mu{grid-template-columns:1fr 1fr;gap:6px}
+  .mu input.memo{grid-column:1/-1}
+  .content{padding:14px}
+}
+</style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-lol-gold selection:text-black">
-
-  <header class="sticky top-0 z-40 bg-opacity-95 bg-[#091428] border-b border-lol-border backdrop-blur shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Brand & Title -->
-      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchMainTab('guides')">
-        <div class="w-10 h-10 rounded-full border border-lol-gold flex items-center justify-center bg-black/40 text-lol-gold shadow-md">
-          <i class="fa-solid font-bold text-xl fa-shield-halved"></i>
-        </div>
-        <div>
-          <h1 class="text-xl font-extrabold gold-gradient-text tracking-wider uppercase">LoL Note & Feedback</h1>
-          <p class="text-xs text-slate-400">챔피언 공략 & 나만의 플레이 피드백 노트</p>
-        </div>
-      </div>
-
-      <!-- Navigation Tabs -->
-      <div class="flex items-center space-x-2 sm:space-x-4">
-        <button id="nav-btn-guides" onclick="switchMainTab('guides')" class="px-4 py-2 rounded-lg font-bold text-sm transition-all duration-200 border border-lol-gold bg-lol-gold text-black shadow-lg">
-          <i class="fa-solid fa-book-bookmark mr-1.5"></i> 챔피언 공략노트
-        </button>
-        <button id="nav-btn-feedback" onclick="switchMainTab('feedback')" class="px-4 py-2 rounded-lg font-bold text-sm transition-all duration-200 border border-slate-700 bg-slate-800 text-slate-300 hover:border-lol-gold">
-          <i class="fa-solid fa-gamepad mr-1.5"></i> 플레이 피드백
-        </button>
-      </div>
-
-      <!-- Firebase Status Indicator & Config Button -->
-      <div class="flex items-center space-x-2">
-        <button onclick="openFirebaseConfigModal()" title="Firebase 키 설정 및 상태 확인" class="flex items-center space-x-2 text-xs bg-slate-900/90 hover:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 hover:border-lol-gold transition text-slate-300">
-          <span id="firebase-dot" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
-          <span id="firebase-text" class="text-slate-300">로컬 모드</span>
-          <i class="fa-solid fa-gear text-slate-400 hover:text-lol-gold ml-1"></i>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-    <!-- SECTION 1: CHAMPION GUIDES -->
-    <section id="section-guides" class="space-y-6">
-      
-      <!-- Filter Bar & Custom Add Controls -->
-      <div class="bg-[#0A141E] p-4 rounded-xl border border-lol-border flex flex-col md:flex-row gap-4 items-center justify-between">
-        
-        <!-- Lane Filter Tabs -->
-        <div class="flex flex-wrap items-center gap-1.5 w-full md:w-auto" id="lane-tabs-container">
-          <!-- Dynamically Rendered Lane Tabs -->
-        </div>
-
-        <!-- Right Tools: Add Champion, Add Lane, Search -->
-        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full md:w-auto">
-          <div class="relative w-full sm:w-48">
-            <input type="text" id="search-champion-input" oninput="renderChampionGrid()" placeholder="챔피언 검색..." 
-              class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-3 py-1.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-lol-gold">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-          </div>
-
-          <button onclick="openAddLaneModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold text-slate-200 transition whitespace-nowrap">
-            <i class="fa-solid fa-plus text-lol-gold mr-1"></i> 라인 추가
-          </button>
-
-          <button onclick="openAddChampionModal()" class="px-3 py-1.5 bg-lol-gold/10 hover:bg-lol-gold/20 border border-lol-gold text-lol-gold font-semibold rounded-lg text-xs transition whitespace-nowrap">
-            <i class="fa-solid fa-user-plus mr-1"></i> 챔피언 추가
-          </button>
-        </div>
-      </div>
-
-      <!-- Champion Grid Stats Summary -->
-      <div class="flex justify-between items-center px-1 text-xs text-slate-400">
-        <span>표시 중인 챔피언: <strong id="champ-count" class="text-lol-gold">0</strong>개</span>
-        <span class="italic"><i class="fa-solid fa-circle-info mr-1"></i>챔피언 카드를 클릭하여 룬, 아이템, 상대법을 작성하세요.</span>
-      </div>
-
-      <!-- Champion Grid Display -->
-      <div id="champion-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
-        <!-- Dynamic Cards Inserted Here -->
-      </div>
-    </section>
-
-    <!-- SECTION 2: PLAY FEEDBACK LOGS -->
-    <section id="section-feedback" class="hidden space-y-6">
-      
-      <!-- Top Banner / New Log Button -->
-      <div class="bg-gradient-to-r from-[#0A141E] via-[#1E232A] to-[#0A141E] p-6 rounded-xl border border-lol-border flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-          <h2 class="text-xl font-bold gold-gradient-text flex items-center">
-            <i class="fa-solid fa-chart-line mr-2.5 text-lol-gold"></i> 나만의 게임 피드백 노트
-          </h2>
-          <p class="text-xs text-slate-400 mt-1">
-            승패보다 중요한 것은 복기입니다. 잘했던 점, 실수한 점, 다음 판 목표를 기록하세요.
-          </p>
-        </div>
-        <button onclick="openAddFeedbackModal()" class="w-full sm:w-auto px-5 py-2.5 bg-lol-gold hover:bg-amber-400 text-black font-bold rounded-lg shadow-lg transition flex items-center justify-center">
-          <i class="fa-solid fa-pen-to-square mr-2"></i> 새 피드백 작성하기
-        </button>
-      </div>
-
-      <!-- Feedback Dashboard Summary -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-[#0A141E] p-4 rounded-xl border border-slate-800 flex items-center justify-between">
-          <div>
-            <p class="text-xs text-slate-400 font-semibold uppercase">총 피드백 판수</p>
-            <p id="stat-total-games" class="text-2xl font-black text-slate-100">0판</p>
-          </div>
-          <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg">
-            <i class="fa-solid fa-gamepad"></i>
-          </div>
-        </div>
-
-        <div class="bg-[#0A141E] p-4 rounded-xl border border-slate-800 flex items-center justify-between">
-          <div>
-            <p class="text-xs text-slate-400 font-semibold uppercase">기록 승률</p>
-            <p id="stat-winrate" class="text-2xl font-black text-emerald-400">0%</p>
-          </div>
-          <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg">
-            <i class="fa-solid fa-trophy"></i>
-          </div>
-        </div>
-
-        <div class="bg-[#0A141E] p-4 rounded-xl border border-slate-800 flex items-center justify-between">
-          <div>
-            <p class="text-xs text-slate-400 font-semibold uppercase">평균 KDA</p>
-            <p id="stat-avg-kda" class="text-2xl font-black text-lol-gold">0.00:1</p>
-          </div>
-          <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg">
-            <i class="fa-solid fa-crosshairs"></i>
-          </div>
-        </div>
-      </div>
-
-      <!-- Feedback List Filter -->
-      <div class="flex flex-col sm:flex-row gap-3 items-center justify-between bg-[#0A141E] p-3 rounded-lg border border-slate-800">
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <select id="filter-feedback-champ" onchange="renderFeedbackList()" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg p-2 focus:outline-none focus:border-lol-gold">
-            <option value="ALL">모든 챔피언 피드백</option>
-          </select>
-          <select id="filter-feedback-result" onchange="renderFeedbackList()" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg p-2 focus:outline-none focus:border-lol-gold">
-            <option value="ALL">모든 결과 (승/패)</option>
-            <option value="WIN">승리 (WIN)</option>
-            <option value="LOSS">패배 (LOSS)</option>
-          </select>
-        </div>
-        <span id="feedback-count-text" class="text-xs text-slate-400">0개의 피드백 노트</span>
-      </div>
-
-      <!-- Feedback Logs Grid -->
-      <div id="feedback-list-container" class="space-y-4">
-        <!-- Dynamic Feedback Cards -->
-      </div>
-    </section>
-
-  </main>
-
-  <!-- MODAL 1: CHAMPION DETAIL & GUIDE EDITOR MODAL -->
-  <div id="modal-champ-detail" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-    <div class="bg-[#0A141E] border border-lol-border rounded-xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-      
-      <!-- Modal Header -->
-      <div class="bg-[#1E232A] p-4 border-b border-lol-border flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <img id="detail-champ-img" src="" class="w-14 h-14 rounded-lg border-2 border-lol-gold object-cover shadow">
-          <div>
-            <div class="flex items-center gap-2">
-              <h3 id="detail-champ-name" class="text-xl font-black text-slate-100">챔피언 이름</h3>
-              <span id="detail-champ-id" class="text-xs text-slate-400 font-mono">ID</span>
-            </div>
-            <!-- Lane badges -->
-            <div id="detail-champ-lanes" class="flex flex-wrap gap-1 mt-1">
-              <!-- Lanes tags -->
-            </div>
-          </div>
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <button onclick="saveChampionGuide()" class="px-4 py-2 bg-lol-gold hover:bg-amber-400 text-black font-bold rounded-lg text-xs shadow transition">
-            <i class="fa-solid fa-floppy-disk mr-1"></i> 공략 저장하기
-          </button>
-          <button onclick="closeModal('modal-champ-detail')" class="p-2 text-slate-400 hover:text-white rounded-lg">
-            <i class="fa-solid fa-xmark text-lg"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Modal Body -->
-      <div class="p-5 overflow-y-auto space-y-6 flex-grow text-sm">
-        
-        <!-- Champion Image & Lane Edit Panel -->
-        <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800 flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div class="flex items-center gap-3 w-full sm:w-auto">
-            <label class="text-xs font-semibold text-slate-400">이미지 URL:</label>
-            <input type="text" id="detail-input-imgurl" class="flex-grow sm:w-80 bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 focus:border-lol-gold" placeholder="https://...">
-          </div>
-          <div class="flex items-center gap-2 w-full sm:w-auto">
-            <label class="text-xs font-semibold text-slate-400">포지션/라인 선택:</label>
-            <div id="detail-lane-checkboxes" class="flex flex-wrap gap-2 text-xs">
-              <!-- Dynamic Lane Checkboxes -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Guide Section Tabs / Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          
-          <!-- 1. Runes (룬 설정) -->
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3">
-            <h4 class="font-bold text-lol-gold flex items-center text-base">
-              <i class="fa-solid fa-bolt mr-2 text-amber-400"></i> 추천 룬 (Runes)
-            </h4>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">핵심 룬 빌드 (주 룬 & 보조 룬)</label>
-              <input type="text" id="guide-runes-main" placeholder="예: 정밀 (정복자 - 승전보 - 민첩함 - 최후의 저항) + 결의" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold">
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">파편 & 상세 설명 메모</label>
-              <textarea id="guide-runes-notes" rows="3" placeholder="능력치 파편 세팅이나 상대에 따른 룬 변화 설명..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold"></textarea>
-            </div>
-          </div>
-
-          <!-- 2. Starting Items & Spells (시작아이템 & 스펠) -->
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3">
-            <h4 class="font-bold text-lol-gold flex items-center text-base">
-              <i class="fa-solid fa-flask mr-2 text-blue-400"></i> 시작 아이템 & 소환사 주문
-            </h4>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">시작 아이템</label>
-              <input type="text" id="guide-start-items" placeholder="예: 도란의 검 + 1체력포션 or 도란의 방패" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold">
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">추천 스펠 (Spells)</label>
-              <input type="text" id="guide-spells" placeholder="예: 점멸 + 점화 / 점멸 + 텔레포트" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold">
-            </div>
-          </div>
-
-          <!-- 3. Core Items & Build Path (아이템 트리) -->
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3 md:col-span-2">
-            <h4 class="font-bold text-lol-gold flex items-center text-base">
-              <i class="fa-solid fa-shield-cat mr-2 text-emerald-400"></i> 핵심 아이템 빌드 (Items)
-            </h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs text-slate-400 mb-1">1, 2, 3 코어템 빌드</label>
-                <input type="text" id="guide-core-items" placeholder="예: 몰락한 왕의 검 -> 크라켄 -> 무한의 대검" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold">
-              </div>
-              <div>
-                <label class="block text-xs text-slate-400 mb-1">신발 & 상황별 유동적 아이템</label>
-                <input type="text" id="guide-situational-items" placeholder="예: 판금 장화, 헤르메스 / AP 상대 주포 / CC 상대 수은" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold">
-              </div>
-            </div>
-          </div>
-
-          <!-- 4. Counter Matchups (상대법 & 카운터 팁) -->
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3 md:col-span-2">
-            <h4 class="font-bold text-lol-gold flex items-center text-base">
-              <i class="fa-solid fa-skull mr-2 text-red-400"></i> 라인전 상대법 & 카운터 팁
-            </h4>
-            <textarea id="guide-matchups" rows="4" placeholder="어려운 챔피언 상대법, 라인전 주도권 잡는 딜교 팁, 렙타이밍 노하우 등 상세 가이드..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold"></textarea>
-          </div>
-
-          <!-- 5. Quick Check-List (게임 중 한눈에 볼 핵심 체크리스트) -->
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3 md:col-span-2">
-            <h4 class="font-bold text-lol-gold flex items-center text-base">
-              <i class="fa-solid fa-list-check mr-2 text-purple-400"></i> 인게임 알트탭 핵심 요약 (Cheat Sheet)
-            </h4>
-            <textarea id="guide-quick-notes" rows="3" placeholder="게임 화면에서 알트탭으로 바로 볼 3줄 요약! (예: 1. 3렙 전 무리금지 / 2. 용타임 전 W 쿨 확인 / 3. 한타 시 상대 딜러 마크)" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold"></textarea>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 2: ADD CHAMPION MODAL -->
-  <div id="modal-add-champion" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-[#0A141E] border border-lol-border rounded-xl w-full max-w-md p-5 space-y-4 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-lg font-bold text-slate-100 flex items-center">
-          <i class="fa-solid fa-user-plus text-lol-gold mr-2"></i> 새 챔피언 추가하기
-        </h3>
-        <button onclick="closeModal('modal-add-champion')" class="text-slate-400 hover:text-white">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block text-slate-300 mb-1 font-semibold">챔피언 이름 (한국어)</label>
-          <input type="text" id="new-champ-name" placeholder="예: 암베사, 로크, 신규 챔피언..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
-        </div>
-
-        <div>
-          <label class="block text-slate-300 mb-1 font-semibold">챔피언 영문 ID 또는 식별 키</label>
-          <input type="text" id="new-champ-id" placeholder="예: Ambessa, Roke, Custom1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
-        </div>
-
-        <div>
-          <label class="block text-slate-300 mb-1 font-semibold">이미지 URL (선택)</label>
-          <input type="text" id="new-champ-img" placeholder="https://... (비워둘 시 기본 이미지)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
-        </div>
-
-        <div>
-          <label class="block text-slate-300 mb-1 font-semibold">포지션/라인 선택</label>
-          <div id="new-champ-lanes" class="flex flex-wrap gap-2 pt-1">
-            <!-- Dynamic Lanes checkboxes -->
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeModal('modal-add-champion')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">취소</button>
-        <button onclick="submitNewChampion()" class="px-4 py-1.5 bg-lol-gold text-black font-bold rounded-lg text-xs hover:bg-amber-400">추가하기</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 3: ADD LANE MODAL -->
-  <div id="modal-add-lane" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-[#0A141E] border border-lol-border rounded-xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-lg font-bold text-slate-100 flex items-center">
-          <i class="fa-solid fa-plus text-lol-gold mr-2"></i> 새 라인/카테고리 추가
-        </h3>
-        <button onclick="closeModal('modal-add-lane')" class="text-slate-400 hover:text-white">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block text-slate-300 mb-1 font-semibold">라인 코드 (영문)</label>
-          <input type="text" id="new-lane-key" placeholder="예: ARAM, ROTATION, FLEX" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
-        </div>
-        <div>
-          <label class="block text-slate-300 mb-1 font-semibold">라인 표시 이름 (한국어)</label>
-          <input type="text" id="new-lane-label" placeholder="예: 칼바람, 로테이션, 원챔" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
-        </div>
-        <div>
-          <label class="block text-slate-300 mb-1 font-semibold">아이콘 FontAwesome 클래스 (선택)</label>
-          <input type="text" id="new-lane-icon" placeholder="fa-crosshairs" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeModal('modal-add-lane')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">취소</button>
-        <button onclick="submitNewLane()" class="px-4 py-1.5 bg-lol-gold text-black font-bold rounded-lg text-xs hover:bg-amber-400">라인 생성</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 4: ADD PLAY FEEDBACK MODAL -->
-  <div id="modal-add-feedback" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-    <div class="bg-[#0A141E] border border-lol-border rounded-xl w-full max-w-2xl p-5 space-y-4 shadow-2xl my-auto">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-lg font-bold text-slate-100 flex items-center">
-          <i class="fa-solid fa-gamepad text-lol-gold mr-2"></i> 게임 피드백 복기 작성
-        </h3>
-        <button onclick="closeModal('modal-add-feedback')" class="text-slate-400 hover:text-white">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-        <div>
-          <label class="block text-slate-300 mb-1 font-semibold">내가 플레이한 챔피언</label>
-          <select id="fb-my-champ" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
-            <!-- Dynamic Champion options -->
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-slate-300 mb-1 font-semibold">상대 챔피언 (맞라이너 / 정글)</label>
-          <input type="text" id="fb-vs-champ" placeholder="예: 제드, 리신, 다리우스..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
-        </div>
-
-        <div>
-          <label class="block text-slate-300 mb-1 font-semibold">경기 결과</label>
-          <select id="fb-result" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
-            <option value="WIN">승리 (WIN)</option>
-            <option value="LOSS">패배 (LOSS)</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-slate-300 mb-1 font-semibold">라인/포지션</label>
-          <select id="fb-lane" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
-            <option value="TOP">탑 (TOP)</option>
-            <option value="JUG">정글 (JUG)</option>
-            <option value="MID">미드 (MID)</option>
-            <option value="ADC">원딜 (ADC)</option>
-            <option value="SUP">서폿 (SUP)</option>
-          </select>
-        </div>
-
-        <div class="sm:col-span-2 grid grid-cols-4 gap-2">
-          <div>
-            <label class="block text-slate-400 mb-1 text-[11px]">킬 (K)</label>
-            <input type="number" id="fb-kills" value="0" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-slate-200">
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1 text-[11px]">데스 (D)</label>
-            <input type="number" id="fb-deaths" value="0" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-slate-200">
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1 text-[11px]">어시 (A)</label>
-            <input type="number" id="fb-assists" value="0" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-slate-200">
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1 text-[11px]">CS (분당/총)</label>
-            <input type="text" id="fb-cs" placeholder="185 (7.2)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-slate-200">
-          </div>
-        </div>
-
-        <div class="sm:col-span-2">
-          <label class="block text-slate-300 mb-1 font-semibold text-emerald-400"><i class="fa-solid fa-circle-check mr-1"></i> 이번 판 잘했던 점</label>
-          <textarea id="fb-good" rows="2" placeholder="예: 3렙 때 스펠 이득 잘 봄, 바텀 로밍 타이밍 완벽했음" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold"></textarea>
-        </div>
-
-        <div class="sm:col-span-2">
-          <label class="block text-slate-300 mb-1 font-semibold text-rose-400"><i class="fa-solid fa-circle-xmark mr-1"></i> 실수하거나 아쉬웠던 점</label>
-          <textarea id="fb-bad" rows="2" placeholder="예: 6렙 전 와드 안 박아서 정글 갱에 당함, 용타임 전 뇌절" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold"></textarea>
-        </div>
-
-        <div class="sm:col-span-2">
-          <label class="block text-slate-300 mb-1 font-semibold text-lol-gold"><i class="fa-solid fa-bullseye mr-1"></i> 다음 판 피드백 / 개선 목표</label>
-          <textarea id="fb-next" rows="2" placeholder="예: 첫 라인 밀고 3분 15초에 반드시 귀환 후 와드 설치하기" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold"></textarea>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-        <button onclick="closeModal('modal-add-feedback')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">취소</button>
-        <button onclick="submitNewFeedback()" class="px-4 py-1.5 bg-lol-gold text-black font-bold rounded-lg text-xs hover:bg-amber-400">저장하기</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 5: FIREBASE CONFIG SETTINGS MODAL -->
-  <div id="modal-firebase-config" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-[#0A141E] border border-lol-border rounded-xl w-full max-w-lg p-5 space-y-4 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-lg font-bold text-slate-100 flex items-center">
-          <i class="fa-solid fa-fire text-amber-500 mr-2"></i> Firebase 개인 고유 키 연동 설정
-        </h3>
-        <button onclick="closeModal('modal-firebase-config')" class="text-slate-400 hover:text-white">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <p class="text-xs text-slate-400">
-        Firebase 콘솔(<span class="text-lol-gold">Project Settings &gt; General &gt; Your apps</span>)에서 발급받은 SDK 설정 키를 붙여넣으세요.
-      </p>
-
-      <!-- JSON Input Area -->
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block text-slate-300 mb-1 font-semibold flex items-center justify-between">
-            <span>Firebase Config JSON 직접 입력</span>
-            <button onclick="fillSampleFirebaseConfig()" class="text-[10px] text-lol-gold underline hover:text-amber-300">샘플 키 입력</button>
-          </label>
-          <textarea id="fb-config-json-input" rows="6" placeholder='{
-  "apiKey": "AIzaSy...",
-  "authDomain": "your-app.firebaseapp.com",
-  "projectId": "your-app-id",
-  "storageBucket": "your-app.appspot.com",
-  "messagingSenderId": "1234567890",
-  "appId": "1:1234567890:web:abcdef..."
-}' class="w-full bg-slate-950 font-mono border border-slate-700 rounded-lg p-2.5 text-xs text-emerald-400 focus:border-lol-gold focus:outline-none"></textarea>
-        </div>
-
-        <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-[11px] text-slate-400 space-y-1">
-          <p class="font-bold text-slate-300"><i class="fa-solid fa-circle-info mr-1 text-lol-gold"></i> 키 입력 안내</p>
-          <p>• 키를 입력하면 브라우저에 저장되며 Firebase 데이터베이스와 동기화됩니다.</p>
-          <p>• 키를 입력하지 않더라도 모든 공략/피드백 기능은 로컬 브라우저에 정상 저장됩니다.</p>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-        <button onclick="resetFirebaseConfig()" class="px-3 py-1.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-lg text-xs font-semibold">
-          <i class="fa-solid fa-trash-can mr-1"></i> 키 초기화
-        </button>
-        <div class="flex gap-2">
-          <button onclick="closeModal('modal-firebase-config')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">취소</button>
-          <button onclick="saveCustomFirebaseConfig()" class="px-4 py-1.5 bg-lol-gold text-black font-bold rounded-lg text-xs hover:bg-amber-400">
-            <i class="fa-solid fa-plug mr-1"></i> 설정 저장 &amp; 연동
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    // Global App Configuration & State
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'lol-note-app-default';
-    
-    function getStoredFirebaseConfig() {
-      const stored = localStorage.getItem('user_firebase_config');
-      if (stored) {
-        try {
-          return JSON.parse(stored);
-        } catch (e) {
-          console.error("Local stored config error:", e);
-        }
-      }
-      return typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-    }
-
-    let firebaseConfig = getStoredFirebaseConfig();
-
-    // Initialize Firebase Services Safely
-    let app, auth, db;
-    let currentUser = null;
-    let isFirebaseConnected = false;
-
-    async function initFirebaseServices(cfg) {
-      if (!cfg || !cfg.apiKey || cfg.apiKey.includes('Dummy')) {
-        updateFirebaseStatus('offline', '로컬 모드 (키 미설정)');
-        return;
-      }
-
-      try {
-        app = initializeApp(cfg);
-        auth = getAuth(app);
-        db = getFirestore(app);
-
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
-
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            currentUser = user;
-            updateFirebaseStatus('connected', '클라우드 동기화됨');
-            setupRealtimeSync();
-          } else {
-            updateFirebaseStatus('offline', '오프라인 / 로컬 모드');
-          }
-        });
-      } catch (err) {
-        console.warn("Firebase Init fallback:", err);
-        updateFirebaseStatus('offline', '연동 실패 (로컬 모드)');
-      }
-    }
-
-    // Default Lanes Definition
-    window.lanes = [
-      { key: 'ALL', label: '전체 챔피언', icon: 'fa-globe' },
-      { key: 'TOP', label: '탑 (Top)', icon: 'fa-shield' },
-      { key: 'JUG', label: '정글 (Jungle)', icon: 'fa-tree' },
-      { key: 'MID', label: '미드 (Mid)', icon: 'fa-hat-wizard' },
-      { key: 'ADC', label: '원딜 (ADC)', icon: 'fa-bow-arrow' },
-      { key: 'SUP', label: '서폿 (Sup)', icon: 'fa-hand-holding-heart' }
-    ];
-
-    // Local state stores
-    window.championsMap = {}; // { 'Garen': { id, name, imgUrl, lanes: [], guide: {} } }
-    window.guidesMap = JSON.parse(localStorage.getItem('local_lol_guides') || '{}');
-    window.feedbacksList = JSON.parse(localStorage.getItem('local_lol_feedbacks') || '[]');
-    window.activeLaneFilter = 'ALL';
-    window.activeMainTab = 'guides';
-    window.currentEditingChampId = null;
-
-    // Riot DataDragon Version & Base Image URL
-    const DDRAGON_VER = '14.24.1';
-    const CHAMP_IMG_BASE = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VER}/img/champion/`;
-
-    // Pre-populated default champions list (Ensures instantaneous rendering offline)
-    const defaultChampionsList = [
-      { id: 'Roke', name: '로크', lanes: ['TOP', 'MID'], imgUrl: 'https://placehold.co/120x120/1e232a/c8aa6e?text=ROKE' },
-      { id: 'Ambessa', name: '암베사', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Ambessa.png` },
-      { id: 'Smolder', name: '스몰더', lanes: ['ADC', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Smolder.png` },
-      { id: 'Hwei', name: '웨이', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Hwei.png` },
-      { id: 'Briar', name: '브라이어', lanes: ['JUG', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Briar.png` },
-      { id: 'Naafiri', name: '나피리', lanes: ['MID', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Naafiri.png` },
-      { id: 'Milio', name: '밀리오', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Milio.png` },
-      { id: 'KSante', name: '크산테', lanes: ['TOP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}KSante.png` },
-      { id: 'Garen', name: '가렌', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Garen.png` },
-      { id: 'Galio', name: '갈리오', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Galio.png` },
-      { id: 'Gangplank', name: '갱플랭크', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Gangplank.png` },
-      { id: 'Gragas', name: '그라가스', lanes: ['TOP', 'JUG', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Gragas.png` },
-      { id: 'Graves', name: '그레이브즈', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Graves.png` },
-      { id: 'Gwen', name: '그웬', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Gwen.png` },
-      { id: 'Nami', name: '나미', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Nami.png` },
-      { id: 'Nasus', name: '나서스', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Nasus.png` },
-      { id: 'Nautilus', name: '노틸러스', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Nautilus.png` },
-      { id: 'Nocturne', name: '녹턴', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Nocturne.png` },
-      { id: 'Nunu', name: '누누와 의지', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Nunu.png` },
-      { id: 'Nidalee', name: '니달리', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Nidalee.png` },
-      { id: 'Neeko', name: '니코', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Neeko.png` },
-      { id: 'Nilah', name: '닐라', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Nilah.png` },
-      { id: 'Darius', name: '다리우스', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Darius.png` },
-      { id: 'Diana', name: '다이애나', lanes: ['JUG', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Diana.png` },
-      { id: 'Draven', name: '드레이븐', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Draven.png` },
-      { id: 'Ryze', name: '라이즈', lanes: ['MID', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Ryze.png` },
-      { id: 'Rakan', name: '라칸', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Rakan.png` },
-      { id: 'Rammus', name: '람머스', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Rammus.png` },
-      { id: 'Lux', name: '럭스', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Lux.png` },
-      { id: 'Rumble', name: '럼블', lanes: ['TOP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Rumble.png` },
-      { id: 'Renata', name: '글라스크', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Renata.png` },
-      { id: 'Renekton', name: '레넥톤', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Renekton.png` },
-      { id: 'Leona', name: '레오나', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Leona.png` },
-      { id: 'RekSai', name: '렉사이', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}RekSai.png` },
-      { id: 'Rengar', name: '렝가', lanes: ['JUG', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Rengar.png` },
-      { id: 'Lucian', name: '루시안', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Lucian.png` },
-      { id: 'Lulu', name: '룰루', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Lulu.png` },
-      { id: 'Leblanc', name: '르블랑', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Leblanc.png` },
-      { id: 'LeeSin', name: '리 신', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}LeeSin.png` },
-      { id: 'Riven', name: '리븐', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Riven.png` },
-      { id: 'Lissandra', name: '리산드라', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Lissandra.png` },
-      { id: 'Lillia', name: '릴리아', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Lillia.png` },
-      { id: 'MasterYi', name: '마스터 이', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}MasterYi.png` },
-      { id: 'MaoKai', name: '마오카이', lanes: ['JUG', 'SUP', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Maokai.png` },
-      { id: 'Malzahar', name: '말자하', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Malzahar.png` },
-      { id: 'Malphite', name: '말파이트', lanes: ['TOP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Malphite.png` },
-      { id: 'Mordekaiser', name: '모데카이저', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Mordekaiser.png` },
-      { id: 'Morgana', name: '몰가나', lanes: ['SUP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Morgana.png` },
-      { id: 'DrMundo', name: '문도 박사', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}DrMundo.png` },
-      { id: 'MissFortune', name: '미스 포츈', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}MissFortune.png` },
-      { id: 'Bard', name: '바드', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Bard.png` },
-      { id: 'Varus', name: '바루스', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Varus.png` },
-      { id: 'Vi', name: '바이', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Vi.png` },
-      { id: 'Veigar', name: '베이거', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Veigar.png` },
-      { id: 'Vayn', name: '베인', lanes: ['ADC', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Vayne.png` },
-      { id: 'Vex', name: '벡스', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Vex.png` },
-      { id: 'Belveth', name: '벨베스', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Belveth.png` },
-      { id: 'Velkoz', name: '벨코즈', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Velkoz.png` },
-      { id: 'Volibear', name: '볼리베어', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Volibear.png` },
-      { id: 'Braum', name: '브라움', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Braum.png` },
-      { id: 'Brand', name: '브랜드', lanes: ['SUP', 'JUG', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Brand.png` },
-      { id: 'Blitzcrank', name: '블리츠크랭크', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Blitzcrank.png` },
-      { id: 'Viego', name: '비에고', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Viego.png` },
-      { id: 'Viktor', name: '빅토르', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Viktor.png` },
-      { id: 'Poppy', name: '뽀삐', lanes: ['TOP', 'JUG', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Poppy.png` },
-      { id: 'Samira', name: '사미라', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Samira.png` },
-      { id: 'Sion', name: '사이온', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Sion.png` },
-      { id: 'Sylas', name: '사일러스', lanes: ['MID', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Sylas.png` },
-      { id: 'Shaco', name: '샤코', lanes: ['JUG', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Shaco.png` },
-      { id: 'Senna', name: '세나', lanes: ['SUP', 'ADC'], imgUrl: `${CHAMP_IMG_BASE}Senna.png` },
-      { id: 'Seraphine', name: '세라핀', lanes: ['SUP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Seraphine.png` },
-      { id: 'Sejuani', name: '세주아니', lanes: ['JUG', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Sejuani.png` },
-      { id: 'Sett', name: '세트', lanes: ['TOP', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Sett.png` },
-      { id: 'Sona', name: '소나', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Sona.png` },
-      { id: 'Soraka', name: '소라카', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Soraka.png` },
-      { id: 'Shen', name: '쉔', lanes: ['TOP', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Shen.png` },
-      { id: 'Shyvana', name: '쉬바나', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Shyvana.png` },
-      { id: 'Swain', name: '스웨인', lanes: ['SUP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Swain.png` },
-      { id: 'Skarner', name: '스카너', lanes: ['JUG', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Skarner.png` },
-      { id: 'Sivir', name: '시비르', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Sivir.png` },
-      { id: 'XinZhao', name: '신 짜오', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}XinZhao.png` },
-      { id: 'Syndra', name: '신드라', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Syndra.png` },
-      { id: 'Singed', name: '신지드', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Singed.png` },
-      { id: 'Thresh', name: '쓰레쉬', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Thresh.png` },
-      { id: 'Ahri', name: '아리', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Ahri.png` },
-      { id: 'Amumu', name: '아무무', lanes: ['JUG', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Amumu.png` },
-      { id: 'AurelionSol', name: '아우렐리온 솔', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}AurelionSol.png` },
-      { id: 'Ivern', name: '아이번', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Ivern.png` },
-      { id: 'Azir', name: '아지르', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Azir.png` },
-      { id: 'Akali', name: '아칼리', lanes: ['MID', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Akali.png` },
-      { id: 'Aatrox', name: '아트록스', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Aatrox.png` },
-      { id: 'Aphelios', name: '아펠리오스', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Aphelios.png` },
-      { id: 'Alistar', name: '알리스타', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Alistar.png` },
-      { id: 'Anivia', name: '애니비아', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Anivia.png` },
-      { id: 'Annie', name: '애니', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Annie.png` },
-      { id: 'Ashe', name: '애쉬', lanes: ['ADC', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Ashe.png` },
-      { id: 'Yasuo', name: '야스오', lanes: ['MID', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Yasuo.png` },
-      { id: 'Ekko', name: '에코', lanes: ['JUG', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Ekko.png` },
-      { id: 'Elise', name: '엘리스', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Elise.png` },
-      { id: 'MonkeyKing', name: '오공', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}MonkeyKing.png` },
-      { id: 'Ornn', name: '오른', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Ornn.png` },
-      { id: 'Olaf', name: '올라프', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Olaf.png` },
-      { id: 'Yone', name: '요네', lanes: ['MID', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Yone.png` },
-      { id: 'Yorick', name: '요릭', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Yorick.png` },
-      { id: 'Udyr', name: '우디르', lanes: ['JUG', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Udyr.png` },
-      { id: 'Urgot', name: '우르곳', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Urgot.png` },
-      { id: 'Irelia', name: '이렐리아', lanes: ['TOP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Irelia.png` },
-      { id: 'Evelynn', name: '이블린', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Evelynn.png` },
-      { id: 'Ezreal', name: '이지리얼', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Ezreal.png` },
-      { id: 'Illaoi', name: '일라오이', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Illaoi.png` },
-      { id: 'JarvanIV', name: '자르반 4세', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}JarvanIV.png` },
-      { id: 'Xayah', name: '자야', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Xayah.png` },
-      { id: 'Zyra', name: '자이라', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Zyra.png` },
-      { id: 'Zac', name: '자크', lanes: ['JUG', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Zac.png` },
-      { id: 'Janna', name: '잔나', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Janna.png` },
-      { id: 'Jax', name: '잭스', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Jax.png` },
-      { id: 'Zed', name: '제드', lanes: ['MID', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Zed.png` },
-      { id: 'Xerath', name: '제라스', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Xerath.png` },
-      { id: 'Zeri', name: '제리', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Zeri.png` },
-      { id: 'Jayce', name: '제이스', lanes: ['TOP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Jayce.png` },
-      { id: 'Zoe', name: '조이', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Zoe.png` },
-      { id: 'Ziggs', name: '직스', lanes: ['MID', 'ADC'], imgUrl: `${CHAMP_IMG_BASE}Ziggs.png` },
-      { id: 'Jhin', name: '진', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Jhin.png` },
-      { id: 'Zilean', name: '질리언', lanes: ['SUP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Zilean.png` },
-      { id: 'Jinx', name: '징크스', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Jinx.png` },
-      { id: 'ChoGath', name: '초가스', lanes: ['TOP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Chogath.png` },
-      { id: 'Karma', name: '카르마', lanes: ['SUP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Karma.png` },
-      { id: 'Kassadin', name: '카사딘', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Kassadin.png` },
-      { id: 'Karthus', name: '카서스', lanes: ['JUG', 'ADC'], imgUrl: `${CHAMP_IMG_BASE}Karthus.png` },
-      { id: 'Cassiopeia', name: '카시오페아', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Cassiopeia.png` },
-      { id: 'Kaisa', name: '카이사', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Kaisa.png` },
-      { id: 'Khazix', name: '카직스', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Khazix.png` },
-      { id: 'Katarina', name: '카타리나', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Katarina.png` },
-      { id: 'Kalista', name: '칼리스타', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Kalista.png` },
-      { id: 'Kennen', name: '케넨', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Kennen.png` },
-      { id: 'Caitlyn', name: '케이틀린', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Caitlyn.png` },
-      { id: 'Kayn', name: '케인', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Kayn.png` },
-      { id: 'Kayle', name: '케이틀린/케일', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Kayle.png` },
-      { id: 'KogMaw', name: '코그모', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}KogMaw.png` },
-      { id: 'Corki', name: '코르키', lanes: ['MID', 'ADC'], imgUrl: `${CHAMP_IMG_BASE}Corki.png` },
-      { id: 'Quinn', name: '퀸', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Quinn.png` },
-      { id: 'Kled', name: '클레드', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Kled.png` },
-      { id: 'Qiyana', name: '키아나', lanes: ['MID', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Qiyana.png` },
-      { id: 'Kindred', name: '킨드레드', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Kindred.png` },
-      { id: 'Taric', name: '타릭', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Taric.png` },
-      { id: 'Talon', name: '탈론', lanes: ['MID', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Talon.png` },
-      { id: 'Taliyah', name: '탈리야', lanes: ['MID', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Taliyah.png` },
-      { id: 'TahmKench', name: '탐 켄치', lanes: ['TOP', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}TahmKench.png` },
-      { id: 'Trundle', name: '트런들', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Trundle.png` },
-      { id: 'Tristana', name: '트리스타나', lanes: ['ADC', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Tristana.png` },
-      { id: 'Tryndamere', name: '트린다미어', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Tryndamere.png` },
-      { id: 'TwistedFate', name: '트위스티드 페이트', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}TwistedFate.png` },
-      { id: 'Twitch', name: '트위치', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Twitch.png` },
-      { id: 'Pyke', name: '파이크', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Pyke.png` },
-      { id: 'Pantheon', name: '판테온', lanes: ['TOP', 'MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Pantheon.png` },
-      { id: 'Fiddlesticks', name: '피들스틱', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Fiddlesticks.png` },
-      { id: 'Fiora', name: '피오라', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Fiora.png` },
-      { id: 'Fizz', name: '피즈', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Fizz.png` },
-      { id: 'Heimerdinger', name: '하이머딩거', lanes: ['TOP', 'MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Heimerdinger.png` }
-    ];
-
-    // Load initial defaults
-    function initializeDefaultChampions() {
-      defaultChampionsList.forEach(c => {
-        window.championsMap[c.id] = {
-          id: c.id,
-          name: c.name,
-          title: '챔피언',
-          imgUrl: c.imgUrl,
-          lanes: c.lanes || ['MID'],
-          isCustom: false
-        };
-      });
-
-      // Load custom champions stored in LocalStorage
-      const localCustom = JSON.parse(localStorage.getItem('local_lol_custom_champs') || '{}');
-      Object.keys(localCustom).forEach(k => {
-        window.championsMap[k] = localCustom[k];
-      });
-    }
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      // Step 1: Render Local Default Champions Immediately
-      initializeDefaultChampions();
-      renderLaneTabs();
-      renderChampionGrid();
-      renderFeedbackList();
-
-      // Step 2: Try background Firebase connection
-      initFirebaseServices(firebaseConfig);
-
-      // Step 3: Fetch DataDragon to update missing champions in background
-      loadRiotChampionsInBackground();
-    });
-
-    // Helper: Update Firebase Status UI
-    function updateFirebaseStatus(status, message) {
-      const dot = document.getElementById('firebase-dot');
-      const text = document.getElementById('firebase-text');
-      if (!dot || !text) return;
-
-      if (status === 'connected') {
-        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
-        text.textContent = message;
-        isFirebaseConnected = true;
-      } else if (status === 'connecting') {
-        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
-        text.textContent = message;
-      } else {
-        dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-500';
-        text.textContent = message;
-        isFirebaseConnected = false;
-      }
-    }
-
-    window.openFirebaseConfigModal = function() {
-      const input = document.getElementById('fb-config-json-input');
-      const currentCfg = getStoredFirebaseConfig();
-      if (input && currentCfg) {
-        input.value = JSON.stringify(currentCfg, null, 2);
-      }
-      openModal('modal-firebase-config');
-    };
-
-    window.fillSampleFirebaseConfig = function() {
-      const input = document.getElementById('fb-config-json-input');
-      if (input) {
-        input.value = JSON.stringify({
-          apiKey: "AIzaSyYOUR_ACTUAL_API_KEY_HERE",
-          authDomain: "your-project-id.firebaseapp.com",
-          projectId: "your-project-id",
-          storageBucket: "your-project-id.appspot.com",
-          messagingSenderId: "1234567890",
-          appId: "1:1234567890:web:1234567890abcdef"
-        }, null, 2);
-      }
-    };
-
-    window.saveCustomFirebaseConfig = function() {
-      const raw = document.getElementById('fb-config-json-input').value.trim();
-      if (!raw) {
-        showToast('Firebase Config JSON을 입력해 주세요.', true);
-        return;
-      }
-
-      try {
-        const parsed = JSON.parse(raw);
-        if (!parsed.apiKey || !parsed.projectId) {
-          showToast('유효하지 않은 Firebase Config입니다. (apiKey, projectId 필수)', true);
-          return;
-        }
-
-        localStorage.setItem('user_firebase_config', JSON.stringify(parsed));
-        firebaseConfig = parsed;
-
-        closeModal('modal-firebase-config');
-        showToast('Firebase 키가 저장되었습니다. 재연동을 시작합니다.');
-
-        updateFirebaseStatus('connecting', '재연동 중...');
-        initFirebaseServices(parsed);
-      } catch (e) {
-        showToast('JSON 형식 오류! 올바른 JSON 문자열인지 확인해 주세요.', true);
-      }
-    };
-
-    window.resetFirebaseConfig = function() {
-      localStorage.removeItem('user_firebase_config');
-      firebaseConfig = null;
-      document.getElementById('fb-config-json-input').value = '';
-      closeModal('modal-firebase-config');
-      showToast('Firebase 설정이 초기화되었습니다 (로컬 모드).');
-      updateFirebaseStatus('offline', '로컬 모드');
-    };
-
-    // Load Champion Database from Riot DataDragon asynchronously
-    async function loadRiotChampionsInBackground() {
-      try {
-        const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VER}/data/ko_KR/champion.json`);
-        if (!res.ok) return;
-        const json = await res.json();
-        const data = json.data;
-
-        Object.keys(data).forEach(key => {
-          const champ = data[key];
-          const tags = champ.tags || [];
-          let inferredLanes = [];
-
-          if (tags.includes('Fighter') || tags.includes('Tank')) inferredLanes.push('TOP');
-          if (tags.includes('Assassin') || tags.includes('Fighter')) inferredLanes.push('JUG');
-          if (tags.includes('Mage') || tags.includes('Assassin')) inferredLanes.push('MID');
-          if (tags.includes('Marksman')) inferredLanes.push('ADC');
-          if (tags.includes('Support') || tags.includes('Tank')) inferredLanes.push('SUP');
-
-          if (inferredLanes.length === 0) inferredLanes = ['MID'];
-
-          // Update or insert
-          if (!window.championsMap[key]) {
-            window.championsMap[key] = {
-              id: key,
-              name: champ.name,
-              title: champ.title,
-              imgUrl: `${CHAMP_IMG_BASE}${champ.image.full}`,
-              lanes: inferredLanes,
-              isCustom: false
-            };
-          } else {
-            // Update correct Korean name & image if missing
-            window.championsMap[key].name = champ.name;
-            window.championsMap[key].imgUrl = `${CHAMP_IMG_BASE}${champ.image.full}`;
-          }
-        });
-
-        renderChampionGrid();
-      } catch (e) {
-        console.warn("DDragon background fetch fallback:", e);
-      }
-    }
-
-    function setupRealtimeSync() {
-      if (!db || !currentUser) return;
-
-      // 1. Guides Sync
-      const guidesCol = collection(db, 'artifacts', appId, 'public', 'data', 'guides');
-      onSnapshot(guidesCol, (snapshot) => {
-        snapshot.forEach((docSnap) => {
-          window.guidesMap[docSnap.id] = docSnap.data();
-        });
-        localStorage.setItem('local_lol_guides', JSON.stringify(window.guidesMap));
-        renderChampionGrid();
-      }, (err) => console.error("Firestore Guides Error:", err));
-
-      // 2. Custom Champions Sync
-      const customChampsCol = collection(db, 'artifacts', appId, 'public', 'data', 'custom_champions');
-      onSnapshot(customChampsCol, (snapshot) => {
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          window.championsMap[docSnap.id] = data;
-        });
-        renderChampionGrid();
-        populateFeedbackChampDropdown();
-      }, (err) => console.error("Firestore Custom Champions Error:", err));
-
-      // 3. Custom Lanes Sync
-      const customLanesCol = collection(db, 'artifacts', appId, 'public', 'data', 'custom_lanes');
-      onSnapshot(customLanesCol, (snapshot) => {
-        snapshot.forEach((docSnap) => {
-          const laneObj = docSnap.data();
-          if (!window.lanes.some(l => l.key === laneObj.key)) {
-            window.lanes.push(laneObj);
-          }
-        });
-        renderLaneTabs();
-      }, (err) => console.error("Firestore Custom Lanes Error:", err));
-
-      // 4. Play Feedbacks Sync
-      const feedbackCol = collection(db, 'artifacts', appId, 'public', 'data', 'play_feedbacks');
-      onSnapshot(feedbackCol, (snapshot) => {
-        const list = [];
-        snapshot.forEach((docSnap) => {
-          list.push({ id: docSnap.id, ...docSnap.data() });
-        });
-        window.feedbacksList = list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-        localStorage.setItem('local_lol_feedbacks', JSON.stringify(window.feedbacksList));
-        renderFeedbackList();
-      }, (err) => console.error("Firestore Feedbacks Error:", err));
-    }
-
-    // Render Lane Tabs
-    window.renderLaneTabs = function() {
-      const container = document.getElementById('lane-tabs-container');
-      if (!container) return;
-
-      container.innerHTML = window.lanes.map(lane => {
-        const isActive = window.activeLaneFilter === lane.key;
-        const activeClass = isActive 
-          ? 'bg-lol-gold text-black border-lol-gold font-bold shadow' 
-          : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-lol-gold';
-        
-        return `
-          <button onclick="setLaneFilter('${lane.key}')" class="px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1.5 transition ${activeClass}">
-            <i class="fa-solid ${lane.icon || 'fa-tag'}"></i>
-            <span>${lane.label}</span>
-          </button>
-        `;
-      }).join('');
-    };
-
-    window.setLaneFilter = function(laneKey) {
-      window.activeLaneFilter = laneKey;
-      renderLaneTabs();
-      renderChampionGrid();
-    };
-
-    // Render Champion Grid
-    window.renderChampionGrid = function() {
-      const grid = document.getElementById('champion-grid');
-      const searchInput = document.getElementById('search-champion-input');
-      if (!grid) return;
-
-      const searchQuery = (searchInput ? searchInput.value : '').trim().toLowerCase();
-      
-      const allKeys = Object.keys(window.championsMap);
-      let filtered = allKeys.filter(key => {
-        const champ = window.championsMap[key];
-        
-        // Filter by Lane
-        const matchesLane = window.activeLaneFilter === 'ALL' || (champ.lanes && champ.lanes.includes(window.activeLaneFilter));
-        
-        // Filter by Search Query
-        const matchesSearch = !searchQuery || 
-          champ.name.toLowerCase().includes(searchQuery) || 
-          champ.id.toLowerCase().includes(searchQuery);
-
-        return matchesLane && matchesSearch;
-      });
-
-      // Sort alphabetically by Korean Name
-      filtered.sort((a, b) => window.championsMap[a].name.localeCompare(window.championsMap[b].name, 'ko'));
-
-      document.getElementById('champ-count').textContent = filtered.length;
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-full py-12 text-center text-slate-500 bg-[#0A141E] rounded-xl border border-slate-800">
-            <i class="fa-solid fa-ghost text-3xl mb-2 text-slate-600"></i>
-            <p class="text-sm">검색 결과에 맞는 챔피언이 없습니다.</p>
-          </div>
-        `;
-        return;
-      }
-
-      grid.innerHTML = filtered.map(key => {
-        const champ = window.championsMap[key];
-        const hasGuide = !!window.guidesMap[key];
-
-        return `
-          <div onclick="openChampionDetail('${champ.id}')" 
-            class="group relative bg-[#0A141E] border border-slate-800 hover:border-lol-gold rounded-xl p-2 cursor-pointer transition transform hover:-translate-y-1 flex flex-col items-center">
-            
-            ${hasGuide ? `
-              <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-lol-gold shadow-md" title="공략 작성됨"></span>
-            ` : ''}
-
-            <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-slate-700 group-hover:border-lol-gold">
-              <img src="${champ.imgUrl}" alt="${champ.name}" 
-                onerror="this.src='https://placehold.co/120x120/1e232a/c8aa6e?text=${encodeURIComponent(champ.name)}'"
-                class="w-full h-full object-cover">
-            </div>
-
-            <span class="mt-2 text-xs font-semibold text-slate-200 truncate w-full text-center group-hover:text-lol-gold">
-              ${champ.name}
-            </span>
-            
-            <!-- Lane tags mini -->
-            <div class="flex gap-0.5 mt-1">
-              ${(champ.lanes || []).map(l => `<span class="text-[9px] px-1 bg-slate-900 text-slate-400 rounded">${l}</span>`).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
-    };
-
-    // Open Champion Detail Modal & Populate Data
-    window.openChampionDetail = function(champId) {
-      window.currentEditingChampId = champId;
-      const champ = window.championsMap[champId];
-      if (!champ) return;
-
-      document.getElementById('detail-champ-img').src = champ.imgUrl;
-      document.getElementById('detail-champ-name').textContent = champ.name;
-      document.getElementById('detail-champ-id').textContent = `[ ${champ.id} ]`;
-      document.getElementById('detail-input-imgurl').value = champ.imgUrl || '';
-
-      // Checkboxes for lanes
-      const laneCheckboxes = document.getElementById('detail-lane-checkboxes');
-      laneCheckboxes.innerHTML = window.lanes.filter(l => l.key !== 'ALL').map(l => {
-        const isChecked = (champ.lanes || []).includes(l.key);
-        return `
-          <label class="inline-flex items-center space-x-1 cursor-pointer">
-            <input type="checkbox" value="${l.key}" ${isChecked ? 'checked' : ''} class="champ-detail-lane-cb rounded bg-slate-900 border-slate-700 text-lol-gold focus:ring-0">
-            <span class="text-slate-300">${l.label.split(' ')[0]}</span>
-          </label>
-        `;
-      }).join('');
-
-      // Populate Guide Inputs
-      const guide = window.guidesMap[champId] || {};
-      document.getElementById('guide-runes-main').value = guide.runesMain || '';
-      document.getElementById('guide-runes-notes').value = guide.runesNotes || '';
-      document.getElementById('guide-start-items').value = guide.startItems || '';
-      document.getElementById('guide-spells').value = guide.spells || '';
-      document.getElementById('guide-core-items').value = guide.coreItems || '';
-      document.getElementById('guide-situational-items').value = guide.situationalItems || '';
-      document.getElementById('guide-matchups').value = guide.matchups || '';
-      document.getElementById('guide-quick-notes').value = guide.quickNotes || '';
-
-      openModal('modal-champ-detail');
-    };
-
-    // Save Champion Guide
-    window.saveChampionGuide = async function() {
-      const champId = window.currentEditingChampId;
-      if (!champId) return;
-
-      const newImgUrl = document.getElementById('detail-input-imgurl').value.trim();
-      const selectedLanes = Array.from(document.querySelectorAll('.champ-detail-lane-cb:checked')).map(cb => cb.value);
-
-      // Update local Champion info
-      if (window.championsMap[champId]) {
-        if (newImgUrl) window.championsMap[champId].imgUrl = newImgUrl;
-        window.championsMap[champId].lanes = selectedLanes;
-      }
-
-      // Collect Guide Object
-      const guideObj = {
-        runesMain: document.getElementById('guide-runes-main').value.trim(),
-        runesNotes: document.getElementById('guide-runes-notes').value.trim(),
-        startItems: document.getElementById('guide-start-items').value.trim(),
-        spells: document.getElementById('guide-spells').value.trim(),
-        coreItems: document.getElementById('guide-core-items').value.trim(),
-        situationalItems: document.getElementById('guide-situational-items').value.trim(),
-        matchups: document.getElementById('guide-matchups').value.trim(),
-        quickNotes: document.getElementById('guide-quick-notes').value.trim(),
-        updatedAt: Date.now()
-      };
-
-      window.guidesMap[champId] = guideObj;
-      localStorage.setItem('local_lol_guides', JSON.stringify(window.guidesMap));
-
-      // Save to Firebase Firestore if connected
-      if (db && currentUser) {
-        try {
-          await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'guides', champId), guideObj);
-          await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom_champions', champId), window.championsMap[champId]);
-        } catch (e) {
-          console.error("Firestore save guide failed:", e);
-        }
-      }
-
-      renderChampionGrid();
-      closeModal('modal-champ-detail');
-      showToast('공략 노트 및 설정이 성공적으로 저장되었습니다!');
-    };
-
-    // Open Add Champion Modal
-    window.openAddChampionModal = function() {
-      const laneContainer = document.getElementById('new-champ-lanes');
-      laneContainer.innerHTML = window.lanes.filter(l => l.key !== 'ALL').map(l => `
-        <label class="inline-flex items-center space-x-1 cursor-pointer">
-          <input type="checkbox" value="${l.key}" class="new-champ-lane-cb rounded bg-slate-900 border-slate-700 text-lol-gold">
-          <span class="text-slate-300 text-xs">${l.label.split(' ')[0]}</span>
+<body>
+
+<header class="top">
+  <div class="brand"><b>소환사의 노트</b><span id="verLabel">챔피언 준비 중</span></div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="champs">챔피언</button>
+    <button role="tab" aria-selected="false" data-tab="feedback">플레이 피드백</button>
+    <button role="tab" aria-selected="false" data-tab="settings">설정 · 동기화</button>
+  </nav>
+  <div class="spacer"></div>
+  <div class="sync"><span class="dot" id="syncDot"></span><span id="syncText">이 기기에만 저장 중</span></div>
+</header>
+
+<!-- ============ 챔피언 ============ -->
+<main id="tab-champs" class="show">
+  <div class="wrap">
+    <aside>
+      <p class="sec-label">라인</p>
+      <div class="lane-list" id="laneList"></div>
+      <button class="ghost" id="addLaneBtn">+ 라인 추가</button>
+    </aside>
+    <div class="content">
+      <div class="bar">
+        <h2 id="laneTitle">전체</h2>
+        <input class="search" id="champSearch" placeholder="챔피언 검색" autocomplete="off">
+        <label class="tag" style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px">
+          <input type="checkbox" id="onlyNoted" style="accent-color:var(--gold)"> 작성한 것만
         </label>
-      `).join('');
+        <button class="btn" id="addChampBtn">+ 챔피언 추가</button>
+      </div>
+      <div class="grid" id="champGrid"></div>
+      <div class="empty" id="champEmpty" hidden><b>여기엔 아직 챔피언이 없어요</b>검색어를 지우거나 이 라인에 챔피언을 추가해 보세요.</div>
+    </div>
+  </div>
+</main>
 
-      openModal('modal-add-champion');
-    };
+<!-- ============ 피드백 ============ -->
+<main id="tab-feedback">
+  <div class="content">
+    <div class="bar"><h2>플레이 피드백<em>한 판 끝나고 바로 적어두면 가장 정확해요</em></h2></div>
+    <div class="stats" id="fbStats"></div>
+    <div class="fb-layout">
+      <div class="card">
+        <h3 id="fbFormTitle">오늘 판 기록하기</h3>
+        <div class="row">
+          <div class="field"><label>날짜</label><input type="date" id="fbDate"></div>
+          <div class="field"><label>결과</label><select id="fbResult"><option value="win">승리</option><option value="lose">패배</option><option value="draw">리메이크·기타</option></select></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>챔피언</label><input id="fbChamp" list="champNames" placeholder="예: 리 신"></div>
+          <div class="field"><label>라인</label><select id="fbLane"></select></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>KDA</label><input id="fbKda" placeholder="7/2/11"></div>
+          <div class="field"><label>내 플레이 점수 <span class="hint">1~10</span></label><input type="number" id="fbScore" min="1" max="10" placeholder="6"></div>
+        </div>
+        <div class="field"><label>잘한 것</label><textarea id="fbGood" rows="2" placeholder="15분 전령 타이밍에 탑 다이브 성공"></textarea></div>
+        <div class="field"><label>아쉬운 것</label><textarea id="fbBad" rows="2" placeholder="시야 없이 강가 진입하다 짤림 2번"></textarea></div>
+        <div class="field"><label>다음 판에 고칠 한 가지</label><textarea id="fbGoal" rows="2" placeholder="와드 없는 강가는 무조건 돌아간다"></textarea></div>
+        <div class="row">
+          <button class="btn primary" id="fbSave">기록 저장</button>
+          <button class="btn" id="fbCancel" hidden>수정 취소</button>
+        </div>
+      </div>
+      <div>
+        <div class="bar">
+          <input class="search" id="fbSearch" placeholder="기록 검색 (챔피언·내용)">
+          <select class="btn" id="fbFilter" style="max-width:160px"><option value="all">전체 결과</option><option value="win">승리만</option><option value="lose">패배만</option></select>
+        </div>
+        <div id="fbList"></div>
+      </div>
+    </div>
+  </div>
+</main>
 
-    // Submit Custom Champion
-    window.submitNewChampion = async function() {
-      const name = document.getElementById('new-champ-name').value.trim();
-      let key = document.getElementById('new-champ-id').value.trim();
-      const imgUrl = document.getElementById('new-champ-img').value.trim();
-      const lanes = Array.from(document.querySelectorAll('.new-champ-lane-cb:checked')).map(cb => cb.value);
-
-      if (!name) {
-        showToast('챔피언 이름을 입력해 주세요.', true);
-        return;
-      }
-
-      if (!key) {
-        key = 'Custom_' + Date.now();
-      }
-
-      const champObj = {
-        id: key,
-        name: name,
-        title: '사용자 추가 챔피언',
-        imgUrl: imgUrl || `https://placehold.co/120x120/1e232a/c8aa6e?text=${encodeURIComponent(name)}`,
-        lanes: lanes.length > 0 ? lanes : ['MID'],
-        isCustom: true
-      };
-
-      window.championsMap[key] = champObj;
-
-      // Save custom champ locally
-      const localCustom = JSON.parse(localStorage.getItem('local_lol_custom_champs') || '{}');
-      localCustom[key] = champObj;
-      localStorage.setItem('local_lol_custom_champs', JSON.stringify(localCustom));
-
-      if (db && currentUser) {
-        try {
-          await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom_champions', key), champObj);
-        } catch (e) {
-          console.error("Firestore add custom champ error:", e);
-        }
-      }
-
-      renderChampionGrid();
-      populateFeedbackChampDropdown();
-      closeModal('modal-add-champion');
-      showToast(`${name} 챔피언이 새로 추가되었습니다!`);
-    };
-
-    // Open Add Lane Modal
-    window.openAddLaneModal = function() {
-      openModal('modal-add-lane');
-    };
-
-    // Submit Custom Lane
-    window.submitNewLane = async function() {
-      const key = document.getElementById('new-lane-key').value.trim().toUpperCase();
-      const label = document.getElementById('new-lane-label').value.trim();
-      const icon = document.getElementById('new-lane-icon').value.trim();
-
-      if (!key || !label) {
-        showToast('라인 코드와 표시 이름을 모두 입력해 주세요.', true);
-        return;
-      }
-
-      const laneObj = {
-        key: key,
-        label: label,
-        icon: icon || 'fa-tag'
-      };
-
-      if (!window.lanes.some(l => l.key === key)) {
-        window.lanes.push(laneObj);
-      }
-
-      if (db && currentUser) {
-        try {
-          await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom_lanes', key), laneObj);
-        } catch (e) {
-          console.error("Firestore add lane error:", e);
-        }
-      }
-
-      renderLaneTabs();
-      closeModal('modal-add-lane');
-      showToast(`${label} 라인이 추가되었습니다!`);
-    };
-
-    // Populate Champion Dropdown in Feedback Form
-    function populateFeedbackChampDropdown() {
-      const select = document.getElementById('fb-my-champ');
-      const filterSelect = document.getElementById('filter-feedback-champ');
-      if (!select) return;
-
-      const sorted = Object.keys(window.championsMap).sort((a, b) => 
-        window.championsMap[a].name.localeCompare(window.championsMap[b].name, 'ko')
-      );
-
-      const optionsHtml = sorted.map(key => {
-        const c = window.championsMap[key];
-        return `<option value="${c.id}">${c.name} (${c.id})</option>`;
-      }).join('');
-
-      select.innerHTML = optionsHtml;
-      
-      if (filterSelect) {
-        filterSelect.innerHTML = `<option value="ALL">모든 챔피언 피드백</option>` + optionsHtml;
-      }
-    }
-
-    // Open Feedback Modal
-    window.openAddFeedbackModal = function() {
-      populateFeedbackChampDropdown();
-      openModal('modal-add-feedback');
-    };
-
-    // Submit Feedback Log
-    window.submitNewFeedback = async function() {
-      const myChampId = document.getElementById('fb-my-champ').value;
-      const vsChamp = document.getElementById('fb-vs-champ').value.trim();
-      const result = document.getElementById('fb-result').value;
-      const lane = document.getElementById('fb-lane').value;
-      
-      const kills = parseInt(document.getElementById('fb-kills').value) || 0;
-      const deaths = parseInt(document.getElementById('fb-deaths').value) || 0;
-      const assists = parseInt(document.getElementById('fb-assists').value) || 0;
-      const cs = document.getElementById('fb-cs').value.trim();
-
-      const good = document.getElementById('fb-good').value.trim();
-      const bad = document.getElementById('fb-bad').value.trim();
-      const next = document.getElementById('fb-next').value.trim();
-
-      const feedbackId = 'fb_' + Date.now();
-
-      const newLog = {
-        id: feedbackId,
-        champId: myChampId,
-        vsChamp: vsChamp,
-        result: result,
-        lane: lane,
-        kills: kills,
-        deaths: deaths,
-        assists: assists,
-        cs: cs,
-        good: good,
-        bad: bad,
-        next: next,
-        createdAt: Date.now()
-      };
-
-      window.feedbacksList.unshift(newLog);
-      localStorage.setItem('local_lol_feedbacks', JSON.stringify(window.feedbacksList));
-
-      if (db && currentUser) {
-        try {
-          await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'play_feedbacks', feedbackId), newLog);
-        } catch (e) {
-          console.error("Firestore feedback error:", e);
-        }
-      }
-
-      renderFeedbackList();
-      closeModal('modal-add-feedback');
-      showToast('피드백 일기가 저장되었습니다!');
-    };
-
-    // Render Play Feedback Logs Grid & Update Dashboard Metrics
-    window.renderFeedbackList = function() {
-      const container = document.getElementById('feedback-list-container');
-      if (!container) return;
-
-      const champFilter = document.getElementById('filter-feedback-champ')?.value || 'ALL';
-      const resultFilter = document.getElementById('filter-feedback-result')?.value || 'ALL';
-
-      let filtered = window.feedbacksList.filter(item => {
-        const matchesChamp = champFilter === 'ALL' || item.champId === champFilter;
-        const matchesResult = resultFilter === 'ALL' || item.result === resultFilter;
-        return matchesChamp && matchesResult;
-      });
-
-      // Update Dashboard Stats
-      const totalGames = filtered.length;
-      const wins = filtered.filter(f => f.result === 'WIN').length;
-      const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
-
-      let totalK = 0, totalD = 0, totalA = 0;
-      filtered.forEach(f => {
-        totalK += f.kills || 0;
-        totalD += f.deaths || 0;
-        totalA += f.assists || 0;
-      });
-
-      const avgKdaRatio = totalD > 0 ? ((totalK + totalA) / totalD).toFixed(2) : (totalK + totalA).toFixed(2);
-
-      document.getElementById('stat-total-games').textContent = `${totalGames}판`;
-      document.getElementById('stat-winrate').textContent = `${winRate}%`;
-      document.getElementById('stat-avg-kda').textContent = `${avgKdaRatio}:1`;
-      document.getElementById('feedback-count-text').textContent = `${totalGames}개의 피드백 노트`;
-
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div class="p-8 text-center bg-[#0A141E] rounded-xl border border-slate-800 text-slate-500">
-            <i class="fa-solid fa-clipboard-list text-3xl mb-2 text-slate-600"></i>
-            <p class="text-sm">기록된 피드백이 없습니다. 새 게임 피드백을 추가해보세요!</p>
+<!-- ============ 설정 ============ -->
+<main id="tab-settings">
+  <div class="content">
+    <div class="bar"><h2>설정 · 동기화</h2></div>
+    <div class="settings">
+      <div class="card">
+        <h3>Firebase로 여러 기기에서 같이 쓰기</h3>
+        <p>연결하면 노트와 피드백이 Firestore에 저장돼서 PC·폰 어디서든 같은 내용을 봅니다. 연결하지 않으면 이 브라우저에만 저장됩니다.</p>
+        <ol class="ol">
+          <li><a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase 콘솔</a>에서 프로젝트를 만듭니다.</li>
+          <li>Authentication에서 <code>익명</code> 또는 <code>이메일/비밀번호</code> 로그인을 켭니다.</li>
+          <li>Firestore Database를 만듭니다.</li>
+          <li>프로젝트 설정 → 내 앱 → 웹 앱 추가 후, <code>firebaseConfig</code> 객체를 그대로 아래에 붙여넣습니다.</li>
+        </ol>
+        <div class="field">
+          <label>firebaseConfig <span class="hint">{ apiKey: "...", ... } 형태 그대로 붙여넣기</span></label>
+          <textarea id="fbConfig" rows="7" placeholder='{
+  "apiKey": "AIza...",
+  "authDomain": "my-lol.firebaseapp.com",
+  "projectId": "my-lol",
+  "appId": "1:1234:web:abcd"
+}'></textarea>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="fbConnect">연결하기</button>
+          <button class="btn" id="fbDisconnect">연결 끊기</button>
+        </div>
+        <div id="authBox" style="margin-top:16px" hidden>
+          <div class="row">
+            <div class="field"><label>이메일</label><input id="fbEmail" type="email" autocomplete="username"></div>
+            <div class="field"><label>비밀번호</label><input id="fbPw" type="password" autocomplete="current-password"></div>
           </div>
-        `;
+          <div class="row">
+            <button class="btn" id="fbLogin">로그인</button>
+            <button class="btn" id="fbSignup">계정 만들기</button>
+            <button class="btn" id="fbAnon">익명으로 시작</button>
+            <button class="btn" id="fbLogout" hidden>로그아웃</button>
+          </div>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <button class="btn" id="fbPush">이 기기 내용을 서버로 올리기</button>
+          <button class="btn" id="fbPull">서버 내용 내려받기</button>
+        </div>
+        <details style="margin-top:14px">
+          <summary style="cursor:pointer;color:var(--muted);font-size:13.5px">Firestore 보안 규칙 예시</summary>
+          <pre style="background:var(--panel-2);padding:12px;border-radius:8px;overflow:auto;font-size:12px">rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    match /lolNotes/{uid}/{doc=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}</pre>
+        </details>
+      </div>
+
+      <div class="card">
+        <h3>라인 관리</h3>
+        <p>이름과 아이콘을 바꿀 수 있어요. 라인을 지워도 챔피언은 사라지지 않습니다.</p>
+        <div id="laneEditor"></div>
+        <button class="btn" id="addLaneBtn2" style="margin-top:8px">+ 라인 추가</button>
+      </div>
+
+      <div class="card">
+        <h3>데이터 파일</h3>
+        <p>백업하거나 다른 기기로 옮길 때 쓰세요. 이미지까지 전부 들어갑니다.</p>
+        <div class="row">
+          <button class="btn" id="expBtn">JSON으로 내보내기</button>
+          <button class="btn" id="impBtn">JSON 불러오기</button>
+          <button class="btn danger" id="resetBtn">전부 초기화</button>
+        </div>
+        <input type="file" id="impFile" accept="application/json" hidden>
+      </div>
+    </div>
+  </div>
+</main>
+
+<datalist id="champNames"></datalist>
+
+<!-- 챔피언 상세 시트 -->
+<div class="scrim" id="scrim"></div>
+<section class="sheet" id="sheet" aria-modal="true" role="dialog">
+  <header>
+    <span id="shPor"></span>
+    <div><h3 id="shName"></h3><div class="sub" id="shSub"></div></div>
+    <button class="x" id="shClose" aria-label="닫기">×</button>
+  </header>
+  <div class="body">
+    <div class="field"><label>룬 <span class="hint">주룬·보조룬·파편</span></label><textarea data-note="runes" rows="3" placeholder="정복자 / 승전보 / 전설:완력 / 최후의 저항&#10;보조: 마법의 신발 + 비스킷&#10;파편: 공속-적응-방어"></textarea></div>
+    <div class="row">
+      <div class="field"><label>시작 아이템</label><textarea data-note="start" rows="2" placeholder="도란의 검 + 물약"></textarea></div>
+      <div class="field"><label>스펠 · 스킬 선마</label><textarea data-note="skill" rows="2" placeholder="점멸/점화 · Q선마 → E → W"></textarea></div>
+    </div>
+    <div class="field"><label>핵심 아이템 순서</label><textarea data-note="core" rows="2" placeholder="1코어 → 신발 → 2코어 → 3코어"></textarea></div>
+    <div class="field"><label>상황별 아이템 <span class="hint">상대 조합에 따라</span></label><textarea data-note="situational" rows="2" placeholder="AP 많으면 …, 치유 있으면 …"></textarea></div>
+    <div class="field"><label>콤보 · 조작</label><textarea data-note="combo" rows="2" placeholder="E-Q-평-W 취소, 점멸은 Q 시전 중"></textarea></div>
+    <div class="field"><label>라인전 · 운영 요령</label><textarea data-note="lane" rows="3" placeholder="3렙까지 웨이브 밀지 않기, 6렙 이후 갱 호응 각"></textarea></div>
+
+    <div class="field">
+      <label>상대법 <span class="hint">매치업별로 한 줄씩</span></label>
+      <div id="muList"></div>
+      <button class="btn sm" id="muAdd" style="margin-top:6px">+ 상대 추가</button>
+    </div>
+
+    <div class="field"><label>기타 메모</label><textarea data-note="memo" rows="3"></textarea></div>
+
+    <div class="row" style="margin-top:22px">
+      <button class="btn" id="shEdit">이름 · 라인 · 사진 바꾸기</button>
+      <button class="btn danger" id="shDelete" hidden>이 챔피언 삭제</button>
+    </div>
+  </div>
+</section>
+
+<!-- 라인 추가 모달 -->
+<div class="modal" id="laneModal">
+  <div class="mh">라인 추가</div>
+  <div class="mb">
+    <div class="field"><label>라인 이름</label><input id="laneName" placeholder="예: 스웨인 전용"></div>
+    <div class="field"><label>아이콘 <span class="hint">이모지 한 글자</span></label><input id="laneIcon" placeholder="🔥" maxlength="4"></div>
+  </div>
+  <div class="mf"><button class="btn" data-close>취소</button><button class="btn primary" id="laneSave">추가</button></div>
+</div>
+
+<!-- 챔피언 추가/수정 모달 -->
+<div class="modal" id="champModal">
+  <div class="mh" id="champModalTitle">챔피언 추가</div>
+  <div class="mb">
+    <div class="field"><label>챔피언 이름</label><input id="cmName" placeholder="예: 로크"></div>
+    <div class="field"><label>라인 <span class="hint">여러 개 선택 가능</span></label><div class="pick" id="cmLanes"></div></div>
+    <div class="field">
+      <label>사진 <span class="hint">정사각형으로 잘라 저장돼요</span></label>
+      <div style="display:flex;gap:12px;align-items:center">
+        <img class="prev" id="cmPrev" alt="">
+        <div>
+          <input type="file" id="cmFile" accept="image/*" style="max-width:220px">
+          <button class="btn sm" id="cmClearImg" style="margin-top:8px">사진 지우기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mf"><button class="btn" data-close>취소</button><button class="btn primary" id="cmSave">저장</button></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =======================================================================
+   소환사의 노트 — 챔피언 공략 노트 + 플레이 피드백 + Firebase 동기화
+   ======================================================================= */
+
+/* ---------- 기본 챔피언 데이터 (ddragon id, 한글명, 기본 라인) ---------- */
+const BASE = [
+["Aatrox","아트록스","top"],["Ahri","아리","mid"],["Akali","아칼리","mid"],["Akshan","아크샨","mid"],
+["Alistar","알리스타","support"],["Ambessa","암베사","top"],["Amumu","아무무","jungle"],["Anivia","애니비아","mid"],
+["Annie","애니","mid"],["Aphelios","아펠리오스","adc"],["Ashe","애쉬","adc"],["AurelionSol","아우렐리온 솔","mid"],
+["Aurora","오로라","mid"],["Azir","아지르","mid"],["Bard","바드","support"],["Belveth","벨베스","jungle"],
+["Blitzcrank","블리츠크랭크","support"],["Brand","브랜드","support"],["Braum","브라움","support"],["Briar","브라이어","jungle"],
+["Caitlyn","케이틀린","adc"],["Camille","카밀","top"],["Cassiopeia","카시오페아","mid"],["Chogath","초가스","top"],
+["Corki","코르키","mid"],["Darius","다리우스","top"],["Diana","다이애나","jungle"],["DrMundo","문도 박사","top"],
+["Draven","드레이븐","adc"],["Ekko","에코","jungle"],["Elise","엘리스","jungle"],["Evelynn","이블린","jungle"],
+["Ezreal","이즈리얼","adc"],["Fiddlesticks","피들스틱","jungle"],["Fiora","피오라","top"],["Fizz","피즈","mid"],
+["Galio","갈리오","mid"],["Gangplank","갱플랭크","top"],["Garen","가렌","top"],["Gnar","나르","top"],
+["Gragas","그라가스","jungle"],["Graves","그레이브즈","jungle"],["Gwen","그웬","top"],["Hecarim","헤카림","jungle"],
+["Heimerdinger","하이머딩거","mid"],["Hwei","흐웨이","mid"],["Illaoi","일라오이","top"],["Irelia","이렐리아","top"],
+["Ivern","아이번","jungle"],["Janna","잔나","support"],["JarvanIV","자르반 4세","jungle"],["Jax","잭스","top"],
+["Jayce","제이스","top"],["Jhin","진","adc"],["Jinx","징크스","adc"],["KSante","크산테","top"],
+["Kaisa","카이사","adc"],["Kalista","칼리스타","adc"],["Karma","카르마","support"],["Karthus","카서스","jungle"],
+["Kassadin","카사딘","mid"],["Katarina","카타리나","mid"],["Kayle","케일","top"],["Kayn","케인","jungle"],
+["Kennen","케넨","top"],["Khazix","카직스","jungle"],["Kindred","킨드레드","jungle"],["Kled","클레드","top"],
+["KogMaw","코그모","adc"],["Leblanc","르블랑","mid"],["LeeSin","리 신","jungle"],["Leona","레오나","support"],
+["Lillia","릴리아","jungle"],["Lissandra","리산드라","mid"],["Locke","로크","mid"],["Lucian","루시안","adc"],
+["Lulu","룰루","support"],["Lux","럭스","support"],["Malphite","말파이트","top"],["Malzahar","말자하","mid"],
+["Maokai","마오카이","support"],["MasterYi","마스터 이","jungle"],["Mel","멜","mid"],["Milio","밀리오","support"],
+["MissFortune","미스 포츈","adc"],["MonkeyKing","오공","jungle"],["Mordekaiser","모데카이저","top"],["Morgana","모르가나","support"],
+["Naafiri","나피리","mid"],["Nami","나미","support"],["Nasus","나서스","top"],["Nautilus","노틸러스","support"],
+["Neeko","니코","mid"],["Nidalee","니달리","jungle"],["Nilah","닐라","adc"],["Nocturne","녹턴","jungle"],
+["Nunu","누누와 윌럼프","jungle"],["Olaf","올라프","top"],["Orianna","오리아나","mid"],["Ornn","오른","top"],
+["Pantheon","판테온","top"],["Poppy","뽀삐","jungle"],["Pyke","파이크","support"],["Qiyana","키아나","mid"],
+["Quinn","퀸","top"],["Rakan","라칸","support"],["Rammus","람머스","jungle"],["RekSai","렉사이","jungle"],
+["Rell","렐","support"],["Renata","레나타 글라스크","support"],["Renekton","레넥톤","top"],["Rengar","렝가","jungle"],
+["Riven","리븐","top"],["Rumble","럼블","top"],["Ryze","라이즈","mid"],["Samira","사미라","adc"],
+["Sejuani","세주아니","jungle"],["Senna","세나","support"],["Seraphine","세라핀","support"],["Sett","세트","top"],
+["Shaco","샤코","jungle"],["Shen","쉔","top"],["Shyvana","쉬바나","jungle"],["Singed","신지드","top"],
+["Sion","사이온","top"],["Sivir","시비르","adc"],["Skarner","스카너","jungle"],["Smolder","스몰더","adc"],
+["Sona","소나","support"],["Soraka","소라카","support"],["Swain","스웨인","mid"],["Sylas","사일러스","mid"],
+["Syndra","신드라","mid"],["TahmKench","탐 켄치","top"],["Taliyah","탈리야","jungle"],["Talon","탈론","mid"],
+["Taric","타릭","support"],["Teemo","티모","top"],["Thresh","쓰레쉬","support"],["Tristana","트리스타나","adc"],
+["Trundle","트런들","jungle"],["Tryndamere","트린다미어","top"],["TwistedFate","트위스티드 페이트","mid"],["Twitch","트위치","adc"],
+["Udyr","우디르","jungle"],["Urgot","우르곳","top"],["Varus","바루스","adc"],["Vayne","베인","adc"],
+["Veigar","베이가","mid"],["Velkoz","벨코즈","mid"],["Vex","벡스","mid"],["Vi","바이","jungle"],
+["Viego","비에고","jungle"],["Viktor","빅토르","mid"],["Vladimir","블라디미르","mid"],["Volibear","볼리베어","top"],
+["Warwick","워윅","jungle"],["Xayah","자야","adc"],["Xerath","제라스","mid"],["XinZhao","신 짜오","jungle"],
+["Yasuo","야스오","mid"],["Yone","요네","mid"],["Yorick","요릭","top"],["Yunara","유나라","adc"],
+["Yuumi","유미","support"],["Zac","자크","jungle"],["Zahen","자헨","mid"],["Zed","제드","mid"],
+["Zeri","제리","adc"],["Ziggs","직스","mid"],["Zilean","질리언","support"],["Zoe","조이","mid"],
+["Zyra","자이라","support"]
+];
+
+const DEFAULT_LANES = [
+  {id:"top",name:"탑",icon:"🗡"},
+  {id:"jungle",name:"정글",icon:"🌿"},
+  {id:"mid",name:"미드",icon:"✨"},
+  {id:"adc",name:"원딜",icon:"🏹"},
+  {id:"support",name:"서포터",icon:"🛡"}
+];
+const NOTE_KEYS = ["runes","start","skill","core","situational","combo","lane","memo"];
+const FALLBACK_VER = "15.24.1";
+
+/* ---------- 상태 ---------- */
+let state = null;      // lanes, champions, notes, feedback
+let images = {};       // champId -> dataURL
+let ddVer = FALLBACK_VER;
+let curLane = "all", curChamp = null, editingFb = null, champModalMode = "add", pendingImg = null;
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const LS_STATE = "lolnote.state.v1", LS_IMG = "lolnote.images.v1", LS_CFG = "lolnote.fbconfig.v1";
+const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4);
+
+function freshState(){
+  return {
+    lanes: DEFAULT_LANES.map(l=>({...l})),
+    champions: BASE.map(([id,name,lane])=>({id,name,lanes:[lane],custom:false})),
+    notes: {},
+    feedback: [],
+    updatedAt: Date.now()
+  };
+}
+
+/* 기본 목록이 늘어났을 때 기존 저장본에 자동 병합 */
+function mergeBase(s){
+  const have = new Set(s.champions.map(c=>c.id));
+  let added = 0;
+  BASE.forEach(([id,name,lane])=>{
+    if(!have.has(id)){ s.champions.push({id,name,lanes:[lane],custom:false}); added++; }
+  });
+  return added;
+}
+
+function load(){
+  try{ state = JSON.parse(localStorage.getItem(LS_STATE)||"null"); }catch(e){ state=null; }
+  if(!state || !state.champions) state = freshState();
+  else mergeBase(state);
+  state.lanes = state.lanes || DEFAULT_LANES.map(l=>({...l}));
+  state.notes = state.notes || {};
+  state.feedback = state.feedback || [];
+  try{ images = JSON.parse(localStorage.getItem(LS_IMG)||"{}"); }catch(e){ images={}; }
+}
+
+let saveTimer = null;
+function save(sync=true){
+  state.updatedAt = Date.now();
+  try{
+    localStorage.setItem(LS_STATE, JSON.stringify(state));
+    localStorage.setItem(LS_IMG, JSON.stringify(images));
+  }catch(e){
+    toast("저장 공간이 꽉 찼어요. 설정에서 JSON으로 내보낸 뒤 사진을 줄여 주세요.");
+  }
+  if(sync && FB.ready){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=>FB.push(true), 900);
+  }
+}
+
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove("show"), 2600);
+}
+
+/* ---------- 이미지 ---------- */
+function portraitURL(c){
+  if(images[c.id]) return images[c.id];
+  if(c.custom) return null;
+  return `https://ddragon.leagueoflegends.com/cdn/${ddVer}/img/champion/${c.id}.png`;
+}
+function portraitEl(c){
+  const url = portraitURL(c);
+  const ini = esc(c.name.slice(0,1));
+  if(!url) return `<span class="ini">${ini}</span>`;
+  return `<img src="${esc(url)}" alt="" loading="lazy" data-ini="${ini}" onerror="imgFail(this)">`;
+}
+window.imgFail = function(img){
+  const s = document.createElement("span");
+  s.className = "ini"; s.textContent = img.dataset.ini || "?";
+  img.replaceWith(s);
+};
+function resizeImage(file, size=160){
+  return new Promise((res,rej)=>{
+    const fr = new FileReader();
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const cv = document.createElement("canvas");
+        cv.width = cv.height = size;
+        const ctx = cv.getContext("2d");
+        const m = Math.min(img.width, img.height);
+        ctx.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,size,size);
+        res(cv.toDataURL("image/webp",0.82));
+      };
+      img.onerror = rej; img.src = fr.result;
+    };
+    fr.onerror = rej; fr.readAsDataURL(file);
+  });
+}
+
+/* ---------- ddragon 버전 / 신규 챔피언 자동 반영 ---------- */
+async function syncDDragon(){
+  try{
+    const vs = await fetch("https://ddragon.leagueoflegends.com/api/versions.json").then(r=>r.json());
+    ddVer = vs[0] || FALLBACK_VER;
+    $("#verLabel").textContent = "패치 " + ddVer;
+    const data = await fetch(`https://ddragon.leagueoflegends.com/cdn/${ddVer}/data/ko_KR/champion.json`).then(r=>r.json());
+    const have = new Set(state.champions.map(c=>c.id));
+    let added = 0;
+    Object.values(data.data).forEach(ch=>{
+      const cur = state.champions.find(c=>c.id===ch.id);
+      if(cur){ if(!cur.custom && cur.name!==ch.name) cur.name = ch.name; return; }
+      // id 추정이 빗나간 기본 챔피언은 이름으로 찾아 id를 바로잡는다
+      const byName = state.champions.find(c=>!c.custom && c.name===ch.name && !data.data[c.id]);
+      if(byName){
+        const old = byName.id; byName.id = ch.id;
+        if(state.notes[old]){ state.notes[ch.id] = state.notes[old]; delete state.notes[old]; }
+        if(images[old]){ images[ch.id] = images[old]; delete images[old]; }
         return;
       }
+      if(!have.has(ch.id)){ state.champions.push({id:ch.id,name:ch.name,lanes:[],custom:false}); added++; }
+    });
+    if(added) toast(`새 챔피언 ${added}명을 불러왔어요. 라인은 직접 지정해 주세요.`);
+    save(false); renderChamps(); renderLanes(); fillDatalist();
+  }catch(e){
+    $("#verLabel").textContent = "오프라인 모드";
+  }
+}
 
-      container.innerHTML = filtered.map(log => {
-        const champ = window.championsMap[log.champId] || { name: log.champId, imgUrl: '' };
-        const isWin = log.result === 'WIN';
-        const dateStr = new Date(log.createdAt).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+/* ---------- 라인 ---------- */
+function laneById(id){ return state.lanes.find(l=>l.id===id); }
+function champsInLane(id){
+  if(id==="all") return state.champions;
+  if(id==="none") return state.champions.filter(c=>!c.lanes || !c.lanes.length);
+  return state.champions.filter(c=>(c.lanes||[]).includes(id));
+}
+function hasNote(id){
+  const n = state.notes[id]; if(!n) return false;
+  return NOTE_KEYS.some(k=>(n[k]||"").trim()) || (n.matchups||[]).some(m=>m.name||m.memo);
+}
 
-        return `
-          <div class="bg-[#0A141E] border ${isWin ? 'border-emerald-500/30' : 'border-rose-500/30'} rounded-xl p-4 space-y-3 shadow">
-            
-            <!-- Top Header Row -->
-            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
-              <div class="flex items-center space-x-3">
-                <img src="${champ.imgUrl}" class="w-12 h-12 rounded-lg border-2 ${isWin ? 'border-emerald-500' : 'border-rose-500'} object-cover">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-extrabold text-slate-100 text-base">${champ.name}</span>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase ${isWin ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'}">
-                      ${isWin ? '승리 WIN' : '패배 LOSS'}
-                    </span>
-                    <span class="text-xs px-2 py-0.5 bg-slate-800 text-slate-300 rounded">${log.lane || 'LINE'}</span>
-                  </div>
-                  <p class="text-xs text-slate-400 mt-0.5">
-                    VS <strong class="text-slate-200">${log.vsChamp || '미지정'}</strong> | ${dateStr}
-                  </p>
-                </div>
-              </div>
+function renderLanes(){
+  const list = $("#laneList");
+  const items = [{id:"all",name:"전체",icon:"◆"}, ...state.lanes, {id:"none",name:"라인 미지정",icon:"?"}];
+  list.innerHTML = items.map(l=>`
+    <button class="lane-btn" data-lane="${l.id}" aria-current="${l.id===curLane}">
+      <span class="ic">${l.icon||"◆"}</span><span>${esc(l.name)}</span>
+      <span class="cnt">${champsInLane(l.id).length}</span>
+    </button>`).join("");
+  // 피드백 폼 라인 선택
+  const keep = $("#fbLane").value;
+  $("#fbLane").innerHTML = `<option value="">선택 안 함</option>` +
+    state.lanes.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join("");
+  $("#fbLane").value = keep;
+  if(!document.activeElement?.closest?.(".lane-edit")) renderLaneEditor();
+}
 
-              <!-- KDA Stats -->
-              <div class="text-right">
-                <div class="text-base font-black text-slate-100">
-                  <span class="text-emerald-400">${log.kills}</span> / 
-                  <span class="text-rose-400">${log.deaths}</span> / 
-                  <span class="text-amber-400">${log.assists}</span>
-                </div>
-                <div class="text-xs text-slate-400">
-                  CS: ${log.cs || 'N/A'}
-                </div>
-              </div>
-            </div>
+function renderLaneEditor(){
+  $("#laneEditor").innerHTML = state.lanes.map(l=>`
+    <div class="lane-edit" data-id="${l.id}">
+      <input class="ic-in" value="${esc(l.icon||"")}" data-k="icon" aria-label="아이콘">
+      <input value="${esc(l.name)}" data-k="name" aria-label="라인 이름">
+      <button class="btn sm danger" data-del="${l.id}">삭제</button>
+    </div>`).join("") || `<p style="color:var(--muted)">라인이 없습니다.</p>`;
+}
 
-            <!-- Notes Content -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
-              ${log.good ? `
-                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
-                  <p class="font-bold text-emerald-400 mb-1"><i class="fa-solid fa-circle-check mr-1"></i> 잘한 점</p>
-                  <p class="text-slate-300 leading-relaxed">${log.good}</p>
-                </div>
-              ` : ''}
+/* ---------- 챔피언 그리드 ---------- */
+function esc(s){ return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
 
-              ${log.bad ? `
-                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
-                  <p class="font-bold text-rose-400 mb-1"><i class="fa-solid fa-circle-xmark mr-1"></i> 실수 / 아쉬운 점</p>
-                  <p class="text-slate-300 leading-relaxed">${log.bad}</p>
-                </div>
-              ` : ''}
+function renderChamps(){
+  const q = $("#champSearch").value.trim().toLowerCase();
+  const onlyNoted = $("#onlyNoted").checked;
+  let list = champsInLane(curLane);
+  if(q) list = list.filter(c=>c.name.toLowerCase().includes(q)||c.id.toLowerCase().includes(q));
+  if(onlyNoted) list = list.filter(c=>hasNote(c.id));
+  list = list.slice().sort((a,b)=>a.name.localeCompare(b.name,"ko"));
 
-              ${log.next ? `
-                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
-                  <p class="font-bold text-lol-gold mb-1"><i class="fa-solid fa-bullseye mr-1"></i> 다음 개선점</p>
-                  <p class="text-slate-300 leading-relaxed">${log.next}</p>
-                </div>
-              ` : ''}
-            </div>
+  const t = curLane==="all" ? "전체" : curLane==="none" ? "라인 미지정" : (laneById(curLane)?.name||"");
+  $("#laneTitle").innerHTML = `${esc(t)}<em>${list.length}명 · 노트 ${list.filter(c=>hasNote(c.id)).length}개</em>`;
 
-          </div>
-        `;
-      }).join('');
-    };
+  $("#champGrid").innerHTML = list.map(c=>`
+    <button class="champ" data-champ="${esc(c.id)}">
+      <span class="por">${portraitEl(c)}</span>
+      <span class="nm">${esc(c.name)}</span>
+      ${hasNote(c.id)?'<span class="flag" title="노트 있음"></span>':""}
+    </button>`).join("");
+  $("#champEmpty").hidden = list.length>0;
+}
 
-    // Main Tab Switcher
-    window.switchMainTab = function(tabName) {
-      window.activeMainTab = tabName;
-      const btnGuides = document.getElementById('nav-btn-guides');
-      const btnFeedback = document.getElementById('nav-btn-feedback');
-      const secGuides = document.getElementById('section-guides');
-      const secFeedback = document.getElementById('section-feedback');
+function fillDatalist(){
+  $("#champNames").innerHTML = state.champions.map(c=>`<option value="${esc(c.name)}">`).join("");
+}
 
-      if (tabName === 'guides') {
-        secGuides.classList.remove('hidden');
-        secFeedback.classList.add('hidden');
+/* ---------- 상세 시트 ---------- */
+function openChamp(id){
+  const c = state.champions.find(x=>x.id===id); if(!c) return;
+  curChamp = c;
+  const n = state.notes[id] || {};
+  $("#shPor").innerHTML = portraitEl(c);
+  $("#shName").textContent = c.name;
+  const laneNames = (c.lanes||[]).map(l=>laneById(l)?.name).filter(Boolean).join(" · ") || "라인 미지정";
+  $("#shSub").textContent = laneNames;
+  NOTE_KEYS.forEach(k=>{ $(`[data-note="${k}"]`).value = n[k] || ""; });
+  renderMatchups(n.matchups || []);
+  $("#shDelete").hidden = !c.custom;
+  $("#sheet").classList.add("show"); $("#scrim").classList.add("show");
+  $("#sheet").querySelector(".body").scrollTop = 0;
+}
+function closeSheet(){
+  $("#sheet").classList.remove("show"); $("#scrim").classList.remove("show");
+  curChamp = null; renderChamps();
+}
+function noteOf(id){ return state.notes[id] || (state.notes[id] = {matchups:[]}); }
 
-        btnGuides.className = 'px-4 py-2 rounded-lg font-bold text-sm transition-all border border-lol-gold bg-lol-gold text-black shadow-lg';
-        btnFeedback.className = 'px-4 py-2 rounded-lg font-bold text-sm transition-all border border-slate-700 bg-slate-800 text-slate-300 hover:border-lol-gold';
-      } else {
-        secGuides.classList.add('hidden');
-        secFeedback.classList.remove('hidden');
+function renderMatchups(arr){
+  $("#muList").innerHTML = arr.map((m,i)=>`
+    <div class="mu" data-i="${i}">
+      <input list="champNames" data-f="name" value="${esc(m.name||"")}" placeholder="상대 챔피언">
+      <select data-f="diff" data-d="${m.diff||"even"}">
+        <option value="easy"${m.diff==="easy"?" selected":""}>할 만함</option>
+        <option value="even"${(!m.diff||m.diff==="even")?" selected":""}>반반</option>
+        <option value="hard"${m.diff==="hard"?" selected":""}>힘듦</option>
+      </select>
+      <input class="memo" data-f="memo" value="${esc(m.memo||"")}" placeholder="어떻게 상대할지">
+      <button class="del" data-del-mu="${i}" aria-label="삭제">×</button>
+    </div>`).join("");
+}
 
-        btnFeedback.className = 'px-4 py-2 rounded-lg font-bold text-sm transition-all border border-lol-gold bg-lol-gold text-black shadow-lg';
-        btnGuides.className = 'px-4 py-2 rounded-lg font-bold text-sm transition-all border border-slate-700 bg-slate-800 text-slate-300 hover:border-lol-gold';
-        
-        populateFeedbackChampDropdown();
-        renderFeedbackList();
-      }
-    };
+/* 노트 자동 저장 */
+let noteTimer=null;
+document.addEventListener("input", e=>{
+  const t = e.target;
+  if(t.dataset.note && curChamp){
+    noteOf(curChamp.id)[t.dataset.note] = t.value;
+    clearTimeout(noteTimer); noteTimer = setTimeout(()=>save(), 500);
+  }
+  if(t.dataset.f && curChamp){
+    const i = +t.closest(".mu").dataset.i;
+    const n = noteOf(curChamp.id); n.matchups = n.matchups || [];
+    n.matchups[i] = n.matchups[i] || {};
+    n.matchups[i][t.dataset.f] = t.value;
+    if(t.dataset.f==="diff") t.dataset.d = t.value;
+    clearTimeout(noteTimer); noteTimer = setTimeout(()=>save(), 500);
+  }
+  if(t.closest(".lane-edit")){
+    const row = t.closest(".lane-edit"), l = laneById(row.dataset.id);
+    if(l){ l[t.dataset.k] = t.value; clearTimeout(noteTimer); noteTimer=setTimeout(()=>{save();renderLanes();renderChamps();},600); }
+  }
+});
 
-    // Modal Controls
-    window.openModal = function(id) {
-      const modal = document.getElementById(id);
-      if (modal) modal.classList.remove('hidden');
-    };
-
-    window.closeModal = function(id) {
-      const modal = document.getElementById(id);
-      if (modal) modal.classList.add('hidden');
-    };
-
-    // Simple Toast Notification
-    function showToast(msg, isError = false) {
-      const toast = document.createElement('div');
-      toast.className = `fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl shadow-2xl text-xs font-bold transition transform duration-300 flex items-center space-x-2 border ${isError ? 'bg-rose-900/90 text-rose-100 border-rose-500' : 'bg-slate-900/95 text-lol-gold border-lol-gold'}`;
-      toast.innerHTML = `<i class="fa-solid ${isError ? 'fa-triangle-exclamation text-rose-400' : 'fa-circle-check text-lol-gold'}"></i><span>${msg}</span>`;
-      document.body.appendChild(toast);
-
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
+document.addEventListener("click", e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  if(b.dataset.lane){ curLane = b.dataset.lane; renderLanes(); renderChamps(); }
+  if(b.dataset.champ) openChamp(b.dataset.champ);
+  if(b.dataset.delMu!=null && curChamp){
+    const n = noteOf(curChamp.id); n.matchups.splice(+b.dataset.delMu,1);
+    renderMatchups(n.matchups); save();
+  }
+  if(b.dataset.del){
+    if(confirm("이 라인을 지울까요? 챔피언은 그대로 남습니다.")){
+      state.lanes = state.lanes.filter(l=>l.id!==b.dataset.del);
+      state.champions.forEach(c=>c.lanes=(c.lanes||[]).filter(x=>x!==b.dataset.del));
+      if(curLane===b.dataset.del) curLane="all";
+      save(); renderLanes(); renderChamps();
     }
+  }
+  if(b.dataset.fbEdit) editFeedback(b.dataset.fbEdit);
+  if(b.dataset.fbDel){
+    if(confirm("이 기록을 지울까요?")){
+      state.feedback = state.feedback.filter(f=>f.id!==b.dataset.fbDel);
+      save(); renderFeedback();
+    }
+  }
+  if(b.hasAttribute("data-close")) closeModals();
+});
 
-  </script>
+$("#muAdd").onclick = ()=>{
+  const n = noteOf(curChamp.id); n.matchups = n.matchups||[];
+  n.matchups.push({name:"",diff:"even",memo:""});
+  renderMatchups(n.matchups); save();
+  $("#muList").lastElementChild?.querySelector("input")?.focus();
+};
+$("#shClose").onclick = closeSheet;
+$("#scrim").onclick = ()=>{ closeSheet(); closeModals(); };
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ closeSheet(); closeModals(); } });
+$("#champSearch").oninput = renderChamps;
+$("#onlyNoted").onchange = renderChamps;
+
+/* ---------- 탭 ---------- */
+$$("nav.tabs button").forEach(b=>b.onclick = ()=>{
+  $$("nav.tabs button").forEach(x=>x.setAttribute("aria-selected", x===b));
+  $$("main").forEach(m=>m.classList.toggle("show", m.id==="tab-"+b.dataset.tab));
+  if(b.dataset.tab==="feedback") renderFeedback();
+});
+
+/* ---------- 모달 ---------- */
+function closeModals(){ $$(".modal").forEach(m=>m.classList.remove("show")); if(!$("#sheet").classList.contains("show")) $("#scrim").classList.remove("show"); }
+function openModal(sel){ $("#scrim").classList.add("show"); $(sel).classList.add("show"); }
+
+$("#addLaneBtn").onclick = $("#addLaneBtn2").onclick = ()=>{
+  $("#laneName").value=""; $("#laneIcon").value=""; openModal("#laneModal"); $("#laneName").focus();
+};
+$("#laneSave").onclick = ()=>{
+  const name = $("#laneName").value.trim();
+  if(!name) return toast("라인 이름을 적어 주세요.");
+  state.lanes.push({id:"L"+uid(), name, icon:$("#laneIcon").value.trim()||"◆"});
+  save(); renderLanes(); closeModals(); toast(`'${name}' 라인을 추가했어요.`);
+};
+
+function openChampModal(mode){
+  champModalMode = mode; pendingImg = null;
+  const editing = mode==="edit" ? curChamp : null;
+  $("#champModalTitle").textContent = editing ? "챔피언 수정" : "챔피언 추가";
+  $("#cmName").value = editing ? editing.name : "";
+  $("#cmLanes").innerHTML = state.lanes.map(l=>`
+    <label><input type="checkbox" value="${l.id}" ${editing&&(editing.lanes||[]).includes(l.id)?"checked":""}>${esc(l.icon||"")} ${esc(l.name)}</label>`).join("");
+  const prev = $("#cmPrev");
+  const url = editing ? portraitURL(editing) : null;
+  prev.src = url || "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+  $("#cmFile").value = "";
+  openModal("#champModal"); $("#cmName").focus();
+}
+$("#addChampBtn").onclick = ()=>openChampModal("add");
+$("#shEdit").onclick = ()=>openChampModal("edit");
+$("#cmFile").onchange = async e=>{
+  const f = e.target.files[0]; if(!f) return;
+  try{ pendingImg = await resizeImage(f); $("#cmPrev").src = pendingImg; }
+  catch(err){ toast("이미지를 읽지 못했어요."); }
+};
+$("#cmClearImg").onclick = ()=>{ pendingImg="__clear__"; $("#cmPrev").src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="; };
+$("#cmSave").onclick = ()=>{
+  const name = $("#cmName").value.trim();
+  if(!name) return toast("이름을 적어 주세요.");
+  const lanes = [...$("#cmLanes").querySelectorAll("input:checked")].map(i=>i.value);
+  let c;
+  if(champModalMode==="edit" && curChamp){ c = curChamp; c.name = name; c.lanes = lanes; }
+  else{
+    c = {id:"C"+uid(), name, lanes, custom:true};
+    state.champions.push(c);
+  }
+  if(pendingImg==="__clear__") delete images[c.id];
+  else if(pendingImg) images[c.id] = pendingImg;
+  save(); renderLanes(); renderChamps(); fillDatalist(); closeModals();
+  if(champModalMode==="edit") openChamp(c.id); else toast(`${name} 추가 완료`);
+};
+$("#shDelete").onclick = ()=>{
+  if(!curChamp || !curChamp.custom) return;
+  if(!confirm(`${curChamp.name}을(를) 지울까요? 노트도 함께 사라집니다.`)) return;
+  state.champions = state.champions.filter(x=>x.id!==curChamp.id);
+  delete state.notes[curChamp.id]; delete images[curChamp.id];
+  save(); closeSheet(); renderLanes(); renderChamps(); fillDatalist();
+};
+
+/* ---------- 피드백 ---------- */
+function todayStr(){ const d=new Date(); return d.toISOString().slice(0,10); }
+$("#fbDate").value = todayStr();
+
+$("#fbSave").onclick = ()=>{
+  const rec = {
+    id: editingFb || uid(),
+    date: $("#fbDate").value || todayStr(),
+    result: $("#fbResult").value,
+    champ: $("#fbChamp").value.trim(),
+    lane: $("#fbLane").value,
+    kda: $("#fbKda").value.trim(),
+    score: $("#fbScore").value,
+    good: $("#fbGood").value.trim(),
+    bad: $("#fbBad").value.trim(),
+    goal: $("#fbGoal").value.trim()
+  };
+  if(!rec.champ && !rec.good && !rec.bad && !rec.goal) return toast("내용을 조금이라도 적어 주세요.");
+  if(editingFb) state.feedback = state.feedback.map(f=>f.id===editingFb?rec:f);
+  else state.feedback.unshift(rec);
+  editingFb = null; resetFbForm(); save(); renderFeedback();
+  toast("기록했어요.");
+};
+$("#fbCancel").onclick = ()=>{ editingFb=null; resetFbForm(); };
+function resetFbForm(){
+  $("#fbDate").value = todayStr(); $("#fbResult").value="win";
+  ["#fbChamp","#fbKda","#fbScore","#fbGood","#fbBad","#fbGoal"].forEach(s=>$(s).value="");
+  $("#fbLane").value=""; $("#fbCancel").hidden = true;
+  $("#fbFormTitle").textContent = "오늘 판 기록하기"; $("#fbSave").textContent = "기록 저장";
+}
+function editFeedback(id){
+  const f = state.feedback.find(x=>x.id===id); if(!f) return;
+  editingFb = id;
+  $("#fbDate").value=f.date; $("#fbResult").value=f.result; $("#fbChamp").value=f.champ||"";
+  $("#fbLane").value=f.lane||""; $("#fbKda").value=f.kda||""; $("#fbScore").value=f.score||"";
+  $("#fbGood").value=f.good||""; $("#fbBad").value=f.bad||""; $("#fbGoal").value=f.goal||"";
+  $("#fbCancel").hidden=false; $("#fbFormTitle").textContent="기록 수정"; $("#fbSave").textContent="수정 저장";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function renderFeedback(){
+  const q = $("#fbSearch").value.trim().toLowerCase();
+  const filt = $("#fbFilter").value;
+  let list = state.feedback.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  if(filt!=="all") list = list.filter(f=>f.result===filt);
+  if(q) list = list.filter(f=>[f.champ,f.good,f.bad,f.goal,f.kda].join(" ").toLowerCase().includes(q));
+
+  const all = state.feedback, w = all.filter(f=>f.result==="win").length, l = all.filter(f=>f.result==="lose").length;
+  const rate = (w+l) ? Math.round(w/(w+l)*100) : 0;
+  const scores = all.map(f=>+f.score).filter(n=>n>0);
+  const avg = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : "–";
+  const recent = all.slice(0,10);
+  const rw = recent.filter(f=>f.result==="win").length;
+  $("#fbStats").innerHTML = `
+    <div class="stat"><b>${all.length}</b><span>기록한 판</span></div>
+    <div class="stat"><b>${rate}%</b><span>승률 (${w}승 ${l}패)</span></div>
+    <div class="stat"><b>${avg}</b><span>평균 자기 점수</span></div>
+    <div class="stat"><b>${rw}승 ${recent.length-rw}패</b><span>최근 ${recent.length}판</span></div>`;
+
+  $("#fbList").innerHTML = list.length ? list.map(f=>{
+    const ln = laneById(f.lane)?.name;
+    const rt = f.result==="win"?"승리":f.result==="lose"?"패배":"기타";
+    return `<div class="log ${f.result}">
+      <div class="head">
+        <b>${esc(f.champ||"챔피언 미기록")}</b>
+        <span class="tag ${f.result}">${rt}</span>
+        ${ln?`<span class="tag">${esc(ln)}</span>`:""}
+        ${f.kda?`<span class="tag">${esc(f.kda)}</span>`:""}
+        ${f.score?`<span class="tag">내 점수 ${esc(f.score)}</span>`:""}
+        <span class="tag" style="margin-left:auto">${esc(f.date||"")}</span>
+      </div>
+      <dl>
+        ${f.good?`<dt>잘한 것</dt><dd>${esc(f.good)}</dd>`:""}
+        ${f.bad?`<dt>아쉬운 것</dt><dd>${esc(f.bad)}</dd>`:""}
+        ${f.goal?`<dt>다음 목표</dt><dd>${esc(f.goal)}</dd>`:""}
+      </dl>
+      <div class="foot">
+        <button class="btn sm" data-fb-edit="${f.id}">수정</button>
+        <button class="btn sm danger" data-fb-del="${f.id}">삭제</button>
+      </div>
+    </div>`;
+  }).join("") : `<div class="empty"><b>아직 기록이 없어요</b>왼쪽 칸에 방금 끝난 판을 적어 보세요.</div>`;
+}
+$("#fbSearch").oninput = renderFeedback;
+$("#fbFilter").onchange = renderFeedback;
+
+/* ---------- 내보내기 / 불러오기 ---------- */
+$("#expBtn").onclick = ()=>{
+  const blob = new Blob([JSON.stringify({state,images},null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `소환사의노트_${todayStr()}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+};
+$("#impBtn").onclick = ()=>$("#impFile").click();
+$("#impFile").onchange = e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const fr = new FileReader();
+  fr.onload = ()=>{
+    try{
+      const d = JSON.parse(fr.result);
+      if(!d.state?.champions) throw 0;
+      state = d.state; images = d.images||{}; mergeBase(state);
+      save(); renderLanes(); renderChamps(); renderFeedback(); fillDatalist();
+      toast("불러왔어요.");
+    }catch(err){ toast("이 파일은 읽을 수 없어요."); }
+  };
+  fr.readAsText(f); e.target.value="";
+};
+$("#resetBtn").onclick = ()=>{
+  if(!confirm("모든 노트와 기록이 사라집니다. 계속할까요?")) return;
+  state = freshState(); images = {}; save();
+  renderLanes(); renderChamps(); renderFeedback(); fillDatalist(); toast("초기화했어요.");
+};
+
+/* =====================================================================
+   Firebase 동기화
+   ===================================================================== */
+const FB = {
+  app:null, auth:null, db:null, user:null, ready:false, api:null, unsub:null, applying:false
+};
+function setSync(cls, text){
+  const d = $("#syncDot"); d.className = "dot " + (cls||"");
+  $("#syncText").textContent = text;
+}
+
+async function loadSDK(){
+  if(FB.api) return FB.api;
+  const base = "https://www.gstatic.com/firebasejs/10.12.2/";
+  const [app, auth, fs] = await Promise.all([
+    import(base+"firebase-app.js"),
+    import(base+"firebase-auth.js"),
+    import(base+"firebase-firestore.js")
+  ]);
+  FB.api = {app, auth, fs};
+  return FB.api;
+}
+
+function parseConfig(txt){
+  txt = txt.trim().replace(/^const\s+\w+\s*=\s*/,"").replace(/;?\s*$/,"");
+  try{ return JSON.parse(txt); }
+  catch(e){
+    try{ return (new Function("return ("+txt+")"))(); }
+    catch(e2){ return null; }
+  }
+}
+
+async function connect(cfgText, silent){
+  const cfg = parseConfig(cfgText);
+  if(!cfg || !cfg.apiKey || !cfg.projectId){ if(!silent) toast("firebaseConfig 형식을 확인해 주세요."); return; }
+  setSync("busy","연결 중…");
+  try{
+    const {app, auth, fs} = await loadSDK();
+    FB.app = app.initializeApp(cfg);
+    FB.auth = auth.getAuth(FB.app);
+    FB.db = fs.getFirestore(FB.app);
+    localStorage.setItem(LS_CFG, cfgText);
+    $("#authBox").hidden = false;
+    auth.onAuthStateChanged(FB.auth, u=>{
+      FB.user = u; FB.ready = !!u;
+      $("#fbLogout").hidden = !u;
+      if(u){
+        setSync("on", u.isAnonymous ? "익명 계정으로 동기화 중" : (u.email||"동기화 중"));
+        FB.watch(); FB.pull(true);
+      }else{
+        setSync("", "로그인하면 동기화됩니다");
+        if(FB.unsub){ FB.unsub(); FB.unsub=null; }
+      }
+    });
+    if(!silent) toast("Firebase에 연결했어요. 이제 로그인하세요.");
+  }catch(e){
+    console.error(e); setSync("err","연결 실패"); if(!silent) toast("연결에 실패했어요: "+e.message);
+  }
+}
+
+FB.docRef = function(){
+  const {fs} = FB.api;
+  return fs.doc(FB.db, "lolNotes", FB.user.uid, "data", "main");
+};
+FB.imgCol = function(){
+  const {fs} = FB.api;
+  return fs.collection(FB.db, "lolNotes", FB.user.uid, "images");
+};
+
+FB.push = async function(auto){
+  if(!FB.ready || FB.applying) return;
+  try{
+    setSync("busy","저장 중…");
+    const {fs} = FB.api;
+    const payload = {
+      lanes: state.lanes, champions: state.champions,
+      notes: state.notes, feedback: state.feedback,
+      updatedAt: Date.now()
+    };
+    await fs.setDoc(FB.docRef(), payload);
+    // 이미지는 챔피언별 문서로 따로 저장 (문서 1MB 제한 회피)
+    const stored = JSON.parse(localStorage.getItem("lolnote.imgsynced")||"{}");
+    for(const [cid, data] of Object.entries(images)){
+      if(stored[cid] === data.length) continue;
+      await fs.setDoc(fs.doc(FB.imgCol(), cid), {data});
+      stored[cid] = data.length;
+    }
+    localStorage.setItem("lolnote.imgsynced", JSON.stringify(stored));
+    setSync("on", FB.user.isAnonymous ? "익명 계정으로 동기화 중" : (FB.user.email||"동기화 중"));
+    if(!auto) toast("서버에 올렸어요.");
+  }catch(e){ console.error(e); setSync("err","저장 실패"); toast("저장 실패: "+e.message); }
+};
+
+FB.pull = async function(silent){
+  if(!FB.ready) return;
+  try{
+    setSync("busy","불러오는 중…");
+    const {fs} = FB.api;
+    const snap = await fs.getDoc(FB.docRef());
+    if(snap.exists()){
+      applyRemote(snap.data());
+      const imgs = await fs.getDocs(FB.imgCol());
+      imgs.forEach(d=>{ images[d.id] = d.data().data; });
+      save(false);
+      renderLanes(); renderChamps(); renderFeedback(); fillDatalist();
+      if(!silent) toast("서버 내용을 불러왔어요.");
+    }else if(!silent){
+      toast("서버에 저장된 내용이 없어요. '올리기'를 먼저 해 주세요.");
+    }
+    setSync("on", FB.user.isAnonymous ? "익명 계정으로 동기화 중" : (FB.user.email||"동기화 중"));
+  }catch(e){ console.error(e); setSync("err","불러오기 실패"); toast("불러오기 실패: "+e.message); }
+};
+
+function applyRemote(d){
+  FB.applying = true;
+  state.lanes = d.lanes || state.lanes;
+  state.champions = d.champions || state.champions;
+  state.notes = d.notes || {};
+  state.feedback = d.feedback || [];
+  mergeBase(state);
+  FB.applying = false;
+}
+
+FB.watch = function(){
+  if(FB.unsub) FB.unsub();
+  const {fs} = FB.api;
+  FB.unsub = fs.onSnapshot(FB.docRef(), snap=>{
+    if(!snap.exists() || snap.metadata.hasPendingWrites) return;
+    const d = snap.data();
+    if((d.updatedAt||0) <= (state.updatedAt||0)) return;
+    applyRemote(d);
+    state.updatedAt = d.updatedAt;
+    localStorage.setItem(LS_STATE, JSON.stringify(state));
+    renderLanes(); renderChamps(); renderFeedback(); fillDatalist();
+    if(curChamp) openChamp(curChamp.id);
+    toast("다른 기기의 변경 내용을 반영했어요.");
+  });
+};
+
+$("#fbConnect").onclick = ()=>connect($("#fbConfig").value, false);
+$("#fbDisconnect").onclick = ()=>{
+  localStorage.removeItem(LS_CFG);
+  if(FB.unsub) FB.unsub();
+  FB.ready=false; FB.user=null; FB.unsub=null;
+  $("#authBox").hidden = true;
+  setSync("", "이 기기에만 저장 중");
+  toast("연결을 끊었어요. 내용은 이 기기에 그대로 있습니다.");
+};
+$("#fbLogin").onclick = async ()=>{
+  try{ await FB.api.auth.signInWithEmailAndPassword(FB.auth, $("#fbEmail").value, $("#fbPw").value); }
+  catch(e){ toast("로그인 실패: "+e.code); }
+};
+$("#fbSignup").onclick = async ()=>{
+  try{ await FB.api.auth.createUserWithEmailAndPassword(FB.auth, $("#fbEmail").value, $("#fbPw").value); toast("계정을 만들었어요."); }
+  catch(e){ toast("가입 실패: "+e.code); }
+};
+$("#fbAnon").onclick = async ()=>{
+  try{ await FB.api.auth.signInAnonymously(FB.auth); }
+  catch(e){ toast("익명 로그인 실패: "+e.code+" (콘솔에서 익명 로그인을 켜 주세요)"); }
+};
+$("#fbLogout").onclick = async ()=>{ await FB.api.auth.signOut(FB.auth); toast("로그아웃했어요."); };
+$("#fbPush").onclick = ()=>FB.ready ? FB.push(false) : toast("먼저 로그인해 주세요.");
+$("#fbPull").onclick = ()=>FB.ready ? FB.pull(false) : toast("먼저 로그인해 주세요.");
+
+/* ---------- 시작 ---------- */
+load();
+renderLanes(); renderChamps(); renderFeedback(); fillDatalist(); resetFbForm();
+syncDDragon();
+const savedCfg = localStorage.getItem(LS_CFG);
+if(savedCfg){ $("#fbConfig").value = savedCfg; connect(savedCfg, true); }
+</script>
 </body>
 </html>
