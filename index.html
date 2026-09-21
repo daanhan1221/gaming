@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LoL 노트 & 플레이 피드백 센터</title>
   
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -98,15 +97,14 @@
       <!-- Firebase Status Indicator & Config Button -->
       <div class="flex items-center space-x-2">
         <button onclick="openFirebaseConfigModal()" title="Firebase 키 설정 및 상태 확인" class="flex items-center space-x-2 text-xs bg-slate-900/90 hover:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 hover:border-lol-gold transition text-slate-300">
-          <span id="firebase-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-          <span id="firebase-text" class="text-slate-300">동기화 중...</span>
+          <span id="firebase-dot" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+          <span id="firebase-text" class="text-slate-300">로컬 모드</span>
           <i class="fa-solid fa-gear text-slate-400 hover:text-lol-gold ml-1"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content Container -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
     <!-- SECTION 1: CHAMPION GUIDES -->
@@ -157,7 +155,7 @@
       <div class="bg-gradient-to-r from-[#0A141E] via-[#1E232A] to-[#0A141E] p-6 rounded-xl border border-lol-border flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <h2 class="text-xl font-bold gold-gradient-text flex items-center">
-            <i class="fa-solid fa-chart-line mr-2.5 text-lol-gold"></i> 나만의 게임 피드백 노크
+            <i class="fa-solid fa-chart-line mr-2.5 text-lol-gold"></i> 나만의 게임 피드백 노트
           </h2>
           <p class="text-xs text-slate-400 mt-1">
             승패보다 중요한 것은 복기입니다. 잘했던 점, 실수한 점, 다음 판 목표를 기록하세요.
@@ -176,7 +174,7 @@
             <p id="stat-total-games" class="text-2xl font-black text-slate-100">0판</p>
           </div>
           <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg">
-            <i class="fa-solid fa-[#000000] fa-gamepad"></i>
+            <i class="fa-solid fa-gamepad"></i>
           </div>
         </div>
 
@@ -224,7 +222,6 @@
 
   </main>
 
-
   <!-- MODAL 1: CHAMPION DETAIL & GUIDE EDITOR MODAL -->
   <div id="modal-champ-detail" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
     <div class="bg-[#0A141E] border border-lol-border rounded-xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
@@ -255,7 +252,7 @@
         </div>
       </div>
 
-      <!-- Modal Body (Tabbed or Scrollable Sections) -->
+      <!-- Modal Body -->
       <div class="p-5 overflow-y-auto space-y-6 flex-grow text-sm">
         
         <!-- Champion Image & Lane Edit Panel -->
@@ -313,7 +310,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs text-slate-400 mb-1">1, 2, 3 코어템 빌드</label>
-                <input type="text" id="guide-core-items" placeholder="예: 몰락한 왕의 검 -> 몰락 -> 크라켄 -> 무한의 대검" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold">
+                <input type="text" id="guide-core-items" placeholder="예: 몰락한 왕의 검 -> 크라켄 -> 무한의 대검" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-lol-gold">
               </div>
               <div>
                 <label class="block text-xs text-slate-400 mb-1">신발 & 상황별 유동적 아이템</label>
@@ -369,7 +366,7 @@
 
         <div>
           <label class="block text-slate-300 mb-1 font-semibold">이미지 URL (선택)</label>
-          <input type="text" id="new-champ-img" placeholder="https://... (비워둘 시 기본 아이콘 설정)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
+          <input type="text" id="new-champ-img" placeholder="https://... (비워둘 시 기본 이미지)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
         </div>
 
         <div>
@@ -433,6 +430,80 @@
         </button>
       </div>
 
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">내가 플레이한 챔피언</label>
+          <select id="fb-my-champ" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
+            <!-- Dynamic Champion options -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">상대 챔피언 (맞라이너 / 정글)</label>
+          <input type="text" id="fb-vs-champ" placeholder="예: 제드, 리신, 다리우스..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
+        </div>
+
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">경기 결과</label>
+          <select id="fb-result" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
+            <option value="WIN">승리 (WIN)</option>
+            <option value="LOSS">패배 (LOSS)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">라인/포지션</label>
+          <select id="fb-lane" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold">
+            <option value="TOP">탑 (TOP)</option>
+            <option value="JUG">정글 (JUG)</option>
+            <option value="MID">미드 (MID)</option>
+            <option value="ADC">원딜 (ADC)</option>
+            <option value="SUP">서폿 (SUP)</option>
+          </select>
+        </div>
+
+        <div class="sm:col-span-2 grid grid-cols-4 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1 text-[11px]">킬 (K)</label>
+            <input type="number" id="fb-kills" value="0" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-slate-200">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1 text-[11px]">데스 (D)</label>
+            <input type="number" id="fb-deaths" value="0" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-slate-200">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1 text-[11px]">어시 (A)</label>
+            <input type="number" id="fb-assists" value="0" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-slate-200">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1 text-[11px]">CS (분당/총)</label>
+            <input type="text" id="fb-cs" placeholder="185 (7.2)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-slate-200">
+          </div>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="block text-slate-300 mb-1 font-semibold text-emerald-400"><i class="fa-solid fa-circle-check mr-1"></i> 이번 판 잘했던 점</label>
+          <textarea id="fb-good" rows="2" placeholder="예: 3렙 때 스펠 이득 잘 봄, 바텀 로밍 타이밍 완벽했음" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold"></textarea>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="block text-slate-300 mb-1 font-semibold text-rose-400"><i class="fa-solid fa-circle-xmark mr-1"></i> 실수하거나 아쉬웠던 점</label>
+          <textarea id="fb-bad" rows="2" placeholder="예: 6렙 전 와드 안 박아서 정글 갱에 당함, 용타임 전 뇌절" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold"></textarea>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="block text-slate-300 mb-1 font-semibold text-lol-gold"><i class="fa-solid fa-bullseye mr-1"></i> 다음 판 피드백 / 개선 목표</label>
+          <textarea id="fb-next" rows="2" placeholder="예: 첫 라인 밀고 3분 15초에 반드시 귀환 후 와드 설치하기" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-lol-gold"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+        <button onclick="closeModal('modal-add-feedback')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">취소</button>
+        <button onclick="submitNewFeedback()" class="px-4 py-1.5 bg-lol-gold text-black font-bold rounded-lg text-xs hover:bg-amber-400">저장하기</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL 5: FIREBASE CONFIG SETTINGS MODAL -->
   <div id="modal-firebase-config" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-[#0A141E] border border-lol-border rounded-xl w-full max-w-lg p-5 space-y-4 shadow-2xl">
@@ -454,7 +525,7 @@
         <div>
           <label class="block text-slate-300 mb-1 font-semibold flex items-center justify-between">
             <span>Firebase Config JSON 직접 입력</span>
-            <button onclick="fillSampleFirebaseConfig()" class="text-[10px] text-lol-gold underline hover:text-amber-300">기본 샘플 채우기</button>
+            <button onclick="fillSampleFirebaseConfig()" class="text-[10px] text-lol-gold underline hover:text-amber-300">샘플 키 입력</button>
           </label>
           <textarea id="fb-config-json-input" rows="6" placeholder='{
   "apiKey": "AIzaSy...",
@@ -468,19 +539,19 @@
 
         <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-[11px] text-slate-400 space-y-1">
           <p class="font-bold text-slate-300"><i class="fa-solid fa-circle-info mr-1 text-lol-gold"></i> 키 입력 안내</p>
-          <p>• 키를 저장하면 브라우저에 안전하게 보관되어 실시간 데이터 동기화가 활성화됩니다.</p>
-          <p>• 언제든지 [초기화] 버튼으로 기본 오프라인 모드로 전환할 수 있습니다.</p>
+          <p>• 키를 입력하면 브라우저에 저장되며 Firebase 데이터베이스와 동기화됩니다.</p>
+          <p>• 키를 입력하지 않더라도 모든 공략/피드백 기능은 로컬 브라우저에 정상 저장됩니다.</p>
         </div>
       </div>
 
-      <div class="flex items-center justify-between pt-2">
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800">
         <button onclick="resetFirebaseConfig()" class="px-3 py-1.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-lg text-xs font-semibold">
           <i class="fa-solid fa-trash-can mr-1"></i> 키 초기화
         </button>
         <div class="flex gap-2">
           <button onclick="closeModal('modal-firebase-config')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">취소</button>
           <button onclick="saveCustomFirebaseConfig()" class="px-4 py-1.5 bg-lol-gold text-black font-bold rounded-lg text-xs hover:bg-amber-400">
-            <i class="fa-solid fa-plug mr-1"></i> 설정 저장 &amp; 재연동
+            <i class="fa-solid fa-plug mr-1"></i> 설정 저장 &amp; 연동
           </button>
         </div>
       </div>
@@ -495,18 +566,6 @@
     // Global App Configuration & State
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'lol-note-app-default';
     
-    // Default Firebase Config Fallback
-    const firebaseConfig = {
-      apiKey: "AIzaSyA2ECbZumISupaSbfmOwz4h21oLSbNv_zo",
-      authDomain: "gaming-c38f9.firebaseapp.com",
-      databaseURL: "https://gaming-c38f9-default-rtdb.firebaseio.com",
-      projectId: "gaming-c38f9",
-      storageBucket: "gaming-c38f9.firebasestorage.app",
-      messagingSenderId: "666444670157",
-      appId: "1:666444670157:web:6760ba5dd4a9aa56287584",
-      measurementId: "G-LSPG0X90R7"
-    };
-
     function getStoredFirebaseConfig() {
       const stored = localStorage.getItem('user_firebase_config');
       if (stored) {
@@ -516,17 +575,22 @@
           console.error("Local stored config error:", e);
         }
       }
-      return typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : defaultConfig;
+      return typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
     }
 
     let firebaseConfig = getStoredFirebaseConfig();
 
-    // Initialize Firebase Services
+    // Initialize Firebase Services Safely
     let app, auth, db;
     let currentUser = null;
     let isFirebaseConnected = false;
 
     async function initFirebaseServices(cfg) {
+      if (!cfg || !cfg.apiKey || cfg.apiKey.includes('Dummy')) {
+        updateFirebaseStatus('offline', '로컬 모드 (키 미설정)');
+        return;
+      }
+
       try {
         app = initializeApp(cfg);
         auth = getAuth(app);
@@ -541,7 +605,7 @@
         onAuthStateChanged(auth, (user) => {
           if (user) {
             currentUser = user;
-            updateFirebaseStatus('connected', '클라우드 연동 완료');
+            updateFirebaseStatus('connected', '클라우드 동기화됨');
             setupRealtimeSync();
           } else {
             updateFirebaseStatus('offline', '오프라인 / 로컬 모드');
@@ -549,7 +613,7 @@
         });
       } catch (err) {
         console.warn("Firebase Init fallback:", err);
-        updateFirebaseStatus('offline', '연동 실패 / 로컬 모드');
+        updateFirebaseStatus('offline', '연동 실패 (로컬 모드)');
       }
     }
 
@@ -564,9 +628,9 @@
     ];
 
     // Local state stores
-    window.championsMap = {}; // { 'Garen': { id, name, iconUrl, lanes: [], guide: {} } }
-    window.guidesMap = {};    // { 'Garen': { runes, items, matchups, quickNotes } }
-    window.feedbacksList = [];
+    window.championsMap = {}; // { 'Garen': { id, name, imgUrl, lanes: [], guide: {} } }
+    window.guidesMap = JSON.parse(localStorage.getItem('local_lol_guides') || '{}');
+    window.feedbacksList = JSON.parse(localStorage.getItem('local_lol_feedbacks') || '[]');
     window.activeLaneFilter = 'ALL';
     window.activeMainTab = 'guides';
     window.currentEditingChampId = null;
@@ -575,19 +639,201 @@
     const DDRAGON_VER = '14.24.1';
     const CHAMP_IMG_BASE = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VER}/img/champion/`;
 
-    window.addEventListener('load', async () => {
-      updateFirebaseStatus('connecting', '서버 연결 중...');
-      
-      // Step 1: Initialize Auth
-      await initFirebaseServices(firebaseConfig);
+    // Pre-populated default champions list (Ensures instantaneous rendering offline)
+    const defaultChampionsList = [
+      { id: 'Roke', name: '로크', lanes: ['TOP', 'MID'], imgUrl: 'https://placehold.co/120x120/1e232a/c8aa6e?text=ROKE' },
+      { id: 'Ambessa', name: '암베사', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Ambessa.png` },
+      { id: 'Smolder', name: '스몰더', lanes: ['ADC', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Smolder.png` },
+      { id: 'Hwei', name: '웨이', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Hwei.png` },
+      { id: 'Briar', name: '브라이어', lanes: ['JUG', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Briar.png` },
+      { id: 'Naafiri', name: '나피리', lanes: ['MID', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Naafiri.png` },
+      { id: 'Milio', name: '밀리오', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Milio.png` },
+      { id: 'KSante', name: '크산테', lanes: ['TOP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}KSante.png` },
+      { id: 'Garen', name: '가렌', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Garen.png` },
+      { id: 'Galio', name: '갈리오', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Galio.png` },
+      { id: 'Gangplank', name: '갱플랭크', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Gangplank.png` },
+      { id: 'Gragas', name: '그라가스', lanes: ['TOP', 'JUG', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Gragas.png` },
+      { id: 'Graves', name: '그레이브즈', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Graves.png` },
+      { id: 'Gwen', name: '그웬', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Gwen.png` },
+      { id: 'Nami', name: '나미', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Nami.png` },
+      { id: 'Nasus', name: '나서스', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Nasus.png` },
+      { id: 'Nautilus', name: '노틸러스', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Nautilus.png` },
+      { id: 'Nocturne', name: '녹턴', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Nocturne.png` },
+      { id: 'Nunu', name: '누누와 의지', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Nunu.png` },
+      { id: 'Nidalee', name: '니달리', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Nidalee.png` },
+      { id: 'Neeko', name: '니코', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Neeko.png` },
+      { id: 'Nilah', name: '닐라', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Nilah.png` },
+      { id: 'Darius', name: '다리우스', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Darius.png` },
+      { id: 'Diana', name: '다이애나', lanes: ['JUG', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Diana.png` },
+      { id: 'Draven', name: '드레이븐', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Draven.png` },
+      { id: 'Ryze', name: '라이즈', lanes: ['MID', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Ryze.png` },
+      { id: 'Rakan', name: '라칸', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Rakan.png` },
+      { id: 'Rammus', name: '람머스', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Rammus.png` },
+      { id: 'Lux', name: '럭스', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Lux.png` },
+      { id: 'Rumble', name: '럼블', lanes: ['TOP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Rumble.png` },
+      { id: 'Renata', name: '글라스크', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Renata.png` },
+      { id: 'Renekton', name: '레넥톤', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Renekton.png` },
+      { id: 'Leona', name: '레오나', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Leona.png` },
+      { id: 'RekSai', name: '렉사이', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}RekSai.png` },
+      { id: 'Rengar', name: '렝가', lanes: ['JUG', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Rengar.png` },
+      { id: 'Lucian', name: '루시안', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Lucian.png` },
+      { id: 'Lulu', name: '룰루', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Lulu.png` },
+      { id: 'Leblanc', name: '르블랑', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Leblanc.png` },
+      { id: 'LeeSin', name: '리 신', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}LeeSin.png` },
+      { id: 'Riven', name: '리븐', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Riven.png` },
+      { id: 'Lissandra', name: '리산드라', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Lissandra.png` },
+      { id: 'Lillia', name: '릴리아', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Lillia.png` },
+      { id: 'MasterYi', name: '마스터 이', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}MasterYi.png` },
+      { id: 'MaoKai', name: '마오카이', lanes: ['JUG', 'SUP', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Maokai.png` },
+      { id: 'Malzahar', name: '말자하', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Malzahar.png` },
+      { id: 'Malphite', name: '말파이트', lanes: ['TOP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Malphite.png` },
+      { id: 'Mordekaiser', name: '모데카이저', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Mordekaiser.png` },
+      { id: 'Morgana', name: '몰가나', lanes: ['SUP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Morgana.png` },
+      { id: 'DrMundo', name: '문도 박사', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}DrMundo.png` },
+      { id: 'MissFortune', name: '미스 포츈', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}MissFortune.png` },
+      { id: 'Bard', name: '바드', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Bard.png` },
+      { id: 'Varus', name: '바루스', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Varus.png` },
+      { id: 'Vi', name: '바이', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Vi.png` },
+      { id: 'Veigar', name: '베이거', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Veigar.png` },
+      { id: 'Vayn', name: '베인', lanes: ['ADC', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Vayne.png` },
+      { id: 'Vex', name: '벡스', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Vex.png` },
+      { id: 'Belveth', name: '벨베스', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Belveth.png` },
+      { id: 'Velkoz', name: '벨코즈', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Velkoz.png` },
+      { id: 'Volibear', name: '볼리베어', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Volibear.png` },
+      { id: 'Braum', name: '브라움', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Braum.png` },
+      { id: 'Brand', name: '브랜드', lanes: ['SUP', 'JUG', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Brand.png` },
+      { id: 'Blitzcrank', name: '블리츠크랭크', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Blitzcrank.png` },
+      { id: 'Viego', name: '비에고', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Viego.png` },
+      { id: 'Viktor', name: '빅토르', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Viktor.png` },
+      { id: 'Poppy', name: '뽀삐', lanes: ['TOP', 'JUG', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Poppy.png` },
+      { id: 'Samira', name: '사미라', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Samira.png` },
+      { id: 'Sion', name: '사이온', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Sion.png` },
+      { id: 'Sylas', name: '사일러스', lanes: ['MID', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Sylas.png` },
+      { id: 'Shaco', name: '샤코', lanes: ['JUG', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Shaco.png` },
+      { id: 'Senna', name: '세나', lanes: ['SUP', 'ADC'], imgUrl: `${CHAMP_IMG_BASE}Senna.png` },
+      { id: 'Seraphine', name: '세라핀', lanes: ['SUP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Seraphine.png` },
+      { id: 'Sejuani', name: '세주아니', lanes: ['JUG', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Sejuani.png` },
+      { id: 'Sett', name: '세트', lanes: ['TOP', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Sett.png` },
+      { id: 'Sona', name: '소나', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Sona.png` },
+      { id: 'Soraka', name: '소라카', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Soraka.png` },
+      { id: 'Shen', name: '쉔', lanes: ['TOP', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Shen.png` },
+      { id: 'Shyvana', name: '쉬바나', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Shyvana.png` },
+      { id: 'Swain', name: '스웨인', lanes: ['SUP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Swain.png` },
+      { id: 'Skarner', name: '스카너', lanes: ['JUG', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Skarner.png` },
+      { id: 'Sivir', name: '시비르', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Sivir.png` },
+      { id: 'XinZhao', name: '신 짜오', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}XinZhao.png` },
+      { id: 'Syndra', name: '신드라', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Syndra.png` },
+      { id: 'Singed', name: '신지드', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Singed.png` },
+      { id: 'Thresh', name: '쓰레쉬', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Thresh.png` },
+      { id: 'Ahri', name: '아리', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Ahri.png` },
+      { id: 'Amumu', name: '아무무', lanes: ['JUG', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Amumu.png` },
+      { id: 'AurelionSol', name: '아우렐리온 솔', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}AurelionSol.png` },
+      { id: 'Ivern', name: '아이번', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Ivern.png` },
+      { id: 'Azir', name: '아지르', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Azir.png` },
+      { id: 'Akali', name: '아칼리', lanes: ['MID', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Akali.png` },
+      { id: 'Aatrox', name: '아트록스', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Aatrox.png` },
+      { id: 'Aphelios', name: '아펠리오스', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Aphelios.png` },
+      { id: 'Alistar', name: '알리스타', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Alistar.png` },
+      { id: 'Anivia', name: '애니비아', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Anivia.png` },
+      { id: 'Annie', name: '애니', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Annie.png` },
+      { id: 'Ashe', name: '애쉬', lanes: ['ADC', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Ashe.png` },
+      { id: 'Yasuo', name: '야스오', lanes: ['MID', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Yasuo.png` },
+      { id: 'Ekko', name: '에코', lanes: ['JUG', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Ekko.png` },
+      { id: 'Elise', name: '엘리스', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Elise.png` },
+      { id: 'MonkeyKing', name: '오공', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}MonkeyKing.png` },
+      { id: 'Ornn', name: '오른', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Ornn.png` },
+      { id: 'Olaf', name: '올라프', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Olaf.png` },
+      { id: 'Yone', name: '요네', lanes: ['MID', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Yone.png` },
+      { id: 'Yorick', name: '요릭', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Yorick.png` },
+      { id: 'Udyr', name: '우디르', lanes: ['JUG', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Udyr.png` },
+      { id: 'Urgot', name: '우르곳', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Urgot.png` },
+      { id: 'Irelia', name: '이렐리아', lanes: ['TOP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Irelia.png` },
+      { id: 'Evelynn', name: '이블린', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Evelynn.png` },
+      { id: 'Ezreal', name: '이지리얼', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Ezreal.png` },
+      { id: 'Illaoi', name: '일라오이', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Illaoi.png` },
+      { id: 'JarvanIV', name: '자르반 4세', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}JarvanIV.png` },
+      { id: 'Xayah', name: '자야', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Xayah.png` },
+      { id: 'Zyra', name: '자이라', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Zyra.png` },
+      { id: 'Zac', name: '자크', lanes: ['JUG', 'TOP'], imgUrl: `${CHAMP_IMG_BASE}Zac.png` },
+      { id: 'Janna', name: '잔나', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Janna.png` },
+      { id: 'Jax', name: '잭스', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Jax.png` },
+      { id: 'Zed', name: '제드', lanes: ['MID', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Zed.png` },
+      { id: 'Xerath', name: '제라스', lanes: ['MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Xerath.png` },
+      { id: 'Zeri', name: '제리', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Zeri.png` },
+      { id: 'Jayce', name: '제이스', lanes: ['TOP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Jayce.png` },
+      { id: 'Zoe', name: '조이', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Zoe.png` },
+      { id: 'Ziggs', name: '직스', lanes: ['MID', 'ADC'], imgUrl: `${CHAMP_IMG_BASE}Ziggs.png` },
+      { id: 'Jhin', name: '진', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Jhin.png` },
+      { id: 'Zilean', name: '질리언', lanes: ['SUP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Zilean.png` },
+      { id: 'Jinx', name: '징크스', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Jinx.png` },
+      { id: 'ChoGath', name: '초가스', lanes: ['TOP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Chogath.png` },
+      { id: 'Karma', name: '카르마', lanes: ['SUP', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Karma.png` },
+      { id: 'Kassadin', name: '카사딘', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Kassadin.png` },
+      { id: 'Karthus', name: '카서스', lanes: ['JUG', 'ADC'], imgUrl: `${CHAMP_IMG_BASE}Karthus.png` },
+      { id: 'Cassiopeia', name: '카시오페아', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Cassiopeia.png` },
+      { id: 'Kaisa', name: '카이사', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Kaisa.png` },
+      { id: 'Khazix', name: '카직스', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Khazix.png` },
+      { id: 'Katarina', name: '카타리나', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Katarina.png` },
+      { id: 'Kalista', name: '칼리스타', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Kalista.png` },
+      { id: 'Kennen', name: '케넨', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Kennen.png` },
+      { id: 'Caitlyn', name: '케이틀린', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Caitlyn.png` },
+      { id: 'Kayn', name: '케인', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Kayn.png` },
+      { id: 'Kayle', name: '케이틀린/케일', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Kayle.png` },
+      { id: 'KogMaw', name: '코그모', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}KogMaw.png` },
+      { id: 'Corki', name: '코르키', lanes: ['MID', 'ADC'], imgUrl: `${CHAMP_IMG_BASE}Corki.png` },
+      { id: 'Quinn', name: '퀸', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Quinn.png` },
+      { id: 'Kled', name: '클레드', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Kled.png` },
+      { id: 'Qiyana', name: '키아나', lanes: ['MID', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Qiyana.png` },
+      { id: 'Kindred', name: '킨드레드', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Kindred.png` },
+      { id: 'Taric', name: '타릭', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Taric.png` },
+      { id: 'Talon', name: '탈론', lanes: ['MID', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Talon.png` },
+      { id: 'Taliyah', name: '탈리야', lanes: ['MID', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Taliyah.png` },
+      { id: 'TahmKench', name: '탐 켄치', lanes: ['TOP', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}TahmKench.png` },
+      { id: 'Trundle', name: '트런들', lanes: ['TOP', 'JUG'], imgUrl: `${CHAMP_IMG_BASE}Trundle.png` },
+      { id: 'Tristana', name: '트리스타나', lanes: ['ADC', 'MID'], imgUrl: `${CHAMP_IMG_BASE}Tristana.png` },
+      { id: 'Tryndamere', name: '트린다미어', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Tryndamere.png` },
+      { id: 'TwistedFate', name: '트위스티드 페이트', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}TwistedFate.png` },
+      { id: 'Twitch', name: '트위치', lanes: ['ADC'], imgUrl: `${CHAMP_IMG_BASE}Twitch.png` },
+      { id: 'Pyke', name: '파이크', lanes: ['SUP'], imgUrl: `${CHAMP_IMG_BASE}Pyke.png` },
+      { id: 'Pantheon', name: '판테온', lanes: ['TOP', 'MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Pantheon.png` },
+      { id: 'Fiddlesticks', name: '피들스틱', lanes: ['JUG'], imgUrl: `${CHAMP_IMG_BASE}Fiddlesticks.png` },
+      { id: 'Fiora', name: '피오라', lanes: ['TOP'], imgUrl: `${CHAMP_IMG_BASE}Fiora.png` },
+      { id: 'Fizz', name: '피즈', lanes: ['MID'], imgUrl: `${CHAMP_IMG_BASE}Fizz.png` },
+      { id: 'Heimerdinger', name: '하이머딩거', lanes: ['TOP', 'MID', 'SUP'], imgUrl: `${CHAMP_IMG_BASE}Heimerdinger.png` }
+    ];
 
-      // Step 2: Fetch Riot Champions Base Data
-      await loadInitialRiotChampions();
+    // Load initial defaults
+    function initializeDefaultChampions() {
+      defaultChampionsList.forEach(c => {
+        window.championsMap[c.id] = {
+          id: c.id,
+          name: c.name,
+          title: '챔피언',
+          imgUrl: c.imgUrl,
+          lanes: c.lanes || ['MID'],
+          isCustom: false
+        };
+      });
 
-      // Step 3: Render initial UI
+      // Load custom champions stored in LocalStorage
+      const localCustom = JSON.parse(localStorage.getItem('local_lol_custom_champs') || '{}');
+      Object.keys(localCustom).forEach(k => {
+        window.championsMap[k] = localCustom[k];
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      // Step 1: Render Local Default Champions Immediately
+      initializeDefaultChampions();
       renderLaneTabs();
       renderChampionGrid();
       renderFeedbackList();
+
+      // Step 2: Try background Firebase connection
+      initFirebaseServices(firebaseConfig);
+
+      // Step 3: Fetch DataDragon to update missing champions in background
+      loadRiotChampionsInBackground();
     });
 
     // Helper: Update Firebase Status UI
@@ -613,7 +859,7 @@
     window.openFirebaseConfigModal = function() {
       const input = document.getElementById('fb-config-json-input');
       const currentCfg = getStoredFirebaseConfig();
-      if (input) {
+      if (input && currentCfg) {
         input.value = JSON.stringify(currentCfg, null, 2);
       }
       openModal('modal-firebase-config');
@@ -651,7 +897,7 @@
         firebaseConfig = parsed;
 
         closeModal('modal-firebase-config');
-        showToast('Firebase 고유 키가 저장되었습니다. 재연동을 시작합니다.');
+        showToast('Firebase 키가 저장되었습니다. 재연동을 시작합니다.');
 
         updateFirebaseStatus('connecting', '재연동 중...');
         initFirebaseServices(parsed);
@@ -662,88 +908,71 @@
 
     window.resetFirebaseConfig = function() {
       localStorage.removeItem('user_firebase_config');
-      firebaseConfig = defaultConfig;
-      document.getElementById('fb-config-json-input').value = JSON.stringify(defaultConfig, null, 2);
+      firebaseConfig = null;
+      document.getElementById('fb-config-json-input').value = '';
       closeModal('modal-firebase-config');
-      showToast('Firebase 설정이 기본 상태로 초기화되었습니다.');
-      initFirebaseServices(defaultConfig);
+      showToast('Firebase 설정이 초기화되었습니다 (로컬 모드).');
+      updateFirebaseStatus('offline', '로컬 모드');
     };
 
-    // Load Champion Database from Riot DataDragon
-    async function loadInitialRiotChampions() {
+    // Load Champion Database from Riot DataDragon asynchronously
+    async function loadRiotChampionsInBackground() {
       try {
         const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VER}/data/ko_KR/champion.json`);
+        if (!res.ok) return;
         const json = await res.json();
         const data = json.data;
 
-        // Basic default lane assignment rules based on Riot tags
         Object.keys(data).forEach(key => {
           const champ = data[key];
           const tags = champ.tags || [];
           let inferredLanes = [];
 
-          if (tags.includes('Top') || tags.includes('Fighter') || tags.includes('Tank')) inferredLanes.push('TOP');
-          if (tags.includes('Jungle') || tags.includes('Assassin')) inferredLanes.push('JUG');
+          if (tags.includes('Fighter') || tags.includes('Tank')) inferredLanes.push('TOP');
+          if (tags.includes('Assassin') || tags.includes('Fighter')) inferredLanes.push('JUG');
           if (tags.includes('Mage') || tags.includes('Assassin')) inferredLanes.push('MID');
           if (tags.includes('Marksman')) inferredLanes.push('ADC');
           if (tags.includes('Support') || tags.includes('Tank')) inferredLanes.push('SUP');
 
-          // Fallback if empty
           if (inferredLanes.length === 0) inferredLanes = ['MID'];
 
-          window.championsMap[key] = {
-            id: key,
-            name: champ.name, // Korean Name
-            title: champ.title,
-            imgUrl: `${CHAMP_IMG_BASE}${champ.image.full}`,
-            lanes: inferredLanes,
-            isCustom: false
-          };
-        });
-
-        // Ensure newly released / user requested special champions like Smolder, Ambessa, Naafiri, Briar, Hwei etc exist
-        const recentChamps = [
-          { id: 'Ambessa', name: '암베사', lanes: ['TOP', 'JUG'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Ambessa.png' },
-          { id: 'Smolder', name: '스몰더', lanes: ['ADC', 'MID'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Smolder.png' },
-          { id: 'Hwei', name: '웨이', lanes: ['MID', 'SUP'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Hwei.png' },
-          { id: 'Briar', name: '브라이어', lanes: ['JUG', 'TOP'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Briar.png' },
-          { id: 'Naafiri', name: '나피리', lanes: ['MID', 'TOP'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Naafiri.png' },
-          { id: 'Milio', name: '밀리오', lanes: ['SUP'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Milio.png' },
-          { id: 'KSante', name: '크산테', lanes: ['TOP', 'MID'], imgUrl: 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/KSante.png' },
-          { id: 'RokeCustom', name: '로크', lanes: ['TOP', 'MID'], imgUrl: 'https://placehold.co/120x120/1e232a/c8aa6e?text=ROKE' }
-        ];
-
-        recentChamps.forEach(rc => {
-          if (!window.championsMap[rc.id]) {
-            window.championsMap[rc.id] = {
-              id: rc.id,
-              name: rc.name,
-              title: '신규 / 커스텀 챔피언',
-              imgUrl: rc.imgUrl,
-              lanes: rc.lanes,
-              isCustom: true
+          // Update or insert
+          if (!window.championsMap[key]) {
+            window.championsMap[key] = {
+              id: key,
+              name: champ.name,
+              title: champ.title,
+              imgUrl: `${CHAMP_IMG_BASE}${champ.image.full}`,
+              lanes: inferredLanes,
+              isCustom: false
             };
+          } else {
+            // Update correct Korean name & image if missing
+            window.championsMap[key].name = champ.name;
+            window.championsMap[key].imgUrl = `${CHAMP_IMG_BASE}${champ.image.full}`;
           }
         });
 
+        renderChampionGrid();
       } catch (e) {
-        console.warn("DDragon fetch fallback:", e);
+        console.warn("DDragon background fetch fallback:", e);
       }
     }
 
     function setupRealtimeSync() {
       if (!db || !currentUser) return;
 
-      // 1. Guides Sync: /artifacts/{appId}/public/data/guides
+      // 1. Guides Sync
       const guidesCol = collection(db, 'artifacts', appId, 'public', 'data', 'guides');
       onSnapshot(guidesCol, (snapshot) => {
         snapshot.forEach((docSnap) => {
           window.guidesMap[docSnap.id] = docSnap.data();
         });
+        localStorage.setItem('local_lol_guides', JSON.stringify(window.guidesMap));
         renderChampionGrid();
       }, (err) => console.error("Firestore Guides Error:", err));
 
-      // 2. Custom Champions Sync: /artifacts/{appId}/public/data/custom_champions
+      // 2. Custom Champions Sync
       const customChampsCol = collection(db, 'artifacts', appId, 'public', 'data', 'custom_champions');
       onSnapshot(customChampsCol, (snapshot) => {
         snapshot.forEach((docSnap) => {
@@ -754,7 +983,7 @@
         populateFeedbackChampDropdown();
       }, (err) => console.error("Firestore Custom Champions Error:", err));
 
-      // 3. Custom Lanes Sync: /artifacts/{appId}/public/data/custom_lanes
+      // 3. Custom Lanes Sync
       const customLanesCol = collection(db, 'artifacts', appId, 'public', 'data', 'custom_lanes');
       onSnapshot(customLanesCol, (snapshot) => {
         snapshot.forEach((docSnap) => {
@@ -766,20 +995,19 @@
         renderLaneTabs();
       }, (err) => console.error("Firestore Custom Lanes Error:", err));
 
-      // 4. Play Feedbacks Sync: /artifacts/{appId}/public/data/play_feedbacks
+      // 4. Play Feedbacks Sync
       const feedbackCol = collection(db, 'artifacts', appId, 'public', 'data', 'play_feedbacks');
       onSnapshot(feedbackCol, (snapshot) => {
         const list = [];
         snapshot.forEach((docSnap) => {
           list.push({ id: docSnap.id, ...docSnap.data() });
         });
-        // Sort in memory by timestamp descending
         window.feedbacksList = list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        localStorage.setItem('local_lol_feedbacks', JSON.stringify(window.feedbacksList));
         renderFeedbackList();
       }, (err) => console.error("Firestore Feedbacks Error:", err));
     }
 
-    
     // Render Lane Tabs
     window.renderLaneTabs = function() {
       const container = document.getElementById('lane-tabs-container');
@@ -858,7 +1086,7 @@
 
             <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-slate-700 group-hover:border-lol-gold">
               <img src="${champ.imgUrl}" alt="${champ.name}" 
-                onerror="this.src='https://placehold.co/120x120/1e232a/c8aa6e?text=${champ.id}'"
+                onerror="this.src='https://placehold.co/120x120/1e232a/c8aa6e?text=${encodeURIComponent(champ.name)}'"
                 class="w-full h-full object-cover">
             </div>
 
@@ -940,14 +1168,12 @@
       };
 
       window.guidesMap[champId] = guideObj;
+      localStorage.setItem('local_lol_guides', JSON.stringify(window.guidesMap));
 
       // Save to Firebase Firestore if connected
       if (db && currentUser) {
         try {
-          // Save Guide
           await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'guides', champId), guideObj);
-
-          // Save/Update Champion info
           await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom_champions', champId), window.championsMap[champId]);
         } catch (e) {
           console.error("Firestore save guide failed:", e);
@@ -959,7 +1185,6 @@
       showToast('공략 노트 및 설정이 성공적으로 저장되었습니다!');
     };
 
-    
     // Open Add Champion Modal
     window.openAddChampionModal = function() {
       const laneContainer = document.getElementById('new-champ-lanes');
@@ -999,6 +1224,11 @@
       };
 
       window.championsMap[key] = champObj;
+
+      // Save custom champ locally
+      const localCustom = JSON.parse(localStorage.getItem('local_lol_custom_champs') || '{}');
+      localCustom[key] = champObj;
+      localStorage.setItem('local_lol_custom_champs', JSON.stringify(localCustom));
 
       if (db && currentUser) {
         try {
@@ -1052,7 +1282,6 @@
       closeModal('modal-add-lane');
       showToast(`${label} 라인이 추가되었습니다!`);
     };
-
 
     // Populate Champion Dropdown in Feedback Form
     function populateFeedbackChampDropdown() {
@@ -1117,6 +1346,7 @@
       };
 
       window.feedbacksList.unshift(newLog);
+      localStorage.setItem('local_lol_feedbacks', JSON.stringify(window.feedbacksList));
 
       if (db && currentUser) {
         try {
