@@ -320,7 +320,9 @@
         if (firebaseConfigRaw) {
             try { firebaseConfig = JSON.parse(firebaseConfigRaw); } catch(e) {}
         }
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'lol-guide-app-default';
+        
+        // Use fixed App ID for multi-device cross-synchronization
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'lol-guide-shared-app';
 
         let app = null, auth = null, db = null, currentUser = null;
         if (firebaseConfig && firebaseConfig.apiKey) {
@@ -536,7 +538,7 @@
         });
 
         async function initApp() {
-            // Load LocalStorage backup if available
+            // Load LocalStorage backup first
             const localLines = localStorage.getItem("lol_app_lines");
             const localChamps = localStorage.getItem("lol_app_champs");
             const localGuides = localStorage.getItem("lol_app_guides");
@@ -555,7 +557,7 @@
             renderChampions();
             setupEventListeners();
 
-            // Firebase init if config exists
+            // Firebase authentication and global sync setup
             if (auth) {
                 try {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -570,27 +572,33 @@
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         currentUser = user;
+                        // Start real-time sync across all devices
                         subscribeToData();
                     }
                 });
             }
         }
 
+        // Real-time synchronization callback across devices
         function subscribeToData() {
             if (!currentUser || !db) return;
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'lol_guide_app_store', 'main_store');
+            // Public cloud storage path for multi-device sync
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'lol_shared_guides', 'shared_main_store');
             
             onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     if (data.lines && Array.isArray(data.lines)) {
                         linesState = data.lines;
+                        localStorage.setItem("lol_app_lines", JSON.stringify(linesState));
                     }
                     if (data.champions && Array.isArray(data.champions)) {
                         championsState = data.champions;
+                        localStorage.setItem("lol_app_champs", JSON.stringify(championsState));
                     }
                     if (data.guides && typeof data.guides === 'object') {
                         guidesData = { ...SEED_GUIDES, ...data.guides };
+                        localStorage.setItem("lol_app_guides", JSON.stringify(guidesData));
                     }
                     renderLines();
                     renderChampions();
@@ -604,6 +612,7 @@
         }
 
         async function syncDataToCloud() {
+            // Save to LocalStorage immediately
             localStorage.setItem("lol_app_lines", JSON.stringify(linesState));
             localStorage.setItem("lol_app_champs", JSON.stringify(championsState));
             localStorage.setItem("lol_app_guides", JSON.stringify(guidesData));
@@ -613,7 +622,8 @@
                 return;
             }
 
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'lol_guide_app_store', 'main_store');
+            // Sync to shared public Firestore path
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'lol_shared_guides', 'shared_main_store');
             try {
                 await setDoc(docRef, {
                     lines: linesState,
