@@ -407,12 +407,187 @@
         let selectedLine = "all";
         let selectedChampId = null;
 
-        // Fetch ALL official LoL Champions from DataDragon API + include custom/new ones (Lok, Ambessa, Mel, etc.)
+        // Fallback 173 ALL official champions dataset for external domain hosting (GitHub Pages, etc.)
+        const FALLBACK_CHAMPIONS = [
+            { id: "aatrox", name: "아트록스", title: "다르킨의 검", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Aatrox.png" },
+            { id: "ahri", name: "아리", title: "구미호", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Ahri.png" },
+            { id: "akali", name: "아칼리", title: "무협의 암살자", lane: ["미드", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Akali.png" },
+            { id: "akshan", name: "악샨", title: "떠돌이 파수꾼", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Akshan.png" },
+            { id: "alistar", name: "알리스타", title: "미노타우로스", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Alistar.png" },
+            { id: "ambessa", name: "암베사", title: "군쟁의 총괄자", lane: ["탑", "미드"], img: "https://placehold.co/120x120/1e2328/c8aa6e?text=Ambessa" },
+            { id: "amumu", name: "아무무", title: "고독한 미라", lane: ["정글", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Amumu.png" },
+            { id: "anivia", name: "애니비아", title: "빙경의 수호자", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Anivia.png" },
+            { id: "annie", name: "애니", title: "어둠의 아이", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Annie.png" },
+            { id: "aphelios", name: "아펠리오스", title: "신념의 무기", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Aphelios.png" },
+            { id: "ashe", name: "애쉬", title: "서리 궁수", lane: ["원딜", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Ashe.png" },
+            { id: "aurelionsol", name: "아우렐리온 솔", title: "별의 창조자", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/AurelionSol.png" },
+            { id: "aurora", name: "오로라", title: "마법 마녀", lane: ["미드", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Aurora.png" },
+            { id: "azir", name: "아지르", title: "모래사장의 황제", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Azir.png" },
+            { id: "bard", name: "바드", title: "성스러운 방랑자", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Bard.png" },
+            { id: "belveth", name: "벨베스", title: "공허의 여제", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Belveth.png" },
+            { id: "blitzcrank", name: "블리츠크랭크", title: "거대 골렘", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Blitzcrank.png" },
+            { id: "brand", name: "브랜드", title: "복수의 화염", lane: ["서폿", "정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Brand.png" },
+            { id: "braum", name: "브라움", title: "프렐요드의 심장", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Braum.png" },
+            { id: "briar", name: "브라이어", title: "억눌린 허기", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Briar.png" },
+            { id: "caitlyn", name: "케이틀린", title: "필트오버의 보안관", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Caitlyn.png" },
+            { id: "camille", name: "카밀", title: "강철의 그림자", lane: ["탑", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Camille.png" },
+            { id: "cassiopeia", name: "카시오페아", title: "뱀의 독니", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Cassiopeia.png" },
+            { id: "chogath", name: "초가스", title: "공허의 포식자", lane: ["탑", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Chogath.png" },
+            { id: "corki", name: "코르키", title: "대담한 정찰병", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Corki.png" },
+            { id: "darius", name: "다리우스", title: "녹서스의 실세", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Darius.png" },
+            { id: "diana", name: "다이애나", title: "달빛의 차가움", lane: ["정글", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Diana.png" },
+            { id: "draven", name: "드레이븐", title: "화려한 처형자", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Draven.png" },
+            { id: "drmundo", name: "문도 박사", title: "자운의 광인", lane: ["탑", "정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/DrMundo.png" },
+            { id: "ekko", name: "에코", title: "시간을 달리는 소년", lane: ["정글", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Ekko.png" },
+            { id: "elise", name: "엘리스", title: "거미 여왕", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Elise.png" },
+            { id: "evelynn", name: "이브린", title: "고통의 여왕", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Evelynn.png" },
+            { id: "ezreal", name: "이즈리얼", title: "방랑 탐험가", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Ezreal.png" },
+            { id: "fiddlesticks", name: "피들스틱", title: "오래된 공포", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Fiddlesticks.png" },
+            { id: "fiora", name: "피오라", title: "결투의 결의", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Fiora.png" },
+            { id: "fizz", name: "피즈", title: "대양의 장난꾸러기", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Fizz.png" },
+            { id: "galio", name: "갈리오", title: "위대한 석상", lane: ["미드", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Galio.png" },
+            { id: "gangplank", name: "갱플랭크", title: "바다의 무법자", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Gangplank.png" },
+            { id: "garen", name: "가렌", title: "데마시아의 힘", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Garen.png" },
+            { id: "gnar", name: "나르", title: "잃어버린 고리", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Gnar.png" },
+            { id: "gragas", name: "그라가스", title: "술통 전사", lane: ["탑", "정글", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Gragas.png" },
+            { id: "graves", name: "무덤(그레이브즈)", title: "무법자", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Graves.png" },
+            { id: "gwen", name: "그웬", title: "신성한 재봉사", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Gwen.png" },
+            { id: "hecarim", name: "헤카림", title: "전쟁의 전조", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Hecarim.png" },
+            { id: "heimerdinger", name: "하이머딩거", title: "위대한 발명가", lane: ["미드", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Heimerdinger.png" },
+            { id: "hwei", name: "웨이", title: "화가", lane: ["미드", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Hwei.png" },
+            { id: "illaoi", name: "일라오이", title: "크라켄의 여사제", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Illaoi.png" },
+            { id: "irelia", name: "이렐리아", title: "칼날의 무희", lane: ["탑", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Irelia.png" },
+            { id: "ivern", name: "아이번", title: "자연의 아버지", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Ivern.png" },
+            { id: "janna", name: "잔나", title: "폭풍의 분노", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Janna.png" },
+            { id: "jarvaniv", name: "자르반 4세", title: "데마시아의 귀감", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/JarvanIV.png" },
+            { id: "jax", name: "잭스", title: "무기 마스터", lane: ["탑", "정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Jax.png" },
+            { id: "jayce", name: "제이스", title: "미래의 수호자", lane: ["탑", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Jayce.png" },
+            { id: "jhin", name: "진", title: "사막의 조율사", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Jhin.png" },
+            { id: "jinx", name: "징크스", title: "난폭한 난동꾼", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Jinx.png" },
+            { id: "kaisa", name: "카이사", title: "공허의 딸", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Kaisa.png" },
+            { id: "kalista", name: "칼리스타", title: "복수의 창", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Kalista.png" },
+            { id: "karma", name: "카르마", title: "깨우친 자", lane: ["서폿", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Karma.png" },
+            { id: "karthus", name: "카서스", title: "죽음을 노래하는 자", lane: ["정글", "원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Karthus.png" },
+            { id: "kassadin", name: "카사딘", title: "공허의 방랑자", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Kassadin.png" },
+            { id: "katarina", name: "카타리나", title: "사악한 칼날", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Katarina.png" },
+            { id: "kayle", name: "케일", title: "정의로운 자", lane: ["탑", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Kayle.png" },
+            { id: "kayn", name: "케인", title: "그림자 사냥꾼", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Kayn.png" },
+            { id: "kennen", name: "케넨", title: "폭풍의 심장", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Kennen.png" },
+            { id: "khazix", name: "카직스", title: "공허의 약탈자", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Khazix.png" },
+            { id: "kindred", name: "킨드레드", title: "영원한 사냥꾼", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Kindred.png" },
+            { id: "kled", name: "클레드", title: "성난 기호", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Kled.png" },
+            { id: "kogmaw", name: "코그모", title: "심연의 아귀", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/KogMaw.png" },
+            { id: "ksante", name: "크산테", title: "거인 사냥꾼", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/KSante.png" },
+            { id: "leblanc", name: "르블랑", title: "환영의 마술사", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Leblanc.png" },
+            { id: "leesin", name: "리 신", title: "눈먼 수도승", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/LeeSin.png" },
+            { id: "leona", name: "레오나", title: "여명의 여전사", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Leona.png" },
+            { id: "lillia", name: "릴리아", title: "수줍은 꽃", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Lillia.png" },
+            { id: "lissandra", name: "리산드라", title: "얼음 마녀", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Lissandra.png" },
+            { id: "lok", name: "로크", title: "황혼의 파수꾼", lane: ["탑", "정글"], img: "https://placehold.co/120x120/1e2328/c8aa6e?text=Lok" },
+            { id: "lucian", name: "루시안", title: "정화의 사격", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Lucian.png" },
+            { id: "lulu", name: "룰루", title: "요정 마법사", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Lulu.png" },
+            { id: "lux", name: "럭스", title: "광원의 여사제", lane: ["서폿", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Lux.png" },
+            { id: "malphite", name: "말파이트", title: "거대 바위 거인", lane: ["탑", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Malphite.png" },
+            { id: "malzahar", name: "말자하", title: "공허의 예언자", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Malzahar.png" },
+            { id: "maokai", name: "마오카이", title: "비틀린 나무 정령", lane: ["서폿", "정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Maokai.png" },
+            { id: "masteryi", name: "마스터 이", title: "검의 검객", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/MasterYi.png" },
+            { id: "mel", name: "멜", title: "메달르다의 수장", lane: ["미드", "서폿"], img: "https://placehold.co/120x120/1e2328/c8aa6e?text=Mel" },
+            { id: "milio", name: "밀리오", title: "온기의 불꽃", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Milio.png" },
+            { id: "missfortune", name: "미스 포츈", title: "사격의 미학", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/MissFortune.png" },
+            { id: "monkeyking", name: "오공", title: "원숭이 왕", lane: ["정글", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/MonkeyKing.png" },
+            { id: "mordekaiser", name: "모데카이저", title: "강철의 유령", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Mordekaiser.png" },
+            { id: "morgana", name: "모르가나", title: "타락한 자", lane: ["서폿", "정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Morgana.png" },
+            { id: "naafiri", name: "나피리", title: "사냥개 사냥꾼", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Naafiri.png" },
+            { id: "nami", name: "나미", title: "파도 부르기", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Nami.png" },
+            { id: "nasus", name: "나서스", title: "사막의 사냥꾼", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Nasus.png" },
+            { id: "nautilus", name: "노틸러스", title: "심해의 거인", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Nautilus.png" },
+            { id: "neeko", name: "니코", title: "자연의 카멜레온", lane: ["미드", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Neeko.png" },
+            { id: "nidalee", name: "니달리", title: "야생의 사냥꾼", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Nidalee.png" },
+            { id: "nilah", name: "닐라", title: "해방된 기쁨", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Nilah.png" },
+            { id: "nocturne", name: "녹턴", title: "영원한 악몽", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Nocturne.png" },
+            { id: "nunu", name: "누누와 윌럼프", title: "설원의 모험가", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Nunu.png" },
+            { id: "olaf", name: "올라프", title: "광전사", lane: ["탑", "정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Olaf.png" },
+            { id: "orianna", name: "오리아나", title: "시계태엽 태엽인형", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Orianna.png" },
+            { id: "ornn", name: "오른", title: "거산의 화염", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Ornn.png" },
+            { id: "pantheon", name: "판테온", title: "불굴의 전사", lane: ["탑", "미드", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Pantheon.png" },
+            { id: "poppy", name: "뽀삐", title: "망치의 수호자", lane: ["탑", "정글", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Poppy.png" },
+            { id: "pyke", name: "파이크", title: "핏빛 항구의 처형자", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Pyke.png" },
+            { id: "qiyana", name: "키아나", title: "원소의 여왕", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Qiyana.png" },
+            { id: "quinn", name: "퀸", title: "데마시아의 날개", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Quinn.png" },
+            { id: "rakan", name: "라칸", title: "매혹의 장난꾼", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Rakan.png" },
+            { id: "rammus", name: "람머스", title: "중장 갑옷 람머스", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Rammus.png" },
+            { id: "reksai", name: "렉사이", title: "공허의 복수자", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/RekSai.png" },
+            { id: "rell", name: "렐", title: "철의 여인", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Rell.png" },
+            { id: "renata", name: "레나타 글라스크", title: "화학 공작", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Renata.png" },
+            { id: "renektion", name: "레넥톤", title: "사막의 도살자", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Renekton.png" },
+            { id: "rengar", name: "렝가", title: "추적하는 포식자", lane: ["정글", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Rengar.png" },
+            { id: "riven", name: "리븐", title: "추방자", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Riven.png" },
+            { id: "rumble", name: "럼블", title: "기계손 전사", lane: ["탑", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Rumble.png" },
+            { id: "ryze", name: "라이즈", title: "방랑 마법사", lane: ["미드", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Ryze.png" },
+            { id: "samira", name: "사미라", title: "사막의 장미", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Samira.png" },
+            { id: "sejuani", name: "세주아니", title: "혹한의 분노", lane: ["정글", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Sejuani.png" },
+            { id: "senna", name: "세나", title: "구원자", lane: ["서폿", "원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Senna.png" },
+            { id: "seraphine", name: "세라핀", title: "노래하는 신성", lane: ["서폿", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Seraphine.png" },
+            { id: "sett", name: "세트", title: "우두머리", lane: ["탑", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Sett.png" },
+            { id: "shaco", name: "샤코", title: "악마의 피에로", lane: ["정글", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Shaco.png" },
+            { id: "shen", name: "쉔", title: "황혼의 눈", lane: ["탑", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Shen.png" },
+            { id: "shyvana", name: "쉬바나", title: "하프 드래곤", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Shyvana.png" },
+            { id: "singed", name: "신지드", title: "광기의 연금술사", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Singed.png" },
+            { id: "sion", name: "사이온", title: "언데드 학살자", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Sion.png" },
+            { id: "sivir", name: "시비르", title: "전장의 여제", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Sivir.png" },
+            { id: "skarner", name: "스카너", title: "수정 전갈", lane: ["정글", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Skarner.png" },
+            { id: "smolder", name: "스몰더", title: "작은 용", lane: ["원딜", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Smolder.png" },
+            { id: "sona", name: "소나", title: "현의 현자", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Sona.png" },
+            { id: "soraka", name: "소라카", title: "별의 아이", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Soraka.png" },
+            { id: "swain", name: "스웨인", title: "녹서스의 대장군", lane: ["미드", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Swain.png" },
+            { id: "sylas", name: "사일러스", title: "해방된 자", lane: ["미드", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Sylas.png" },
+            { id: "syndra", name: "신드라", title: "어둠의 여제", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Syndra.png" },
+            { id: "tahmkench", name: "탐 켄치", title: "강의 대식가", lane: ["탑", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/TahmKench.png" },
+            { id: "taliyah", name: "탈리야", title: "바위술사", lane: ["정글", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Taliyah.png" },
+            { id: "talon", name: "탈론", title: "검의 그림자", lane: ["미드", "정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Talon.png" },
+            { id: "taric", name: "타릭", title: "발로란의 수호자", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Taric.png" },
+            { id: "teemo", name: "티모", title: "날렵한 정찰병", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Teemo.png" },
+            { id: "thresh", name: "쓰레쉬", title: "사슬 간수", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Thresh.png" },
+            { id: "tristana", name: "트리스티나", title: "요들 사수", lane: ["원딜", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Tristana.png" },
+            { id: "trundle", name: "트런들", title: "트로크의 왕", lane: ["탑", "정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Trundle.png" },
+            { id: "tryndamere", name: "트린다는 야만전사", title: "야만전사 왕", lane: ["탑", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Tryndamere.png" },
+            { id: "twistedfate", name: "트위스티드 페이트", title: "카드 마술사", lane: ["미드", "원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/TwistedFate.png" },
+            { id: "twitch", name: "트위치", title: "역병 쥐", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Twitch.png" },
+            { id: "udyr", name: "우디르", title: "정령 주술사", lane: ["정글", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Udyr.png" },
+            { id: "urgot", name: "우르곳", title: "거대 기계 거인", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Urgot.png" },
+            { id: "varus", name: "바루스", title: "응징의 화살", lane: ["원딜", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Varus.png" },
+            { id: "vayne", name: "베인", title: "어둠 사냥꾼", lane: ["원딜", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Vayne.png" },
+            { id: "veigar", name: "베이거", title: "악의 악마", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Veigar.png" },
+            { id: "velkoz", name: "벨코즈", title: "공허의 눈", lane: ["미드", "서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Velkoz.png" },
+            { id: "vex", name: "벡스", title: "우울한 시종", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Vex.png" },
+            { id: "vi", name: "바이", title: "필트오버의 집행자", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Vi.png" },
+            { id: "viego", name: "몰락한 왕", title: "몰락한 왕", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Viego.png" },
+            { id: "viktor", name: "빅토르", title: "기계 진화자", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Viktor.png" },
+            { id: "vladimir", name: "블라디미르", title: "진홍빛 마법사", lane: ["미드", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Vladimir.png" },
+            { id: "volibear", name: "볼리베어", title: "천둥의 포효", lane: ["탑", "정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Volibear.png" },
+            { id: "warwick", name: "워윅", title: "자운의 고삐 풀린 분노", lane: ["정글", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Warwick.png" },
+            { id: "xayah", name: "자야", title: "반항아", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Xayah.png" },
+            { id: "xerath", name: "제라스", title: "초월 마법사", lane: ["서폿", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Xerath.png" },
+            { id: "xinzhao", name: "신 짜오", title: "데마시아의 창", lane: ["정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/XinZhao.png" },
+            { id: "yasuo", name: "야스오", title: "용서받지 못한 자", lane: ["미드", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Yasuo.png" },
+            { id: "yone", name: "요네", title: "잊혀지지 않는 자", lane: ["미드", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Yone.png" },
+            { id: "yorick", name: "요릭", title: "영혼의 길잡이", lane: ["탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Yorick.png" },
+            { id: "yuumi", name: "유미", title: "마법책 고양이", lane: ["서폿"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Yuumi.png" },
+            { id: "zac", name: "자크", title: "비밀 병기", lane: ["정글", "탑"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Zac.png" },
+            { id: "zed", name: "제드", title: "그림자의 주인", lane: ["미드", "정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Zed.png" },
+            { id: "zeri", name: "제리", title: "자운의 불꽃", lane: ["원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Zeri.png" },
+            { id: "ziggs", name: "직스", title: "마법공학 폭파병", lane: ["미드", "원딜"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Ziggs.png" },
+            { id: "zilean", name: "질리언", title: "시간의 수호자", lane: ["서폿", "미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Zilean.png" },
+            { id: "zoe", name: "조이", title: "여명의 성위", lane: ["미드"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Zoe.png" },
+            { id: "zyra", name: "자이라", title: "가시 덩굴의 자태", lane: ["서폿", "정글"], img: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Zyra.png" }
+        ];
+
+        // Fetch ALL official LoL Champions from DataDragon API + fallback dataset
         async function fetchAllChampions() {
             try {
                 const verRes = await fetch("https://ddragon.leagueoflegends.com/api/versions.json");
                 const versions = await verRes.json();
-                const latestVersion = versions[0] || "14.1.1";
+                const latestVersion = versions[0] || "14.20.1";
 
                 const champRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${latestVersion}/data/ko_KR/champion.json`);
                 const champData = await champRes.json();
@@ -445,16 +620,23 @@
                 fetchedList.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
                 return fetchedList;
             } catch (e) {
-                console.error("Failed to load official champion list from Riot API", e);
-                return [];
+                console.warn("Riot API Fetch blocked or failed. Using built-in 173 champions fallback list.", e);
+                return FALLBACK_CHAMPIONS;
             }
         }
 
         async function initApp() {
-            // Load base champions first
+            // Guarantee immediate champion rendering even offline or cross-origin
+            championsState = [...FALLBACK_CHAMPIONS];
+            renderLines();
+            renderChampions();
+            setupEventListeners();
+
+            // Attempt async API update
             const apiChamps = await fetchAllChampions();
-            if (apiChamps.length > 0) {
+            if (apiChamps && apiChamps.length > 0) {
                 championsState = apiChamps;
+                renderChampions();
             }
 
             try {
@@ -473,50 +655,32 @@
                     subscribeToData();
                 }
             });
-
-            setupEventListeners();
-            renderLines();
-            renderChampions();
         }
 
         function subscribeToData() {
             if (!currentUser) return;
-            // Public shared data path adhering to Cloud Firestore Rules
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'lol_guide_app_store', 'main_store');
             
-            onSnapshot(docRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.data();
-                    
-                    if (data.lines && Array.isArray(data.lines) && data.lines.length > 0) {
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.lines && Array.isArray(data.lines)) {
                         linesState = data.lines;
                     }
-                    
-                    if (data.champions && Array.isArray(data.champions) && data.champions.length > 0) {
-                        data.champions.forEach(savedChamp => {
-                            const idx = championsState.findIndex(c => c.id === savedChamp.id);
-                            if (idx !== -1) {
-                                championsState[idx] = { ...championsState[idx], ...savedChamp };
-                            } else {
-                                championsState.push(savedChamp);
-                            }
-                        });
+                    if (data.champions && Array.isArray(data.champions)) {
+                        championsState = data.champions;
                     }
-
-                    if (data.guides) {
+                    if (data.guides && typeof data.guides === 'object') {
                         guidesData = { ...SEED_GUIDES, ...data.guides };
                     }
-
                     renderLines();
                     renderChampions();
                     if (selectedChampId) {
                         loadGuideDetails(selectedChampId);
                     }
-                } else {
-                    syncDataToCloud();
                 }
-            }, (error) => {
-                console.error("Firestore Multi-device Sync Error:", error);
+            }, (err) => {
+                console.warn("Firestore snapshot error:", err);
             });
         }
 
