@@ -63,6 +63,14 @@
             </div>
         </div>
         <div class="flex items-center space-x-3">
+            <div class="relative flex items-center bg-[#040d1a] border border-[#1e282d] rounded-md px-2 py-1 text-xs">
+                <i class="fa-solid fa-key text-amber-400 mr-1.5"></i>
+                <span class="text-slate-400 mr-1 hidden sm:inline">동기화 키:</span>
+                <input type="text" id="sync-key-input" value="my-lol-note" placeholder="공유 키 입력" class="bg-transparent w-24 text-amber-200 font-mono focus:outline-none text-xs">
+                <button id="btn-apply-sync-key" class="ml-1 px-1.5 py-0.5 bg-amber-600/80 hover:bg-amber-500 text-slate-950 font-bold rounded text-[10px] transition">
+                    적용
+                </button>
+            </div>
             <button id="btn-add-line" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-200 border border-amber-900/50 rounded-md text-sm transition flex items-center gap-1.5 shadow-sm">
                 <i class="fa-solid fa-plus text-xs"></i> 라인 추가
             </button>
@@ -321,10 +329,13 @@
             try { firebaseConfig = JSON.parse(firebaseConfigRaw); } catch(e) {}
         }
         
-        // Use fixed App ID for multi-device cross-synchronization
+        // Dynamic Sync Key across multiple devices
+        let currentSyncKey = localStorage.getItem("lol_sync_key") || 'my-lol-note';
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'lol-guide-shared-app';
 
         let app = null, auth = null, db = null, currentUser = null;
+        let unsubscribeSnapshot = null;
+
         if (firebaseConfig && firebaseConfig.apiKey) {
             try {
                 app = initializeApp(firebaseConfig);
@@ -538,6 +549,10 @@
         });
 
         async function initApp() {
+            // Set Sync Key Input UI
+            const syncInput = document.getElementById("sync-key-input");
+            if (syncInput) syncInput.value = currentSyncKey;
+
             // Load LocalStorage backup first
             const localLines = localStorage.getItem("lol_app_lines");
             const localChamps = localStorage.getItem("lol_app_champs");
@@ -572,20 +587,25 @@
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         currentUser = user;
-                        // Start real-time sync across all devices
+                        // Start real-time sync with current sync key
                         subscribeToData();
                     }
                 });
             }
         }
 
-        // Real-time synchronization callback across devices
+        // Real-time synchronization callback across devices based on Sync Key
         function subscribeToData() {
             if (!currentUser || !db) return;
-            // Public cloud storage path for multi-device sync
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'lol_shared_guides', 'shared_main_store');
+            if (unsubscribeSnapshot) {
+                unsubscribeSnapshot(); // Unsubscribe previous listener if key changed
+            }
+
+            const cleanKey = currentSyncKey.trim() || 'my-lol-note';
+            // Public cloud storage path for multi-device sync with custom key
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'lol_shared_guides', cleanKey);
             
-            onSnapshot(docRef, (docSnap) => {
+            unsubscribeSnapshot = onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     if (data.lines && Array.isArray(data.lines)) {
@@ -618,12 +638,13 @@
             localStorage.setItem("lol_app_guides", JSON.stringify(guidesData));
 
             if (!currentUser || !db) {
-                showToast("데이터가 로컬에 저장되었습니다!");
+                showToast("로컬에 저장되었습니다. (동기화하려면 온라인 연결 필요)");
                 return;
             }
 
+            const cleanKey = currentSyncKey.trim() || 'my-lol-note';
             // Sync to shared public Firestore path
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'lol_shared_guides', 'shared_main_store');
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'lol_shared_guides', cleanKey);
             try {
                 await setDoc(docRef, {
                     lines: linesState,
@@ -631,7 +652,7 @@
                     guides: guidesData,
                     updatedAt: new Date().toISOString()
                 }, { merge: true });
-                showToast("구름 데이터베이스에 동기화되었습니다!");
+                showToast(`[${cleanKey}] 동기화 키로 데이터가 저장되었습니다!`);
             } catch (err) {
                 console.error("Error saving data to Firestore:", err);
                 showToast("로컬 저장 완료 (구름 동기화 실패)", true);
@@ -785,6 +806,22 @@
         }
 
         function setupEventListeners() {
+            // Sync Key Apply Button
+            const btnApplyKey = document.getElementById("btn-apply-sync-key");
+            if (btnApplyKey) {
+                btnApplyKey.onclick = () => {
+                    const inputVal = document.getElementById("sync-key-input").value.trim();
+                    if (!inputVal) {
+                        showToast("동기화 키를 입력해 주세요.");
+                        return;
+                    }
+                    currentSyncKey = inputVal;
+                    localStorage.setItem("lol_sync_key", currentSyncKey);
+                    subscribeToData();
+                    showToast(`동기화 키가 '${currentSyncKey}'(으)로 변경되었습니다.`);
+                };
+            }
+
             // Search input
             document.getElementById("champ-search-input").addEventListener("input", (e) => {
                 searchQuery = e.target.value;
